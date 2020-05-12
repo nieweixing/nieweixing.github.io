@@ -1,1 +1,6 @@
 theme: jekyll-theme-leap-day
+
+deploy:
+  type: git
+  repository: git@github.com:nieweixing/nieweixing.github.io.git
+  branch: master
