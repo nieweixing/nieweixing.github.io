@@ -1,6 +1,17 @@
-node_modules/*
+# hidden files
+.*
+
+# python compiled files
+*.pyc
+
+# jekyll debug
 _site
-.sass-cache
-.jekyll-metadata
+
+# Jeykll Gemfile.lock
 Gemfile.lock
-.jekyll-cache
+
+# yui-compressor
+*.jar
+
+# bundle cache
+vendor
