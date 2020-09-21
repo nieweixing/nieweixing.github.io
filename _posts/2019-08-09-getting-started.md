@@ -1,7 +1,7 @@
 ---
-title: Getting Started
-author: Cotes Chung
-date: 2019-08-09 20:55:00 +0800
+title: linux定位问题常用命令
+author: VashonNie
+date: 2020-09-021 20:55:00 +0800
 categories: [Blogging, Tutorial]
 tags: [getting started]
 pin: true
