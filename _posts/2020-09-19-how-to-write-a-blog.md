@@ -1,4 +1,5 @@
 ---
+layout: post
 title: how to write a blog
 author: VashonNie
 date: 2020-09-19 20:55:00 +0800
