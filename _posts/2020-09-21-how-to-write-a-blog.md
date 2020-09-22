@@ -1,5 +1,5 @@
 ---
-title: linux定位问题常用命令
+title: how to write a blog
 author: VashonNie
 date: 2020-09-21 20:55:00 +0800
 categories: [Blogging, Tutorial]
