@@ -1,7 +1,7 @@
 ---
 title: how to write a blog
 author: VashonNie
-date: 2020-09-21 20:55:00 +0800
+date: 2020-09-19 20:55:00 +0800
 categories: [Blogging, Tutorial]
 tags: [getting started]
 pin: true
