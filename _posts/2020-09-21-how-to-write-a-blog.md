@@ -1,7 +1,7 @@
 ---
 title: linux定位问题常用命令
 author: VashonNie
-date: 2020-09-021 20:55:00 +0800
+date: 2020-09-21 20:55:00 +0800
 categories: [Blogging, Tutorial]
 tags: [getting started]
 pin: true
