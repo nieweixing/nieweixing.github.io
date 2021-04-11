@@ -154,9 +154,9 @@ menu_icons:
 # 头部显示
 #scheme: Muse 
 #大片留白
-scheme: Mist 
+#scheme: Mist 
 #显示详情
-#scheme: Pisces 
+scheme: Pisces 
 
 
 
@@ -294,11 +294,11 @@ sidebar:
 
 
 # Blog rolls
-#links_title: Links
+links_title: Links
 #links_layout: block
 #links_layout: inline
-#links:
-  #Title: http://example.com/
+links:
+  Title: https://cloud.tencent.com/developer/column/87421
 
 
 # ---------------------------------------------------------------
@@ -317,7 +317,7 @@ excerpt_description: true
 # Automatically Excerpt. Not recommend.
 # Please use <!-- more --> in the post to control excerpt accurately.
 auto_excerpt:
-  enable: false
+  enable: true
   length: 150
 
 # Post meta display settings
@@ -367,7 +367,7 @@ custom_logo:
 # Available value:
 #    normal | night | night eighties | night blue | night bright
 # https://github.com/chriskempson/tomorrow-theme
-highlight_theme: normal
+highlight_theme: night bright
 
 
 # ---------------------------------------------------------------
