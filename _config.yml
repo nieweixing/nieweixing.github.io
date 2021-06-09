@@ -550,6 +550,7 @@ rating:
   color:  fc6423
 
 live2d:
+  enable: true
   model: hijiki
   position: left
   bottom: -30
