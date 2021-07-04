@@ -244,8 +244,8 @@ social_icons:
   cloud: cloud
   linkedin: linkedin
   Gitbook: book
-  weixin: weixin
-  file-user: file-user
+  微信公众号: weixin
+  个人简历: file-user
 
 
 # Sidebar Avatar
