@@ -2,14 +2,19 @@
   position: relative;
   margin: 0 auto;
   width: $main-desktop;
-
+  width: 90%;
+  
   @include tablet() {
     width: auto;
   }
   @include mobile() {
     width: auto;
   }
+  
 }
+
+.container .main-inner { width: 90%; }
+.content-wrap { width: calc(100% - 260px); }
 
 .header-inner {
   position: absolute;
