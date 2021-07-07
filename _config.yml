@@ -156,9 +156,9 @@ menu_icons:
 # 头部显示
 #scheme: Muse 
 #大片留白
-#scheme: Mist 
+scheme: Mist 
 #显示详情
-scheme: Pisces 
+#scheme: Pisces 
 
 
 
