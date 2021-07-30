@@ -463,7 +463,7 @@ changyan:
 # You can get your uid from https://livere.com/insight/myCode (General web site)
 #livere_uid: MTAyMC81MTkzNS8yODQxNg==
 
-Support for gitalk comments system,github的评论系统.
+#Support for gitalk comments system,github的评论系统.
 gitalk:
   enable: true
   clientID: 082ee7110d5f334eb3d1
