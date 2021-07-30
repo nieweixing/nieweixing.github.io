@@ -461,7 +461,7 @@ changyan:
 # 来必乐评论系统
 # Support for LiveRe comments system.
 # You can get your uid from https://livere.com/insight/myCode (General web site)
-livere_uid: MTAyMC81MTkzNS8yODQxNg==
+#livere_uid: MTAyMC81MTkzNS8yODQxNg==
 
 # Support for gitalk comments system,github的评论系统.
 gitalk:
