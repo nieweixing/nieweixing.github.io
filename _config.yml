@@ -465,12 +465,12 @@ livere_uid: MTAyMC81MTkzNS8yODQxNg==
 
 # Support for gitalk comments system,github的评论系统.
 gitalk:
-  enable: false
-  clientID: # 26da2417eaf2810e1a39
-  clientSecret: # 7c4afe0991131007ce83f4c66ce21523a61ba988
-  repo: # nieweixing.github.io
-  owner: # nieweixing
-  admin: # nieweixing
+  enable: true
+  clientID: 082ee7110d5f334eb3d1
+  clientSecret: 2af6ca6607b4ad000d301347a8824b44b8e54c79
+  repo: blogcomment
+  owner: nieweixing
+  admin: nieweixing
 
 
 
