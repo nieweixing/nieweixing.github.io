@@ -139,8 +139,8 @@ spec:
 这里可以用我们自己新增的用户kubesphere或者默认自带的elastic访问集群都可以，这里获取下elastic用户的密码
 
 ```
-# kubectl get secret logging-es-elastic-user -o go-template='{{.data.elastic | base64decode}}' -n elastic-system
-Je24953EK3pW2SOa
+# kubectl get secret logging-es-elastic-user -o go-template='\{{.data.elastic | base64decode}\}' -n elastic-system
+Je24953
 ```
 
 这里我们分别用elastic和kubesphere这2个用户都能访问成功
