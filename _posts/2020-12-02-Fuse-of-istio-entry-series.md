@@ -214,4 +214,4 @@ cluster.outbound|80||httpbin.org.upstream_rq_pending_overflow: 0
 cluster.outbound|80||httpbin.org.upstream_rq_pending_total: 0
 ```
 
-cluster.outbound|8000||httpbin.default.svc.cluster.local.upstream_rq_pending_overflow: 25  这意味着，目前为止已有25个调用被标记为熔断
+cluster.outbound\|8000\|\|httpbin.default.svc.cluster.local.upstream_rq_pending_overflow: 25  这意味着，目前为止已有25个调用被标记为熔断
