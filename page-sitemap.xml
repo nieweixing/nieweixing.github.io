@@ -8,6 +8,27 @@
     </url>
     
     <url>
+        <loc>https://www.niewx.cn/tags/</loc>
+        <lastmod>2021-09-04T12:59:09.934Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    
+    <url>
+        <loc>https://www.niewx.cn/categories/</loc>
+        <lastmod>2021-09-04T12:58:22.193Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    
+    <url>
+        <loc>https://www.niewx.cn/archive/</loc>
+        <lastmod>2021-09-04T12:57:24.893Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    
+    <url>
         <loc>https://www.niewx.cn/about/</loc>
         <lastmod>2021-09-04T10:29:57.475Z</lastmod>
         <changefreq>weekly</changefreq>
@@ -45,27 +66,6 @@
     <url>
         <loc>https://www.niewx.cn/nieweixing.github.io/404.html</loc>
         <lastmod>2021-09-04T05:45:52.903Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.8</priority>
-    </url>
-    
-    <url>
-        <loc>https://www.niewx.cn/tags/</loc>
-        <lastmod>2021-09-03T04:47:34.102Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.8</priority>
-    </url>
-    
-    <url>
-        <loc>https://www.niewx.cn/categories/</loc>
-        <lastmod>2021-09-03T04:47:33.856Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.8</priority>
-    </url>
-    
-    <url>
-        <loc>https://www.niewx.cn/archive/</loc>
-        <lastmod>2021-09-03T04:47:33.855Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
