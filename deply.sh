@@ -2,6 +2,9 @@
 
 hexo generate
 cd ..
+cd nieweixing.github.io
+git pull
+cd ..
 cp -fr ./public/* ./nieweixing.github.io/
 cd nieweixing.github.io
 git add .
