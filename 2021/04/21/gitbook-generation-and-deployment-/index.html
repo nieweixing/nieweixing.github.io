@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="baidu-site-verification" content="093lY4ziMu" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="description" content="聂伟星个人技术博客">
+    <meta name="keyword"  content="聂伟星，博客">
+    <link rel="shortcut icon" href="/img/ironman-draw.png">
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <!--<link href='http://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>-->
+    <title>
+        
+          gitbook的生成和部署 - 聂伟星个人技术博客
+        
+    </title>
+
+    <link rel="canonical" href="https://www.niewx.cn/hexo/2021/04/21/gitbook-generation-and-deployment-/">
+
+    <!-- Bootstrap Core CSS -->
+    
+<link rel="stylesheet" href="../../../../css/bootstrap.min.css">
+
+
+    <!-- Custom CSS --> 
+    
+        
+<link rel="stylesheet" href="../../../../css/dusign-light.css">
+
+        
+<link rel="stylesheet" href="../../../../css/dusign-common-light.css">
+
+        
+<link rel="stylesheet" href="../../../../css/font-awesome.css">
+
+        
+<link rel="stylesheet" href="../../../../css/toc.css">
+
+        <!-- background effects end -->
+    
+    
+    <!-- Pygments Highlight CSS -->
+    
+<link rel="stylesheet" href="../../../../css/highlight.css">
+
+
+    
+<link rel="stylesheet" href="../../../../css/widget.css">
+
+
+    
+<link rel="stylesheet" href="../../../../css/rocket.css">
+
+
+    
+<link rel="stylesheet" href="../../../../css/signature.css">
+
+
+    
+<link rel="stylesheet" href="../../../../css/fonts.googleapis.css">
+
+
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+    <!-- photography -->
+    
+<link rel="stylesheet" href="../../../../css/photography.css">
+
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- background effects start -->
+    
+    <!-- background effects end -->
+
+	<!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        
+            
+                background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('')
+                /*post*/
+            
+        
+    }
+    
+</style>
+
+<header class="intro-header" >
+    <!-- Signature -->
+    <div id="signature">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                
+                    <div class="post-heading">
+                        <div class="tags">
+                            
+                              <a class="tag" href="/tags/#Kubernetes" title="Kubernetes">Kubernetes</a>
+                            
+                              <a class="tag" href="/tags/#gitbook" title="gitbook">gitbook</a>
+                            
+                        </div>
+                        <h1>gitbook的生成和部署</h1>
+                        <h2 class="subheading"></h2>
+                        <span class="meta">
+                            Posted by VashonNie on
+                            2021-04-21
+                        </span>
+
+                        
+                            <div class="blank_box"></div>
+                            <span class="meta">
+                                Words <span class="post-count">1.3k</span> and
+                                Reading Time <span class="post-count">5</span> Minutes
+                            </span>
+                            <div class="blank_box"></div>
+                            <!-- 不蒜子统计 start -->
+                            <span class="meta">
+                                Viewed <span id="busuanzi_value_page_pv"><i class="fa fa-spinner fa-spin"></i></span> Times
+                            </span>
+                            <!-- 不蒜子统计 end -->
+                        
+
+                    </div>
+                
+
+                </div>
+            </div>
+        </div>      
+    </div>
+
+    
+    <div class="waveWrapper">
+        <div class="wave wave_before" style="background-image: url('/img/wave-light.png')"></div>
+        <div class="wave wave_after" style="background-image: url('/img/wave-light.png')"></div>
+    </div>
+    
+</header>
+
+	
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">聂伟星</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archive/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/categories/">Categories</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/photography/">Photography</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                    
+                    <li>
+                        <a href="https://www.niewx.cn/mybook/" target="_blank">Chinese Blog</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    <!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <p>作为一个运维工程，写文档是日常的工作之一，很多时候我们需要将文档分享给其他人，一般都是用现在的在线文档进行分享，其实这里我们也可以gitbook来发布我们的文档，这里可以更加方便的分享给其他人查阅。今天我们来说说如何生成gitbook并部署到k8s上运行我们的gitbook，并提供对应的域名对外提供访问，让其他人可以直接通过域名来访问文档。</p>
+<h1 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h1><ul>
+<li>虚拟机一台</li>
+<li>k8s环境</li>
+<li>域名</li>
+<li>github账号</li>
+</ul>
+<p>生成部署gitbook需要上面这些环境，虚拟机也可以用k8s集群中的node节点，这里只是用来本地构建gitbook的markdown文档和推送编译后的html文件到远程git仓库上，k8s环境这里用的是腾讯云的tke集群，域名和github都需要自行申请。</p>
+<h1 id="本地安装部署gitbook"><a href="#本地安装部署gitbook" class="headerlink" title="本地安装部署gitbook"></a>本地安装部署gitbook</h1><p>gitbook是一个基于Node.js的命令行工具，所以要先安装Node.js，安装nodejs默认会安装npm，所以这里不需要安装npm，安装好之后下载下gitbook-cli命令，然后创建一个目录作为gitbook的工作目录</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[<span class="symbol">root@</span>VM<span class="number">-0</span><span class="number">-13</span>-centos ~]# node -v</span><br><span class="line">v6<span class="number">.17</span><span class="number">.1</span></span><br><span class="line">[<span class="symbol">root@</span>VM<span class="number">-0</span><span class="number">-13</span>-centos ~]# npm -v</span><br><span class="line"><span class="number">3.10</span><span class="number">.10</span></span><br><span class="line">[<span class="symbol">root@</span>VM<span class="number">-0</span><span class="number">-13</span>-centos ~]# npm install -g gitbook-cli</span><br><span class="line">[<span class="symbol">root@</span>VM<span class="number">-0</span><span class="number">-13</span>-centos ~]# mkdir gitbook</span><br><span class="line">[<span class="symbol">root@</span>VM<span class="number">-0</span><span class="number">-13</span>-centos ~]# cd gitbook</span><br><span class="line">[<span class="symbol">root@</span>VM<span class="number">-0</span><span class="number">-13</span>-centos ~]# gitbook init</span><br><span class="line">warn: no summary file <span class="keyword">in</span> <span class="keyword">this</span> book</span><br><span class="line">info: create README.md</span><br><span class="line">info: create SUMMARY.md</span><br><span class="line">info: initialization <span class="keyword">is</span> finished</span><br><span class="line">[<span class="symbol">root@</span>VM<span class="number">-0</span><span class="number">-13</span>-centos gitbook]# ll</span><br><span class="line">total <span class="number">8</span></span><br><span class="line">-rw-r--r-- <span class="number">1</span> root root <span class="number">16</span> Apr <span class="number">22</span> <span class="number">12</span>:<span class="number">39</span> README.md</span><br><span class="line">-rw-r--r-- <span class="number">1</span> root root <span class="number">40</span> Apr <span class="number">22</span> <span class="number">12</span>:<span class="number">39</span> SUMMARY.md</span><br></pre></td></tr></table></figure>
+<p>执行init后会生成2个md文件</p>
+<ul>
+<li>README.md（书籍的介绍在这个文件里）</li>
+<li>SUMMARY.md（书籍的目录结构在这里配置）</li>
+</ul>
+<p>下面我们在SUMMRAY.md编写一下目录结构</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos gitbook]# cat SUMMARY.md</span><br><span class="line"><span class="section"># Summary</span></span><br><span class="line"></span><br><span class="line"><span class="bullet">* </span>[<span class="string">Introduction</span>](<span class="link">README.md</span>)</span><br><span class="line"><span class="bullet">* </span>[<span class="string">前言</span>](<span class="link">readme.md</span>)</span><br><span class="line"><span class="bullet">* </span>[<span class="string">第一章</span>](<span class="link">part1/README.md</span>)</span><br><span class="line"><span class="bullet">    * </span>[<span class="string">第一节</span>](<span class="link">part1/1.md</span>)</span><br><span class="line"><span class="bullet">    * </span>[<span class="string">第二节</span>](<span class="link">part1/2.md</span>)</span><br><span class="line"><span class="bullet">    * </span>[<span class="string">第三节</span>](<span class="link">part1/3.md</span>)</span><br><span class="line"><span class="bullet">    * </span>[<span class="string">第四节</span>](<span class="link">part1/4.md</span>)</span><br><span class="line"><span class="bullet">* </span>[<span class="string">第二章</span>](<span class="link">part2/README.md</span>)</span><br><span class="line"><span class="bullet">* </span>[<span class="string">第三章</span>](<span class="link">part3/README.md</span>)</span><br><span class="line"><span class="bullet">* </span>[<span class="string">第四章</span>](<span class="link">part4/README.md</span>)</span><br></pre></td></tr></table></figure>
+<p>创建一个part1目录，创建一个README.md来作为第一章的简介</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[<span class="symbol">root@</span>VM<span class="number">-0</span><span class="number">-13</span>-centos gitbook]# mkdir part1</span><br><span class="line">[<span class="symbol">root@</span>VM<span class="number">-0</span><span class="number">-13</span>-centos part1]# cat README.md</span><br><span class="line"># 第一章</span><br></pre></td></tr></table></figure>
+<p>然后我们本地运行下gitbook</p>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">[root@VM<span class="number">-0</span><span class="number">-13</span>-centos gitbook]<span class="meta"># gitbook serve &amp;</span></span><br><span class="line">Live reload server started on port: <span class="number">35729</span></span><br><span class="line">Press CTRL+C to quit ...</span><br><span class="line"></span><br><span class="line"><span class="symbol">info:</span> <span class="number">7</span> plugins are installed</span><br><span class="line"><span class="symbol">info:</span> loading plugin <span class="string">"livereload"</span>... OK</span><br><span class="line"><span class="symbol">info:</span> loading plugin <span class="string">"highlight"</span>... OK</span><br><span class="line"><span class="symbol">info:</span> loading plugin <span class="string">"search"</span>... OK</span><br><span class="line"><span class="symbol">info:</span> loading plugin <span class="string">"lunr"</span>... OK</span><br><span class="line"><span class="symbol">info:</span> loading plugin <span class="string">"sharing"</span>... OK</span><br><span class="line"><span class="symbol">info:</span> loading plugin <span class="string">"fontsettings"</span>... OK</span><br><span class="line"><span class="symbol">info:</span> loading plugin <span class="string">"theme-default"</span>... OK</span><br><span class="line"><span class="symbol">info:</span> found <span class="number">1</span> pages</span><br><span class="line"><span class="symbol">info:</span> found <span class="number">0</span> asset files</span><br><span class="line"><span class="symbol">info:</span> &gt;&gt; generation finished with success in <span class="number">1.4</span>s !</span><br><span class="line"></span><br><span class="line">Starting server ...</span><br><span class="line">Serving book on http:<span class="comment">//localhost:4000</span></span><br></pre></td></tr></table></figure>
+<p><img src="1.png" alt="upload-image"> </p>
+<p>运行gitbook后，可以通过服务器ip和4000端口访问，如果后面我们有更新gitbook目录下的markdown文档，gitbook会自动同步并生成静态文件在_book目录下。</p>
+<h1 id="代码上传到github"><a href="#代码上传到github" class="headerlink" title="代码上传到github"></a>代码上传到github</h1><p>这里我们如果要自动化部署可以将gitbook生成的静态文件上传到github，然后构建成docker镜像，最终部署到k8s集群中。</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[<span class="symbol">root@</span>VM<span class="number">-0</span><span class="number">-13</span>-centos gitbook-docker]# ll</span><br><span class="line">total <span class="number">12</span></span><br><span class="line">-rw-r--r-- <span class="number">1</span> root root   <span class="number">87</span> Apr <span class="number">22</span> <span class="number">13</span>:<span class="number">12</span> Dockerfile</span><br><span class="line">drwxr-xr-x <span class="number">4</span> root root <span class="number">4096</span> Apr <span class="number">22</span> <span class="number">13</span>:<span class="number">11</span> gitbook</span><br><span class="line">-rw-r--r-- <span class="number">1</span> root root   <span class="number">17</span> Apr <span class="number">22</span> <span class="number">13</span>:<span class="number">07</span> README.md</span><br></pre></td></tr></table></figure>
+<p>这里的github代码仓库目录结构如下，gitbook存放生成的静态文件，Dokcerfile用来构建docker镜像，具体代码如下，README.md文件说明代码仓库的作用。</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-<span class="number">0</span>-<span class="number">13</span>-centos gitbook-docker]<span class="comment"># cat Dockerfile</span></span><br><span class="line"><span class="keyword">FROM</span> nginx</span><br><span class="line"><span class="keyword">WORKDIR</span><span class="bash"> /usr/share/nginx/html</span></span><br><span class="line"><span class="keyword">ADD</span><span class="bash"> ./gitbook /usr/share/nginx/html</span></span><br><span class="line"><span class="keyword">EXPOSE</span> <span class="number">80</span></span><br></pre></td></tr></table></figure>
+<p>我们直接用一个nginx将gitbook生成的静态文件展示，我们将gitbook-docker的代码push到远程仓库即可，后续更新代码只需要更新gitbook目录下的静态文件。</p>
+<h1 id="自动化构建发布到k8s集群"><a href="#自动化构建发布到k8s集群" class="headerlink" title="自动化构建发布到k8s集群"></a>自动化构建发布到k8s集群</h1><p>这里自动化构建发布用的是腾讯云的TCR镜像仓库和流水线，首先你需要在TCR上购买一个实例，然后新建一个镜像仓库用来存gitbook镜像，这里已经新建了一个gitbook的镜像仓库。</p>
+<p><img src="2.png" alt="upload-image"> </p>
+<p>然后我们新建一条流水线，这样我们更新代码后，就可以自动构建发布到我们的tke集群中，流水线信息如下</p>
+<p><img src="3.png" alt="upload-image"> </p>
+<p>这里我们提交下代码，触发下自动构建看看，</p>
+<p><img src="4.png" alt="upload-image"> </p>
+<p><img src="5.png" alt="upload-image"> </p>
+<p><img src="6.png" alt="upload-image"> </p>
+<p>这里我们看到提交了代码后，流水线将github上的代码构建成docker镜像并发布到tke集群了，pod正常运行。</p>
+<h1 id="ingress域名暴露gitbook服务"><a href="#ingress域名暴露gitbook服务" class="headerlink" title="ingress域名暴露gitbook服务"></a>ingress域名暴露gitbook服务</h1><p>下面我们用ingress来配置域名来访问我们的gitbook服务，这里我们已经在集群部署了nginx-ingress了，首先创建一个service</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">gitbook</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">gitbook</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">clusterIP:</span> <span class="number">172.16</span><span class="number">.8</span><span class="number">.27</span></span><br><span class="line">  <span class="attr">ports:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="number">80</span><span class="number">-80</span><span class="string">-tcp</span></span><br><span class="line">    <span class="attr">port:</span> <span class="number">80</span></span><br><span class="line">    <span class="attr">protocol:</span> <span class="string">TCP</span></span><br><span class="line">    <span class="attr">targetPort:</span> <span class="number">80</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">k8s-app:</span> <span class="string">gitbook</span></span><br><span class="line">    <span class="attr">qcloud-app:</span> <span class="string">gitbook</span></span><br><span class="line">  <span class="attr">sessionAffinity:</span> <span class="string">None</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">ClusterIP</span></span><br></pre></td></tr></table></figure>
+<p>然后创建ingress转发到后端的service</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.k8s.io/v1beta1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Ingress</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">annotations:</span></span><br><span class="line">    <span class="attr">kubernetes.io/ingress.class:</span> <span class="string">ingress</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">gitbook-ingress</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">gitbook</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">rules:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">host:</span> <span class="string">gitbook.tke.niewx.cn</span></span><br><span class="line">    <span class="attr">http:</span></span><br><span class="line">      <span class="attr">paths:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">backend:</span></span><br><span class="line">          <span class="attr">serviceName:</span> <span class="string">gitbook</span></span><br><span class="line">          <span class="attr">servicePort:</span> <span class="number">80</span></span><br><span class="line">        <span class="attr">path:</span> <span class="string">/</span></span><br></pre></td></tr></table></figure>
+<p>ingress创建好之后，我们通过域名来访问下我们的gitbook服务看看，浏览器输入gitbook.tke.niewx.cn就可以访问到我们的gitbook文档了。</p>
+<p><img src="7.png" alt="upload-image"> </p>
+<p>如果我们后面需要更新文档，只需要编写md文档，然后将生成的静态文件更新到远程仓库即可，流水线执行完成后，直接通过域名就可以访问到最新的文档了。</p>
+
+                
+                <hr>
+                <!-- Pager -->
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2021/05/21/Nginx-learning-and-configuration/" data-toggle="tooltip" data-placement="top" title="Nginx的学习和配置">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2021/04/16/k8s-deploy-rancher/" data-toggle="tooltip" data-placement="top" title="k8s上部署rancher">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                <!-- tip start -->
+                
+
+                
+                <div class="comment_notes">
+                    <p>
+                        This is copyright.
+                    </p>
+                </div>
+                
+                <!-- tip end -->
+
+                <!-- Music start-->
+                
+                
+<link rel="stylesheet" href="../../../../css/music-player/fonts/iconfont.css">
+
+
+<link rel="stylesheet" href="../../../../css/music-player/css/reset.css">
+
+
+<link rel="stylesheet" href="../../../../css/music-player/css/player.css">
+
+
+<div class="music-player">
+    <audio class="music-player__audio" ></audio>
+    <div class="music-player__main">
+        <div class="music-player__blur"></div>
+        <div class="music-player__disc">
+            <div class="music-player__image">
+                <img width="100%" src="" alt="">
+            </div>
+            <div class="music-player__pointer"><img width="100%" src="/img/cd_tou.png" alt=""></div>
+        </div>
+        <div class="music-player__controls">
+            <div class="music__info">
+                <h3 class="music__info--title">...</h3>
+                <p class="music__info--singer">...</p>
+            </div>
+            <div class="player-control">
+                <div class="player-control__content">
+                    <div class="player-control__btns">
+                        <div class="player-control__btn player-control__btn--prev"><i class="iconfont icon-prev"></i></div>
+                        <div class="player-control__btn player-control__btn--play"><i class="iconfont icon-play"></i></div>
+                        <div class="player-control__btn player-control__btn--next"><i class="iconfont icon-next"></i></div>
+                        <div class="player-control__btn player-control__btn--mode"><i class="iconfont icon-loop"></i></div>
+                    </div>
+                    <div class="player-control__volume">
+                        <div class="control__volume--icon player-control__btn"><i class="iconfont icon-volume"></i></div>
+                        <div class="control__volume--progress player_progress"></div>
+                    </div>
+                </div>
+                <div class="player-control__content">
+                    <div class="player__song--progress player_progress"></div>
+                    <div class="player__song--timeProgess nowTime">00:00</div>
+                    <div class="player__song--timeProgess totalTime">00:00</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="../../../../js/music-player/utill.js"></script>
+
+
+<script src="../../../../js/music-player/jquery.min.js"></script>
+
+<!-- netease; qqkg -->
+<!--
+<script src="../../../../js/music-player/player.js?library=config.music.library.js"></script>
+-->
+<script src="../../../../js/music-player/player.js?library=netease&music=https://kg.qq.com/node/play?s=7deFpz7Z26Jmv7di&g_f=share_html"></script>
+                
+                <!-- Music end -->
+
+                <!-- Sharing -->
+                
+                <div class="social-share"  data-wechat-qrcode-helper="" align="center"></div>
+                <!--  css & js -->
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/social-share.js/1.0.16/css/share.min.css">
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/social-share.js/1.0.16/js/social-share.min.js"></script>
+                
+                <!-- Sharing -->
+
+                <!-- gitment start -->
+                
+                <hr>
+                <div id="blog_comments"></div>
+
+<!--
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+-->
+<!--
+<link rel="stylesheet" href="/css/gitment.css">
+<script type="text/javascript" src="/js/gitment.js"></script>
+-->
+
+<script src="https://cdn.jsdelivr.net/gh/theme-next/theme-next-gitment@1/gitment.browser.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/theme-next/theme-next-gitment@1/default.css"/>
+
+<!--
+<link rel="stylesheet" href="https://billts.site/extra_css/gitment.css">
+<script src="https://billts.site/js/gitment.js"></script>
+-->
+
+<script>
+const myTheme = {
+  render(state, instance) {
+    const container = document.createElement('div')
+    container.lang = "en-US"
+    container.className = 'gitment-container gitment-root-container'
+    
+     // your custom component
+    container.appendChild(instance.renderSomething(state, instance))
+    
+    container.appendChild(instance.renderHeader(state, instance))
+    container.appendChild(instance.renderComments(state, instance))
+    container.appendChild(instance.renderEditor(state, instance))
+    //container.appendChild(instance.renderFooter(state, instance))
+    return container
+  },
+  renderSomething(state, instance) {
+    const container = document.createElement('div')
+    container.lang = "en-US"
+    container.className = 'hello_visitor'
+    if (state.user.login) {
+      container.innerText = `Hello ${state.user.login}, Welcome to comment system`
+    }
+    return container
+  }
+}
+
+
+const gitment = new Gitment({
+    id: 'Wed Apr 21 2021 14:10:00 GMT+0800', // optional
+    owner: "nieweixing",
+    repo: "gitalk-comment",
+    oauth: {
+      client_id: "5976cd3d9cc251569467",
+      client_secret: "74117131a57324d4d616267265a94f4a1ac293ec",
+    },
+    theme: myTheme,
+    // ...
+    // For more available options, check out the documentation below
+  })
+  
+  gitment.render('blog_comments')
+  // or
+  // gitment.render(document.getElementById('comments'))
+  // or
+  // document.body.appendChild(gitment.render())
+</script>
+                
+                <!-- gitment end -->
+
+                <!-- 来必力City版安装代码 -->
+                
+                <!-- City版安装代码已完成 -->
+
+                <!-- disqus comment start -->
+                
+                <!-- disqus comment end -->
+            </div>
+            
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+                
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#Kubernetes" title="Kubernetes">Kubernetes</a>
+                        
+                          <a class="tag" href="/tags/#gitbook" title="gitbook">gitbook</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="https://cloud.tencent.com/developer/column/87421" target="_blank">云+社区</a></li>
+                    
+                        <li><a href="https://www.niewx.cn/mybook/" target="_blank">gitbook</a></li>
+                    
+                        <li><a href="https://github.com/nieweixing" target="_blank">vashon&#39;s Github</a></li>
+                    
+                        <li><a href="https://weibo.com/3264907804/profile?rig" target="_blank">weibo</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'hover',
+          placement: 'left',
+          icon: 'ℬ'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+
+
+<style  type="text/css">
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/nieweixing">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://twitter.com/nieweixing">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://www.facebook.com/nieweixing">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/nieweixing">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; 聂伟星 2021 
+                    <br>
+                    Powered by 
+                    <a href="https://github.com/dusign/hexo-theme-snail" target="_blank" rel="noopener">
+                        <i>hexo-theme-snail</i>
+                    </a> | 
+                    <iframe name="star" style="margin-left: 2px; margin-bottom:-5px;" frameborder="0" scrolling="0"
+                        width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=dusign&repo=hexo-theme-snail&type=star&count=true">
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+
+</footer>
+
+<!-- jQuery -->
+
+<script src="../../../../js/jquery.min.js"></script>
+
+
+<!-- Bootstrap Core JavaScript -->
+
+<script src="../../../../js/bootstrap.min.js"></script>
+
+
+<!-- Custom Theme JavaScript -->
+
+<script src="../../../../js/hux-blog.min.js"></script>
+
+
+<!-- Search -->
+
+<script src="../../../../js/search.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.niewx.cn/hexo/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = 'bfe4709ccd8c5c9e559c89f4fd0866f3';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Search -->
+
+    <script type="text/javascript">      
+        var search_path = "search.xml";
+        if (search_path.length == 0) {
+            search_path = "search.xml";
+        }
+    var path = "/" + search_path;
+    searchFunc(path, 'local-search-input', 'local-search-result');
+    </script>
+
+
+<!-- busuanzi -->
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+	<a id="rocket" href="#top" class=""></a>
+	<script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+
+    
+        <!-- background effects line -->
+        
+
+        
+            <script type="text/javascript" src="/js/mouse-click.js" content='[&quot;🌱&quot;,&quot;just do it&quot;,&quot;🍀&quot;]' color='[&quot;rgb(121,93,179)&quot; ,&quot;rgb(76,180,231)&quot; ,&quot;rgb(184,90,154)&quot;]'></script>
+        
+
+        <!-- background effects end -->
+    
+
+    <!--<script size="50" alpha='0.3' zIndex="-999" src="/js/ribbonStatic.js"></script>-->
+    
+        <script src="/js/ribbonDynamic.js"></script>
+    
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+
+</html>

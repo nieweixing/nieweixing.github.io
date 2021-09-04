@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="baidu-site-verification" content="093lY4ziMu" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="description" content="聂伟星个人技术博客">
+    <meta name="keyword"  content="聂伟星，博客">
+    <link rel="shortcut icon" href="/img/ironman-draw.png">
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <!--<link href='http://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>-->
+    <title>
+        
+          istio入门系列之安装部署篇 - 聂伟星个人技术博客
+        
+    </title>
+
+    <link rel="canonical" href="https://www.niewx.cn/hexo/2020/11/28/Installation-and-deployment-of-istio-entry-series/">
+
+    <!-- Bootstrap Core CSS -->
+    
+<link rel="stylesheet" href="../../../../css/bootstrap.min.css">
+
+
+    <!-- Custom CSS --> 
+    
+        
+<link rel="stylesheet" href="../../../../css/dusign-light.css">
+
+        
+<link rel="stylesheet" href="../../../../css/dusign-common-light.css">
+
+        
+<link rel="stylesheet" href="../../../../css/font-awesome.css">
+
+        
+<link rel="stylesheet" href="../../../../css/toc.css">
+
+        <!-- background effects end -->
+    
+    
+    <!-- Pygments Highlight CSS -->
+    
+<link rel="stylesheet" href="../../../../css/highlight.css">
+
+
+    
+<link rel="stylesheet" href="../../../../css/widget.css">
+
+
+    
+<link rel="stylesheet" href="../../../../css/rocket.css">
+
+
+    
+<link rel="stylesheet" href="../../../../css/signature.css">
+
+
+    
+<link rel="stylesheet" href="../../../../css/fonts.googleapis.css">
+
+
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+    <!-- photography -->
+    
+<link rel="stylesheet" href="../../../../css/photography.css">
+
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- background effects start -->
+    
+    <!-- background effects end -->
+
+	<!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        
+            
+                background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('')
+                /*post*/
+            
+        
+    }
+    
+</style>
+
+<header class="intro-header" >
+    <!-- Signature -->
+    <div id="signature">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                
+                    <div class="post-heading">
+                        <div class="tags">
+                            
+                              <a class="tag" href="/tags/#Kubernetes" title="Kubernetes">Kubernetes</a>
+                            
+                              <a class="tag" href="/tags/#Istio" title="Istio">Istio</a>
+                            
+                        </div>
+                        <h1>istio入门系列之安装部署篇</h1>
+                        <h2 class="subheading"></h2>
+                        <span class="meta">
+                            Posted by VashonNie on
+                            2020-11-28
+                        </span>
+
+                        
+                            <div class="blank_box"></div>
+                            <span class="meta">
+                                Words <span class="post-count">961</span> and
+                                Reading Time <span class="post-count">4</span> Minutes
+                            </span>
+                            <div class="blank_box"></div>
+                            <!-- 不蒜子统计 start -->
+                            <span class="meta">
+                                Viewed <span id="busuanzi_value_page_pv"><i class="fa fa-spinner fa-spin"></i></span> Times
+                            </span>
+                            <!-- 不蒜子统计 end -->
+                        
+
+                    </div>
+                
+
+                </div>
+            </div>
+        </div>      
+    </div>
+
+    
+    <div class="waveWrapper">
+        <div class="wave wave_before" style="background-image: url('/img/wave-light.png')"></div>
+        <div class="wave wave_after" style="background-image: url('/img/wave-light.png')"></div>
+    </div>
+    
+</header>
+
+	
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">聂伟星</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archive/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/categories/">Categories</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/photography/">Photography</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                    
+                    <li>
+                        <a href="https://www.niewx.cn/mybook/" target="_blank">Chinese Blog</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    <!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <p>本篇我们讲一下如何部署istio到k8s集群，并且部署一个bookinfo样例来进行istio的访问测试。</p>
+<h1 id="部署istio"><a href="#部署istio" class="headerlink" title="部署istio"></a>部署istio</h1><p>这里我们部署的istio版本是1.5.1，对应的k8s集群版本是1.18.4。</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 获取安装脚本</span></span><br><span class="line"><span class="attribute">curl</span> -L https://istio.io/downloadIstio |ISTIO_VERSION=<span class="number">1</span>.<span class="number">5</span>.<span class="number">1</span>  sh -</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装istio客户端</span></span><br><span class="line">export PATH=<span class="string">"<span class="variable">$PATH</span>:/root/istio-1.5.1/bin"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看istio版本，报错是因为我们还没部署istio，暂时可以忽略</span></span><br><span class="line">[root<span class="variable">@VM</span>-<span class="number">0</span>-<span class="number">13</span>-centos istio-<span class="number">1</span>.<span class="number">5</span>.<span class="number">1</span>]<span class="comment"># istioctl version</span></span><br><span class="line"><span class="number">2020</span>-<span class="number">11</span>-29T08:<span class="number">18</span>:<span class="number">41</span>.074811Z	<span class="literal">warn</span>	will use `--remote=<span class="literal">false</span>` to retrieve version <span class="literal">info</span> due to `<span class="literal">no</span> Istio pods in namespace <span class="string">"istio-system"</span>`</span><br><span class="line"><span class="number">1</span>.<span class="number">5</span>.<span class="number">1</span></span><br></pre></td></tr></table></figure>
+<p>istioctl安装配置的选择</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>安装方式</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>默认安装</td>
+<td>istioctl manifest apply</td>
+</tr>
+<tr>
+<td>选择profile</td>
+<td>istioctl manifest apply —set profile=demo</td>
+</tr>
+<tr>
+<td>自定义安装选项</td>
+<td>istioctl manifest apply —set addonComponents.grafana.enabled=true</td>
+</tr>
+<tr>
+<td>自定义安装清单</td>
+<td>istioctl manifest apply —set installPackagePath=&lt;发布路径&gt;/install/kubernetes/operator/charts</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>这里我们采用demo的配置进行安装部署，demo包含了istio的所有组件</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">istioctl manifest apply --<span class="keyword">set</span> profile=demo</span><br><span class="line"></span><br><span class="line">[<span class="symbol">root@</span>VM<span class="number">-0</span><span class="number">-13</span>-centos ~]# kubectl <span class="keyword">get</span> pod -n istio-system</span><br><span class="line">NAME                                    READY   STATUS    RESTARTS   AGE</span><br><span class="line">grafana<span class="number">-84</span>b9bb5d7f-s2btw                <span class="number">1</span>/<span class="number">1</span>     Running   <span class="number">0</span>          <span class="number">6</span>m52s</span><br><span class="line">istio-egressgateway<span class="number">-666956</span>b747-zp4vh    <span class="number">1</span>/<span class="number">1</span>     Running   <span class="number">0</span>          <span class="number">6</span>m58s</span><br><span class="line">istio-ingressgateway<span class="number">-84</span>c4db59b7<span class="number">-654f</span>n   <span class="number">1</span>/<span class="number">1</span>     Running   <span class="number">0</span>          <span class="number">6</span>m58s</span><br><span class="line">istio-tracing<span class="number">-5</span>c87579565<span class="number">-5</span>z4rn          <span class="number">1</span>/<span class="number">1</span>     Running   <span class="number">0</span>          <span class="number">6</span>m52s</span><br><span class="line">istiod<span class="number">-5</span>bffb974b6-dh8jc                 <span class="number">1</span>/<span class="number">1</span>     Running   <span class="number">0</span>          <span class="number">7</span>m16s</span><br><span class="line">kiali<span class="number">-5</span>ddbc4cf59-xc7gd                  <span class="number">1</span>/<span class="number">1</span>     Running   <span class="number">0</span>          <span class="number">6</span>m52s</span><br><span class="line">prometheus<span class="number">-668f</span>978454-mr9pl             <span class="number">2</span>/<span class="number">2</span>     Running   <span class="number">0</span>          <span class="number">6</span>m52s</span><br><span class="line">[<span class="symbol">root@</span>VM<span class="number">-0</span><span class="number">-13</span>-centos ~]# kubectl <span class="keyword">get</span> svc -n istio-system</span><br><span class="line">NAME                        TYPE           CLUSTER-IP       EXTERNAL-IP      PORT(S)                                                                                                                                      AGE</span><br><span class="line">grafana                     ClusterIP      <span class="number">172.16</span><span class="number">.118</span><span class="number">.255</span>   &lt;none&gt;           <span class="number">3000</span>/TCP                                                                                                                                     <span class="number">7</span>m4s</span><br><span class="line">istio-egressgateway         ClusterIP      <span class="number">172.16</span><span class="number">.106</span><span class="number">.170</span>   &lt;none&gt;           <span class="number">80</span>/TCP,<span class="number">443</span>/TCP,<span class="number">15443</span>/TCP                                                                                                                     <span class="number">7</span>m10s</span><br><span class="line">istio-ingressgateway        LoadBalancer   <span class="number">172.16</span><span class="number">.99</span><span class="number">.203</span>    <span class="number">42.194</span><span class="number">.246</span><span class="number">.130</span>   <span class="number">15020</span>:<span class="number">32289</span>/TCP,<span class="number">80</span>:<span class="number">30066</span>/TCP,<span class="number">443</span>:<span class="number">32311</span>/TCP,<span class="number">15029</span>:<span class="number">31532</span>/TCP,<span class="number">15030</span>:<span class="number">31660</span>/TCP,<span class="number">15031</span>:<span class="number">30183</span>/TCP,<span class="number">15032</span>:<span class="number">30388</span>/TCP,<span class="number">31400</span>:<span class="number">30952</span>/TCP,<span class="number">15443</span>:<span class="number">31259</span>/TCP   <span class="number">7</span>m10s</span><br><span class="line">istio-pilot                 ClusterIP      <span class="number">172.16</span><span class="number">.65</span><span class="number">.31</span>     &lt;none&gt;           <span class="number">15010</span>/TCP,<span class="number">15011</span>/TCP,<span class="number">15012</span>/TCP,<span class="number">8080</span>/TCP,<span class="number">15014</span>/TCP,<span class="number">443</span>/TCP                                                                                     <span class="number">7</span>m28s</span><br><span class="line">istiod                      ClusterIP      <span class="number">172.16</span><span class="number">.5</span><span class="number">.124</span>     &lt;none&gt;           <span class="number">15012</span>/TCP,<span class="number">443</span>/TCP                                                                                                                            <span class="number">7</span>m28s</span><br><span class="line">jaeger-agent                ClusterIP      None             &lt;none&gt;           <span class="number">5775</span>/UDP,<span class="number">6831</span>/UDP,<span class="number">6832</span>/UDP                                                                                                                   <span class="number">7</span>m4s</span><br><span class="line">jaeger-collector            ClusterIP      <span class="number">172.16</span><span class="number">.34</span><span class="number">.1</span>      &lt;none&gt;           <span class="number">14267</span>/TCP,<span class="number">14268</span>/TCP,<span class="number">14250</span>/TCP                                                                                                                <span class="number">7</span>m4s</span><br><span class="line">jaeger-collector-headless   ClusterIP      None             &lt;none&gt;           <span class="number">14250</span>/TCP                                                                                                                                    <span class="number">7</span>m4s</span><br><span class="line">jaeger-query                ClusterIP      <span class="number">172.16</span><span class="number">.54</span><span class="number">.199</span>    &lt;none&gt;           <span class="number">16686</span>/TCP                                                                                                                                    <span class="number">7</span>m4s</span><br><span class="line">kiali                       ClusterIP      <span class="number">172.16</span><span class="number">.121</span><span class="number">.70</span>    &lt;none&gt;           <span class="number">20001</span>/TCP                                                                                                                                    <span class="number">7</span>m4s</span><br><span class="line">prometheus                  ClusterIP      <span class="number">172.16</span><span class="number">.38</span><span class="number">.123</span>    &lt;none&gt;           <span class="number">9090</span>/TCP                                                                                                                                     <span class="number">7</span>m4s</span><br><span class="line">tracing                     ClusterIP      <span class="number">172.16</span><span class="number">.110</span><span class="number">.87</span>    &lt;none&gt;           <span class="number">80</span>/TCP                                                                                                                                       <span class="number">7</span>m3s</span><br><span class="line">zipkin                      ClusterIP      <span class="number">172.16</span><span class="number">.120</span><span class="number">.180</span>   &lt;none&gt;           <span class="number">9411</span>/TCP                                                                                                                                     <span class="number">7</span>m3s</span><br></pre></td></tr></table></figure>
+<p>istio的安装部署的验证方式</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$</span> istioctl manifest generate &gt; <span class="variable">$HOME</span>/generated<span class="literal">-manifest</span>.yaml</span><br><span class="line"><span class="variable">$</span> kubectl apply <span class="operator">-f</span> <span class="variable">$HOME</span>/generated<span class="literal">-manifest</span>.yaml</span><br><span class="line"></span><br><span class="line"><span class="variable">$</span> istioctl verify<span class="literal">-install</span> <span class="operator">-f</span> <span class="variable">$HOME</span>/generated<span class="literal">-manifest</span>.yam</span><br></pre></td></tr></table></figure>
+<p>如果某个命名空间不想自动注入，只需为该namespace加上istio-injection=disabled标签即可。</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl <span class="keyword">label</span><span class="bash"> ns <span class="built_in">test</span> istio-injection=disabled</span></span><br></pre></td></tr></table></figure>
+<p>istio删除方式</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">istioctl manifest <span class="keyword">generate</span> --set profile=demo | kubectl delete -f -</span><br></pre></td></tr></table></figure>
+<p>istio的demo中包含一个dashboard，组件叫kiali，我们可以通过kiali来查看组件的运行情况和负载的注入情况。</p>
+<p>我们可以通过下面命令开启kiali的访问</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[<span class="symbol">root@</span>VM<span class="number">-0</span><span class="number">-13</span>-centos treafik]# istioctl dashboard kiali</span><br><span class="line">http:<span class="comment">//localhost:20001/kiali</span></span><br><span class="line">Failed to open browser; open http:<span class="comment">//localhost:20001/kiali in your browser.</span></span><br></pre></td></tr></table></figure>
+<p>也可以通过treafik来暴露一个域名进行访问</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">traefik.containo.us/v1alpha1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">IngressRoute</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">kiali-webui</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">istio-system</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">entryPoints:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">web</span></span><br><span class="line">  <span class="attr">routes:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">match:</span> <span class="string">Host(`istio.k8s.niewx.cn`)</span></span><br><span class="line">    <span class="attr">kind:</span> <span class="string">Rule</span></span><br><span class="line">    <span class="attr">services:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">kiali</span></span><br><span class="line">      <span class="attr">port:</span> <span class="number">20001</span></span><br></pre></td></tr></table></figure>
+<p><img src="1.png" alt="upload-image"> </p>
+<p>通过域名进行访问，登录的账号密码默认为admin/admin</p>
+<h1 id="部署bookinfo测试样例"><a href="#部署bookinfo测试样例" class="headerlink" title="部署bookinfo测试样例"></a>部署bookinfo测试样例</h1><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 运行default命名空间下注入sidecar</span></span><br><span class="line"></span><br><span class="line">kubectl label namespace<span class="built_in"> default </span><span class="attribute">istio-injection</span>=enabled</span><br><span class="line"></span><br><span class="line"><span class="comment"># 部署bookinfo应用</span></span><br><span class="line">kubectl apply -f samples/bookinfo/platform/kube/bookinfo.yaml</span><br></pre></td></tr></table></figure>
+<h1 id="部署bookinfo的访问入口ingressgateway"><a href="#部署bookinfo的访问入口ingressgateway" class="headerlink" title="部署bookinfo的访问入口ingressgateway"></a>部署bookinfo的访问入口ingressgateway</h1><p>bookinfo的访问入口，是部署一个ingressgateway，具体yaml如下</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 部署bookinfo的访问入口</span></span><br><span class="line"><span class="string">kubectl</span> <span class="string">apply</span> <span class="string">-f</span> <span class="string">samples/bookinfo/networking/bookinfo-gateway.yaml</span></span><br><span class="line"></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1alpha3</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Gateway</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">bookinfo-gateway</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">istio:</span> <span class="string">ingressgateway</span> <span class="comment"># use istio default controller</span></span><br><span class="line">  <span class="attr">servers:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">port:</span></span><br><span class="line">      <span class="attr">number:</span> <span class="number">80</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">http</span></span><br><span class="line">      <span class="attr">protocol:</span> <span class="string">HTTP</span></span><br><span class="line">    <span class="attr">hosts:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">"*"</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1alpha3</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">VirtualService</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">bookinfo</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">hosts:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">"*"</span></span><br><span class="line">  <span class="attr">gateways:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">bookinfo-gateway</span></span><br><span class="line">  <span class="attr">http:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">match:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">uri:</span></span><br><span class="line">        <span class="attr">exact:</span> <span class="string">/productpage</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">uri:</span></span><br><span class="line">        <span class="attr">prefix:</span> <span class="string">/static</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">uri:</span></span><br><span class="line">        <span class="attr">exact:</span> <span class="string">/login</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">uri:</span></span><br><span class="line">        <span class="attr">exact:</span> <span class="string">/logout</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">uri:</span></span><br><span class="line">        <span class="attr">prefix:</span> <span class="string">/api/v1/products</span></span><br><span class="line">    <span class="attr">route:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">destination:</span></span><br><span class="line">        <span class="attr">host:</span> <span class="string">productpage</span></span><br><span class="line">        <span class="attr">port:</span></span><br><span class="line">          <span class="attr">number:</span> <span class="number">9080</span></span><br></pre></td></tr></table></figure>
+<p>ingressgateway定义了允许访问bookinfo的访问host，还有一个VirtualService来将流量转发到后端的哪个服务。</p>
+<p><img src="2.png" alt="upload-image"> </p>
+<p>到这里，我们就已经在集群中部署了istion，并且将一个bookinfo的应用通过ingressgateway的方式暴露出去提供访问。</p>
+
+                
+                <hr>
+                <!-- Pager -->
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2020/11/29/VirtualService-and-DestinationRule-of-istio-entry-series/" data-toggle="tooltip" data-placement="top" title="istio入门系列之VirtualService和DestinationRule">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2020/11/28/Product-introduction-of-istio-entry-series/" data-toggle="tooltip" data-placement="top" title="istio入门系列之产品介绍">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                <!-- tip start -->
+                
+
+                
+                <div class="comment_notes">
+                    <p>
+                        This is copyright.
+                    </p>
+                </div>
+                
+                <!-- tip end -->
+
+                <!-- Music start-->
+                
+                
+<link rel="stylesheet" href="../../../../css/music-player/fonts/iconfont.css">
+
+
+<link rel="stylesheet" href="../../../../css/music-player/css/reset.css">
+
+
+<link rel="stylesheet" href="../../../../css/music-player/css/player.css">
+
+
+<div class="music-player">
+    <audio class="music-player__audio" ></audio>
+    <div class="music-player__main">
+        <div class="music-player__blur"></div>
+        <div class="music-player__disc">
+            <div class="music-player__image">
+                <img width="100%" src="" alt="">
+            </div>
+            <div class="music-player__pointer"><img width="100%" src="/img/cd_tou.png" alt=""></div>
+        </div>
+        <div class="music-player__controls">
+            <div class="music__info">
+                <h3 class="music__info--title">...</h3>
+                <p class="music__info--singer">...</p>
+            </div>
+            <div class="player-control">
+                <div class="player-control__content">
+                    <div class="player-control__btns">
+                        <div class="player-control__btn player-control__btn--prev"><i class="iconfont icon-prev"></i></div>
+                        <div class="player-control__btn player-control__btn--play"><i class="iconfont icon-play"></i></div>
+                        <div class="player-control__btn player-control__btn--next"><i class="iconfont icon-next"></i></div>
+                        <div class="player-control__btn player-control__btn--mode"><i class="iconfont icon-loop"></i></div>
+                    </div>
+                    <div class="player-control__volume">
+                        <div class="control__volume--icon player-control__btn"><i class="iconfont icon-volume"></i></div>
+                        <div class="control__volume--progress player_progress"></div>
+                    </div>
+                </div>
+                <div class="player-control__content">
+                    <div class="player__song--progress player_progress"></div>
+                    <div class="player__song--timeProgess nowTime">00:00</div>
+                    <div class="player__song--timeProgess totalTime">00:00</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="../../../../js/music-player/utill.js"></script>
+
+
+<script src="../../../../js/music-player/jquery.min.js"></script>
+
+<!-- netease; qqkg -->
+<!--
+<script src="../../../../js/music-player/player.js?library=config.music.library.js"></script>
+-->
+<script src="../../../../js/music-player/player.js?library=netease&music=https://kg.qq.com/node/play?s=7deFpz7Z26Jmv7di&g_f=share_html"></script>
+                
+                <!-- Music end -->
+
+                <!-- Sharing -->
+                
+                <div class="social-share"  data-wechat-qrcode-helper="" align="center"></div>
+                <!--  css & js -->
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/social-share.js/1.0.16/css/share.min.css">
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/social-share.js/1.0.16/js/social-share.min.js"></script>
+                
+                <!-- Sharing -->
+
+                <!-- gitment start -->
+                
+                <hr>
+                <div id="blog_comments"></div>
+
+<!--
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+-->
+<!--
+<link rel="stylesheet" href="/css/gitment.css">
+<script type="text/javascript" src="/js/gitment.js"></script>
+-->
+
+<script src="https://cdn.jsdelivr.net/gh/theme-next/theme-next-gitment@1/gitment.browser.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/theme-next/theme-next-gitment@1/default.css"/>
+
+<!--
+<link rel="stylesheet" href="https://billts.site/extra_css/gitment.css">
+<script src="https://billts.site/js/gitment.js"></script>
+-->
+
+<script>
+const myTheme = {
+  render(state, instance) {
+    const container = document.createElement('div')
+    container.lang = "en-US"
+    container.className = 'gitment-container gitment-root-container'
+    
+     // your custom component
+    container.appendChild(instance.renderSomething(state, instance))
+    
+    container.appendChild(instance.renderHeader(state, instance))
+    container.appendChild(instance.renderComments(state, instance))
+    container.appendChild(instance.renderEditor(state, instance))
+    //container.appendChild(instance.renderFooter(state, instance))
+    return container
+  },
+  renderSomething(state, instance) {
+    const container = document.createElement('div')
+    container.lang = "en-US"
+    container.className = 'hello_visitor'
+    if (state.user.login) {
+      container.innerText = `Hello ${state.user.login}, Welcome to comment system`
+    }
+    return container
+  }
+}
+
+
+const gitment = new Gitment({
+    id: 'Sat Nov 28 2020 14:10:00 GMT+0800', // optional
+    owner: "nieweixing",
+    repo: "gitalk-comment",
+    oauth: {
+      client_id: "5976cd3d9cc251569467",
+      client_secret: "74117131a57324d4d616267265a94f4a1ac293ec",
+    },
+    theme: myTheme,
+    // ...
+    // For more available options, check out the documentation below
+  })
+  
+  gitment.render('blog_comments')
+  // or
+  // gitment.render(document.getElementById('comments'))
+  // or
+  // document.body.appendChild(gitment.render())
+</script>
+                
+                <!-- gitment end -->
+
+                <!-- 来必力City版安装代码 -->
+                
+                <!-- City版安装代码已完成 -->
+
+                <!-- disqus comment start -->
+                
+                <!-- disqus comment end -->
+            </div>
+            
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+                
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#Kubernetes" title="Kubernetes">Kubernetes</a>
+                        
+                          <a class="tag" href="/tags/#Istio" title="Istio">Istio</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="https://cloud.tencent.com/developer/column/87421" target="_blank">云+社区</a></li>
+                    
+                        <li><a href="https://www.niewx.cn/mybook/" target="_blank">gitbook</a></li>
+                    
+                        <li><a href="https://github.com/nieweixing" target="_blank">vashon&#39;s Github</a></li>
+                    
+                        <li><a href="https://weibo.com/3264907804/profile?rig" target="_blank">weibo</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'hover',
+          placement: 'left',
+          icon: 'ℬ'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+
+
+<style  type="text/css">
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/nieweixing">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://twitter.com/nieweixing">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://www.facebook.com/nieweixing">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/nieweixing">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; 聂伟星 2021 
+                    <br>
+                    Powered by 
+                    <a href="https://github.com/dusign/hexo-theme-snail" target="_blank" rel="noopener">
+                        <i>hexo-theme-snail</i>
+                    </a> | 
+                    <iframe name="star" style="margin-left: 2px; margin-bottom:-5px;" frameborder="0" scrolling="0"
+                        width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=dusign&repo=hexo-theme-snail&type=star&count=true">
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+
+</footer>
+
+<!-- jQuery -->
+
+<script src="../../../../js/jquery.min.js"></script>
+
+
+<!-- Bootstrap Core JavaScript -->
+
+<script src="../../../../js/bootstrap.min.js"></script>
+
+
+<!-- Custom Theme JavaScript -->
+
+<script src="../../../../js/hux-blog.min.js"></script>
+
+
+<!-- Search -->
+
+<script src="../../../../js/search.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.niewx.cn/hexo/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = 'bfe4709ccd8c5c9e559c89f4fd0866f3';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Search -->
+
+    <script type="text/javascript">      
+        var search_path = "search.xml";
+        if (search_path.length == 0) {
+            search_path = "search.xml";
+        }
+    var path = "/" + search_path;
+    searchFunc(path, 'local-search-input', 'local-search-result');
+    </script>
+
+
+<!-- busuanzi -->
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+	<a id="rocket" href="#top" class=""></a>
+	<script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+
+    
+        <!-- background effects line -->
+        
+
+        
+            <script type="text/javascript" src="/js/mouse-click.js" content='[&quot;🌱&quot;,&quot;just do it&quot;,&quot;🍀&quot;]' color='[&quot;rgb(121,93,179)&quot; ,&quot;rgb(76,180,231)&quot; ,&quot;rgb(184,90,154)&quot;]'></script>
+        
+
+        <!-- background effects end -->
+    
+
+    <!--<script size="50" alpha='0.3' zIndex="-999" src="/js/ribbonStatic.js"></script>-->
+    
+        <script src="/js/ribbonDynamic.js"></script>
+    
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+
+</html>

@@ -1,0 +1,1686 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="baidu-site-verification" content="093lY4ziMu" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="description" content="聂伟星个人技术博客">
+    <meta name="keyword"  content="聂伟星，博客">
+    <link rel="shortcut icon" href="/img/ironman-draw.png">
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <!--<link href='http://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>-->
+    <title>
+        
+          聂伟星个人技术博客
+        
+    </title>
+
+    <link rel="canonical" href="https://www.niewx.cn/hexo/archives/2/">
+
+    <!-- Bootstrap Core CSS -->
+    
+<link rel="stylesheet" href="../../css/bootstrap.min.css">
+
+
+    <!-- Custom CSS --> 
+    
+        
+<link rel="stylesheet" href="../../css/dusign-light.css">
+
+        
+<link rel="stylesheet" href="../../css/dusign-common-light.css">
+
+        
+<link rel="stylesheet" href="../../css/font-awesome.css">
+
+        
+<link rel="stylesheet" href="../../css/toc.css">
+
+        <!-- background effects end -->
+    
+    
+    <!-- Pygments Highlight CSS -->
+    
+<link rel="stylesheet" href="../../css/highlight.css">
+
+
+    
+<link rel="stylesheet" href="../../css/widget.css">
+
+
+    
+<link rel="stylesheet" href="../../css/rocket.css">
+
+
+    
+<link rel="stylesheet" href="../../css/signature.css">
+
+
+    
+<link rel="stylesheet" href="../../css/fonts.googleapis.css">
+
+
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+    <!-- photography -->
+    
+<link rel="stylesheet" href="../../css/photography.css">
+
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- background effects start -->
+    
+    <!-- background effects end -->
+
+	<!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        
+            
+                background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('/img/header_img/home-bg-1-dark.jpg') 
+                /*config*/
+            
+        
+    }
+    
+</style>
+
+<header class="intro-header" >
+    <!-- Signature -->
+    <div id="signature">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                
+                    <div class="site-heading">
+                        <h1>聂伟星</h1>
+                        <!--<hr class="small">-->
+                        <span id="subdusi" class="subheading">主要从事公有云、容器及k8s等运维工作，本人现负责腾讯云容器服务(TKE)问题处理，欢迎大家来到我的博客！</span>
+                    </div>
+                
+
+                </div>
+            </div>
+        </div>      
+    </div>
+
+    
+    <div class="waveWrapper">
+        <div class="wave wave_before" style="background-image: url('/img/wave-light.png')"></div>
+        <div class="wave wave_after" style="background-image: url('/img/wave-light.png')"></div>
+    </div>
+    
+</header>
+
+	
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">聂伟星</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archive/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/categories/">Categories</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/photography/">Photography</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                    
+                    <li>
+                        <a href="https://www.niewx.cn/mybook/" target="_blank">Chinese Blog</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    <!-- Main Content -->
+<div class="container">
+    <div class="row">
+        
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-1
+                col-md-8 col-md-offset-1
+                col-sm-12
+                col-xs-12
+                post-container
+            ">
+                <!-- Top -->
+
+    
+
+        <div class="post-preview">
+
+            <a href="/2019/11/01/Hexo-Theme-Snail/">
+                <h2 class="post-title">
+                    <img class="top_logo" src="/img/tp.png"/>
+                    &nbsp;&nbsp;&nbsp;&nbsp;Hexo-Theme-Snail
+                </h2>
+                <h3 class="post-subtitle">
+                    A succinct hexo theme.
+                </h3>
+                <div class="post-content-preview">
+                    hexo-theme-snailView Hexo-Theme-Snail Sources On Github &#10174; 
+View Live Super Snail Blog &#10174;
+
+Hexo-theme-snail is a succinct hexo theme. It has two colors, light and star, that can be set ......
+                </div>
+            </a>
+            
+                <p class="post-meta" style="margin: 10px 0;">
+                    Posted by 聂伟星 on
+                    2019-11-01
+                </p>
+                <div class="tags">
+                    
+                      <a href="/tags/#hexo-theme-snail" title="hexo-theme-snail">hexo-theme-snail</a>
+                    
+                </div>
+            
+
+        </div>
+        <hr>
+
+    
+
+    
+
+        <div class="post-preview">
+
+            <a href="/2020/01/01/Article-template/">
+                <h2 class="post-title">
+                    <img class="top_logo" src="/img/tp.png"/>
+                    &nbsp;&nbsp;&nbsp;&nbsp;Post文章模板
+                </h2>
+                <h3 class="post-subtitle">
+                    
+                </h3>
+                <div class="post-content-preview">
+                    该文章为个人博客模板和markdown的语法使用
+代码配置方式12345678import java.lang.Runtime;public class T&#123;    public static void main(String[] args) &#123;        int availProcessors &#x3D; Runtime.getRuntime().availabl......
+                </div>
+            </a>
+            
+                <p class="post-meta" style="margin: 10px 0;">
+                    Posted by VashonNie on
+                    2020-01-01
+                </p>
+                <div class="tags">
+                    
+                      <a href="/tags/#Template" title="Template">Template</a>
+                    
+                      <a href="/tags/#Markdown" title="Markdown">Markdown</a>
+                    
+                      <a href="/tags/#Kubernetes" title="Kubernetes">Kubernetes</a>
+                    
+                </div>
+            
+
+        </div>
+        <hr>
+
+    
+
+    
+
+        <div class="post-preview">
+
+            <a href="/2020/05/10/k8s-one_click-deployment-script/">
+                <h2 class="post-title">
+                    <img class="top_logo" src="/img/tp.png"/>
+                    &nbsp;&nbsp;&nbsp;&nbsp;kubernetes一键部署包
+                </h2>
+                <h3 class="post-subtitle">
+                    
+                </h3>
+                <div class="post-content-preview">
+                    本章主要介绍了k8s一键部署脚本。
+k8s一键安装包介绍版本说明
+kubernetes为1.15.2版本  
+docker版本为docker-ce-19.03.1-3.el7  
+docker-comnpose版本为1.18.0。  
+
+脚本功能说明start.sh启动部署k8s脚本,必须在master上执行脚本,并且脚本执行方式:
+sh start.sh masterIP node1Ip ......
+                </div>
+            </a>
+            
+                <p class="post-meta" style="margin: 10px 0;">
+                    Posted by VashonNie on
+                    2020-05-10
+                </p>
+                <div class="tags">
+                    
+                      <a href="/tags/#Kubernetes" title="Kubernetes">Kubernetes</a>
+                    
+                      <a href="/tags/#Docker" title="Docker">Docker</a>
+                    
+                </div>
+            
+
+        </div>
+        <hr>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+        <div class="post-preview">
+
+            <a href="/2020/09/15/kubeadm-deploy-k8s/">
+                <h2 class="post-title">
+                    <img class="top_logo" src="/img/tp.png"/>
+                    &nbsp;&nbsp;&nbsp;&nbsp;kubeadm部署k8s
+                </h2>
+                <h3 class="post-subtitle">
+                    
+                </h3>
+                <div class="post-content-preview">
+                    本文主要介绍了如何在centos上采用kubeadm搭建k8s集群。
+环境准备服务器master01:192.168.1.110 （最少2核CPU）node01:192.168.1.100  
+规划services网络：10.96.0.0/12pod网络：10.244.0.0/16  
+配置hosts解析各主机12345vim /etc/hosts127.0.0.1   localhost ......
+                </div>
+            </a>
+            
+                <p class="post-meta" style="margin: 10px 0;">
+                    Posted by VashonNie on
+                    2020-09-15
+                </p>
+                <div class="tags">
+                    
+                      <a href="/tags/#Kubernetes" title="Kubernetes">Kubernetes</a>
+                    
+                      <a href="/tags/#Docker" title="Docker">Docker</a>
+                    
+                </div>
+            
+
+        </div>
+        <hr>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+
+<!-- Main Content -->
+
+    
+
+        <div class="post-preview">
+
+            <a href="/2020/12/25/How-to-control-the-startup-sequence-of-containers-in-pod-in-k8s/">
+                <h2 class="post-title">
+                    k8s中如何控制pod中容器的启动顺序
+                </h2>
+                <h3 class="post-subtitle">
+                    
+                </h3>
+                <div class="post-content-preview">
+                    我们在部署服务的时候，通常会遇到这种场景就是2个服务部署在同一个pod中，但是这2个服务又有先后的依赖关系，那么我们如何在pod中如何来控制容器的启动顺序呢？今天我们来讲一下如何在pod如何控制2个容器的启动顺序，我们在这里在一个pod里面部署springboot和centos的2个容器作为示例，centos的启动需要依赖于springboot的服务启动正常再启动。
+正常我们在一个pod中部......
+                </div>
+            </a>
+            
+                <p class="post-meta" style="margin: 10px 0;">
+                    Posted by VashonNie on
+                    2020-12-25
+                </p>
+                <div class="tags">
+                    
+                      <a href="/tags/#Kubernetes" title="Kubernetes">Kubernetes</a>
+                    
+                      <a href="/tags/#Docker" title="Docker">Docker</a>
+                    
+                </div>
+            
+
+        </div>
+        <hr>
+
+    
+
+    
+
+        <div class="post-preview">
+
+            <a href="/2020/12/22/Build-Kong-Gateway-on-TKE/">
+                <h2 class="post-title">
+                    TKE上搭建kong网关
+                </h2>
+                <h3 class="post-subtitle">
+                    
+                </h3>
+                <div class="post-content-preview">
+                    本文介绍下如何在k8s上搭建kong网关及kong网关的简单使用，kong是一个服务控制平台，通过允许客户管理服务和 API 的整个生命周期，将组织的信息代理到所有服务。Kong Enterprise 建立在 Kong Gateway 之上，使用户能够简化跨混合云和多云部署的 API 和微服务管理。
+Kong Enterprise 旨在利用工作流自动化和现代 GitOps 实践在分散式体系结......
+                </div>
+            </a>
+            
+                <p class="post-meta" style="margin: 10px 0;">
+                    Posted by VashonNie on
+                    2020-12-22
+                </p>
+                <div class="tags">
+                    
+                      <a href="/tags/#TKE" title="TKE">TKE</a>
+                    
+                      <a href="/tags/#Kong" title="Kong">Kong</a>
+                    
+                </div>
+            
+
+        </div>
+        <hr>
+
+    
+
+    
+
+        <div class="post-preview">
+
+            <a href="/2020/12/20/Build-an-enterprise-level-mirror-warehouse-Harbor-on-TKE/">
+                <h2 class="post-title">
+                    TKE上搭建企业级镜像仓库Harbor
+                </h2>
+                <h3 class="post-subtitle">
+                    
+                </h3>
+                <div class="post-content-preview">
+                    本次我们来讲解下如何在TKE上搭建企业级镜像仓库Harbor，这里我们采用的是helm方式部署到TKE集群上，helm部署的harbor会通过ingress暴露前端页面提供访问，一般我们需要通过域名的https方式来访问Harbor仓库，所以我们需要做如下准备：
+
+腾讯云上申请一个TKE集群
+安装helm
+集群上安装nginx-ingress这个插件，可以参考https://cloud.te......
+                </div>
+            </a>
+            
+                <p class="post-meta" style="margin: 10px 0;">
+                    Posted by VashonNie on
+                    2020-12-20
+                </p>
+                <div class="tags">
+                    
+                      <a href="/tags/#Docker" title="Docker">Docker</a>
+                    
+                      <a href="/tags/#TKE" title="TKE">TKE</a>
+                    
+                      <a href="/tags/#Harbor" title="Harbor">Harbor</a>
+                    
+                </div>
+            
+
+        </div>
+        <hr>
+
+    
+
+    
+
+        <div class="post-preview">
+
+            <a href="/2020/12/14/Configure-security-policy-of-istio-entry-series/">
+                <h2 class="post-title">
+                    istio入门系列之配置安全策略
+                </h2>
+                <h3 class="post-subtitle">
+                    
+                </h3>
+                <div class="post-content-preview">
+                    本章我们来讲讲如何通过istio来给业务pod进行安全的配置。istio的安全配置对于业务是透明的，istio的安全架构如下，主要是在istiod里进行认证和授权。
+ 
+首先我们给demo下的httpbin这个服务配置一个安全策略，这里默认访问策略是拒绝所有访问
+1234567891011kubectl apply -f - &lt;&lt;EOFapiVersion: security.i......
+                </div>
+            </a>
+            
+                <p class="post-meta" style="margin: 10px 0;">
+                    Posted by VashonNie on
+                    2020-12-14
+                </p>
+                <div class="tags">
+                    
+                      <a href="/tags/#Kubernetes" title="Kubernetes">Kubernetes</a>
+                    
+                      <a href="/tags/#Istio" title="Istio">Istio</a>
+                    
+                </div>
+            
+
+        </div>
+        <hr>
+
+    
+
+    
+
+        <div class="post-preview">
+
+            <a href="/2020/12/11/Improve-system-flexibility-of-istio-entry-series/">
+                <h2 class="post-title">
+                    istio入门系列之提升系统弹性能力
+                </h2>
+                <h3 class="post-subtitle">
+                    
+                </h3>
+                <div class="post-content-preview">
+                    本章我们来讲讲如何通过istio来提升系统的弹性能力，弹性能力主要包含如下几个方面，我们今天看看如何用istio中的一些功能去解决这些问题。
+
+容错性：重试、幂等
+伸缩性：自动水平扩展（autoscaling）
+过载保护：超时、熔断、降级、限流
+弹性测试：故障注入
+
+今天我们讲讲如何通过istio中的超时、重试、熔断、故障注入来提升服务的弹性能力。
+首先我们通过VirtualService来......
+                </div>
+            </a>
+            
+                <p class="post-meta" style="margin: 10px 0;">
+                    Posted by VashonNie on
+                    2020-12-11
+                </p>
+                <div class="tags">
+                    
+                      <a href="/tags/#Kubernetes" title="Kubernetes">Kubernetes</a>
+                    
+                      <a href="/tags/#Istio" title="Istio">Istio</a>
+                    
+                </div>
+            
+
+        </div>
+        <hr>
+
+    
+
+    
+
+        <div class="post-preview">
+
+            <a href="/2020/12/10/Automated-grayscale-release-of-istio-entry-series/">
+                <h2 class="post-title">
+                    istio入门系列之自动化灰度发布
+                </h2>
+                <h3 class="post-subtitle">
+                    
+                </h3>
+                <div class="post-content-preview">
+                    本章我们学习下如何通过Flagger来实现自动灰度发布的流程，Flagger的实现原理和介绍如下图。
+ 
+ 
+下面我们来部署一下flagger
+添加flagger的helm repo仓库12[root@VM-0-13-centos ~]# helm repo add flagger https://flagger.app"flagger" has been added to your rep......
+                </div>
+            </a>
+            
+                <p class="post-meta" style="margin: 10px 0;">
+                    Posted by VashonNie on
+                    2020-12-10
+                </p>
+                <div class="tags">
+                    
+                      <a href="/tags/#Kubernetes" title="Kubernetes">Kubernetes</a>
+                    
+                      <a href="/tags/#Istio" title="Istio">Istio</a>
+                    
+                      <a href="/tags/#Flagger" title="Flagger">Flagger</a>
+                    
+                </div>
+            
+
+        </div>
+        <hr>
+
+    
+
+    
+
+        <div class="post-preview">
+
+            <a href="/2020/12/09/Implement-CICD-of-gitlab-on-Kubernetes/">
+                <h2 class="post-title">
+                    Kubernetes上实现gitlab的CICD
+                </h2>
+                <h3 class="post-subtitle">
+                    
+                </h3>
+                <div class="post-content-preview">
+                    本次我们来讲解下如何在k8s上搭建gitlab，并且通过gitlab内Pipeline的ci/cd将代码部署到k8s集群内。
+本次k8s环境基于tke托管集群1.18进行测试，镜像仓库使用的是腾讯云的ccr仓库。
+搭建gitlab部署gitla需要部署三个服务，分别是redis、postgresql、gitlab这三个服务，下面我们来讲解具体部署及部署yaml文件
+我们先创建一个gitlab......
+                </div>
+            </a>
+            
+                <p class="post-meta" style="margin: 10px 0;">
+                    Posted by VashonNie on
+                    2020-12-09
+                </p>
+                <div class="tags">
+                    
+                      <a href="/tags/#Kubernetes" title="Kubernetes">Kubernetes</a>
+                    
+                      <a href="/tags/#TKE" title="TKE">TKE</a>
+                    
+                      <a href="/tags/#Devops" title="Devops">Devops</a>
+                    
+                </div>
+            
+
+        </div>
+        <hr>
+
+    
+
+    
+
+        <div class="post-preview">
+
+            <a href="/2020/12/08/Getting-started-in-actual-combat-of-istio-entry-series/">
+                <h2 class="post-title">
+                    istio入门系列之实战入门准备flux自动化部署
+                </h2>
+                <h3 class="post-subtitle">
+                    
+                </h3>
+                <div class="post-content-preview">
+                    本章我们学习下如何通过Flux来进行CI/CD的代码自动发布。
+学习Flux之前，我们需要进行如下准备工作。
+ 
+flux的具体实现流程如下
+ 
+flux的安装首先下载最新的fluxctl客户端安装
+123[root@VM-0-13-centos ~]# wget https://github.com/fluxcd/flux/releases/download/1.21.0/fluxctl_......
+                </div>
+            </a>
+            
+                <p class="post-meta" style="margin: 10px 0;">
+                    Posted by VashonNie on
+                    2020-12-08
+                </p>
+                <div class="tags">
+                    
+                      <a href="/tags/#Kubernetes" title="Kubernetes">Kubernetes</a>
+                    
+                      <a href="/tags/#Istio" title="Istio">Istio</a>
+                    
+                      <a href="/tags/#Flux" title="Flux">Flux</a>
+                    
+                </div>
+            
+
+        </div>
+        <hr>
+
+    
+
+    
+
+        <div class="post-preview">
+
+            <a href="/2020/12/07/Security-authorization-configuration-of-istio-entry-series/">
+                <h2 class="post-title">
+                    istio入门系列之安全授权配置
+                </h2>
+                <h3 class="post-subtitle">
+                    
+                </h3>
+                <div class="post-content-preview">
+                    Istio 的授权功能为网格中的工作负载提供网格、命名空间和工作负载级别的访问控制。这种控制层级提供了以下优点：
+工作负载间和最终用户到工作负载的授权。一个简单的 API：它包括一个单独的并且很容易使用和维护的 AuthorizationPolicy CRD。灵活的语义：运维人员可以在 Istio 属性上定义自定义条件，并使用 DENY 和 ALLOW 动作。高性能：Istio 授权是在 E......
+                </div>
+            </a>
+            
+                <p class="post-meta" style="margin: 10px 0;">
+                    Posted by VashonNie on
+                    2020-12-07
+                </p>
+                <div class="tags">
+                    
+                      <a href="/tags/#Kubernetes" title="Kubernetes">Kubernetes</a>
+                    
+                      <a href="/tags/#Istio" title="Istio">Istio</a>
+                    
+                </div>
+            
+
+        </div>
+        <hr>
+
+    
+
+    
+
+        <div class="post-preview">
+
+            <a href="/2020/12/07/TLS-security-authentication-configuration-of-istio-entry-series/">
+                <h2 class="post-title">
+                    istio入门系列之TLS安全认证的配置
+                </h2>
+                <h3 class="post-subtitle">
+                    
+                </h3>
+                <div class="post-content-preview">
+                    Istio的自动双向TLS特性，您只需配置认证策略即可使用双向 TLS，而无需关注目标规则。
+Istio 跟踪迁移到 sidecar 的服务端工作负载，并将客户端 sidecar 配置为自动向这些工作负载发送双向 TLS 流量， 同时将明文流量发送到没有 sidecar 的工作负载。这使您可以通过最少的配置，逐步在网格中使用双向 TLS。
+istio1.5版本的安全认证默认是使用的SDS（安......
+                </div>
+            </a>
+            
+                <p class="post-meta" style="margin: 10px 0;">
+                    Posted by VashonNie on
+                    2020-12-07
+                </p>
+                <div class="tags">
+                    
+                      <a href="/tags/#Kubernetes" title="Kubernetes">Kubernetes</a>
+                    
+                      <a href="/tags/#Istio" title="Istio">Istio</a>
+                    
+                </div>
+            
+
+        </div>
+        <hr>
+
+    
+
+
+
+<!-- Pager -->
+
+<ul class="pager">
+    
+        <li class="previous">
+            <a href="/">&larr; Newer Posts</a>
+        </li>
+    
+    
+        <li class="next">
+            <a href="/archives/3/">Older Posts &rarr;</a>
+        </li>
+    
+</ul>
+
+
+            </div>
+
+            <!-- Sidebar Container -->
+<div class="
+    col-lg-3 col-lg-offset-0
+    col-md-3 col-md-offset-0
+    col-sm-12
+    col-xs-12
+    sidebar-container
+">
+    
+        
+<!--
+<h5>SEARCH</h5>
+<div class="search-article" class="tags">
+	<input id="search-kw" type="text" name="search_article" placeholder="Enter keywords for search" />
+	<div class="search-img">
+		<img 
+			src="/img/search.png" 
+			alt="search" 
+			onMouseOver="this.src='/img/search-focus.png'" 
+			onMouseOut="this.src='/img/search.png'"/>
+	</div>
+</div>-->
+
+<h5>SEARCH</h5>
+<div id="site_search">
+	<div class="form-group">
+		<input type="text" id="local-search-input" name="q" results="0" placeholder="search" class="st-search-input st-default-search-input form-control"/>
+	</div>  
+	<div id="local-search-result"></div>
+</div>
+
+        <hr>
+    
+        <!-- Featured Tags -->
+
+<section>
+    <!-- no hr -->
+    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+    <div class="tags">
+        
+            
+            <a href="/tags/#hexo-theme-snail" title="hexo-theme-snail" rel="1">hexo-theme-snail</a>
+            
+        
+            
+            <a href="/tags/#Template" title="Template" rel="1">Template</a>
+            
+        
+            
+            <a href="/tags/#Markdown" title="Markdown" rel="1">Markdown</a>
+            
+        
+            
+            <a href="/tags/#Kubernetes" title="Kubernetes" rel="75">Kubernetes</a>
+            
+        
+            
+            <a href="/tags/#Docker" title="Docker" rel="20">Docker</a>
+            
+        
+            
+            <a href="/tags/#TKE" title="TKE" rel="26">TKE</a>
+            
+        
+            
+            <a href="/tags/#EFK" title="EFK" rel="2">EFK</a>
+            
+        
+            
+            <a href="/tags/#Treafik2" title="Treafik2" rel="1">Treafik2</a>
+            
+        
+            
+            <a href="/tags/#Coredns" title="Coredns" rel="1">Coredns</a>
+            
+        
+            
+            <a href="/tags/#Treafik1.7" title="Treafik1.7" rel="1">Treafik1.7</a>
+            
+        
+            
+            <a href="/tags/#Harbor" title="Harbor" rel="2">Harbor</a>
+            
+        
+            
+            <a href="/tags/#configMap" title="configMap" rel="1">configMap</a>
+            
+        
+            
+            <a href="/tags/#Service" title="Service" rel="1">Service</a>
+            
+        
+            
+            <a href="/tags/#COS" title="COS" rel="1">COS</a>
+            
+        
+            
+            <a href="/tags/#Dashboard" title="Dashboard" rel="1">Dashboard</a>
+            
+        
+            
+            <a href="/tags/#NFS" title="NFS" rel="2">NFS</a>
+            
+        
+            
+            <a href="/tags/#Probe" title="Probe" rel="1">Probe</a>
+            
+        
+            
+            <a href="/tags/#Jenkins" title="Jenkins" rel="1">Jenkins</a>
+            
+        
+            
+            <a href="/tags/#RBAC" title="RBAC" rel="1">RBAC</a>
+            
+        
+            
+            <a href="/tags/#linux" title="linux" rel="3">linux</a>
+            
+        
+            
+            <a href="/tags/#ssl" title="ssl" rel="1">ssl</a>
+            
+        
+            
+            <a href="/tags/#kubectl" title="kubectl" rel="1">kubectl</a>
+            
+        
+            
+            <a href="/tags/#ip-masq-agent" title="ip-masq-agent" rel="1">ip-masq-agent</a>
+            
+        
+            
+            <a href="/tags/#Loki" title="Loki" rel="1">Loki</a>
+            
+        
+            
+            <a href="/tags/#Pod" title="Pod" rel="1">Pod</a>
+            
+        
+            
+            <a href="/tags/#etcd" title="etcd" rel="1">etcd</a>
+            
+        
+            
+            <a href="/tags/#securityContext" title="securityContext" rel="1">securityContext</a>
+            
+        
+            
+            <a href="/tags/#Go" title="Go" rel="1">Go</a>
+            
+        
+            
+            <a href="/tags/#externalTrafficPolicy" title="externalTrafficPolicy" rel="1">externalTrafficPolicy</a>
+            
+        
+            
+            <a href="/tags/#Fluent" title="Fluent" rel="1">Fluent</a>
+            
+        
+            
+            <a href="/tags/#kubeconfig" title="kubeconfig" rel="1">kubeconfig</a>
+            
+        
+            
+            <a href="/tags/#Istio" title="Istio" rel="21">Istio</a>
+            
+        
+            
+            <a href="/tags/#VirtualService" title="VirtualService" rel="2">VirtualService</a>
+            
+        
+            
+            <a href="/tags/#DestinationRule" title="DestinationRule" rel="1">DestinationRule</a>
+            
+        
+            
+            <a href="/tags/#Gateway" title="Gateway" rel="1">Gateway</a>
+            
+        
+            
+            <a href="/tags/#ServiceEntry" title="ServiceEntry" rel="1">ServiceEntry</a>
+            
+        
+            
+            <a href="/tags/#Kiali" title="Kiali" rel="1">Kiali</a>
+            
+        
+            
+            <a href="/tags/#Promnetheus" title="Promnetheus" rel="1">Promnetheus</a>
+            
+        
+            
+            <a href="/tags/#Grafana" title="Grafana" rel="1">Grafana</a>
+            
+        
+            
+            <a href="/tags/#Envoy" title="Envoy" rel="1">Envoy</a>
+            
+        
+            
+            <a href="/tags/#Jaeger" title="Jaeger" rel="1">Jaeger</a>
+            
+        
+            
+            <a href="/tags/#Flux" title="Flux" rel="1">Flux</a>
+            
+        
+            
+            <a href="/tags/#Flagger" title="Flagger" rel="1">Flagger</a>
+            
+        
+            
+            <a href="/tags/#Devops" title="Devops" rel="1">Devops</a>
+            
+        
+            
+            <a href="/tags/#Kong" title="Kong" rel="1">Kong</a>
+            
+        
+            
+            <a href="/tags/#Kubeadm" title="Kubeadm" rel="1">Kubeadm</a>
+            
+        
+            
+            <a href="/tags/#openvpn" title="openvpn" rel="1">openvpn</a>
+            
+        
+            
+            <a href="/tags/#thanos" title="thanos" rel="1">thanos</a>
+            
+        
+            
+            <a href="/tags/#prometheus" title="prometheus" rel="1">prometheus</a>
+            
+        
+            
+            <a href="/tags/#rancher" title="rancher" rel="1">rancher</a>
+            
+        
+            
+            <a href="/tags/#gitbook" title="gitbook" rel="1">gitbook</a>
+            
+        
+            
+            <a href="/tags/#Nginx" title="Nginx" rel="1">Nginx</a>
+            
+        
+            
+            <a href="/tags/#Elasticsearch" title="Elasticsearch" rel="1">Elasticsearch</a>
+            
+        
+            
+            <a href="/tags/#python" title="python" rel="1">python</a>
+            
+        
+            
+            <a href="/tags/#cert-manager" title="cert-manager" rel="1">cert-manager</a>
+            
+        
+    </div>
+</section>
+
+        <hr>
+    
+        <!-- Short About -->
+<section class="visible-md visible-lg">
+    <h5><a href="/about/">ABOUT ME</a></h5>
+    <div class="short-about">
+
+        
+            <img id = "avatar_pic" src="/img/ironman-draw.png" />
+        
+
+        
+            <p>Welcome to visit, I&#39;m vashon!</p>
+        
+
+        <!-- SNS Link -->
+        <ul class="list-inline">
+
+            
+                <li>
+                    <a target="_blank"  href="https://github.com/nieweixing">
+                        <span class="fa-stack fa-lg">
+                            <i class="fa fa-circle fa-stack-2x"></i>
+                            <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                        </span>
+                    </a>
+                </li>
+            
+
+            
+                <li>
+                    <a target="_blank" href="https://twitter.com/nieweixing">
+                        <span class="fa-stack fa-lg">
+                            <i class="fa fa-circle fa-stack-2x"></i>
+                            <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                        </span>
+                    </a>
+                </li>
+            
+
+            
+                <li>
+                    <a target="_blank" href="https://www.facebook.com/nieweixing">
+                        <span class="fa-stack fa-lg">
+                            <i class="fa fa-circle fa-stack-2x"></i>
+                            <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                        </span>
+                    </a>
+                </li>
+            
+
+            
+                <li>
+                    <a target="_blank" href="https://www.zhihu.com/people/nieweixing">
+                        <span class="fa-stack fa-lg">
+                            <i class="fa fa-circle fa-stack-2x"></i>
+                            <i class="fa  fa-stack-1x fa-inverse">知</i>
+                        </span>
+                    </a>
+                </li>
+            
+
+            
+
+            
+
+            
+
+        </ul>
+    </div>
+</section>
+        <hr>
+    
+        
+  <h5>VISITORS</h5>
+  <div class="widget">
+    <span>
+    	Viewed <b><i><span id="busuanzi_value_site_pv"><i class="fa fa-spinner fa-spin"></i></span></i></b> Times
+	</span>
+	<br/>
+	<span>
+		<b><i><span id="busuanzi_value_site_uv"><i class="fa fa-spinner fa-spin"></i></span></i></b> Visitors In Total
+	</span>
+  </div>
+
+        <hr>
+    
+        
+  <h5>RECENT POSTS</h5>
+  <div class="widget">
+    <ul>
+      
+        <li>
+          <a href="../../2021/08/07/cert-manager-issues-free-certificates-for-domain-names/">cert-manager为域名签发免费证书</a>
+        </li>
+      
+        <li>
+          <a href="../../2021/07/10/Use-python-to-convert-pdf-to-png-long-image/">使用python脚本将pdf转png长图</a>
+        </li>
+      
+        <li>
+          <a href="../../2021/06/12/use-operator-to-quickly-deploy-es-cluster-in-k8s/">使用eck快速在k8s部署es集群</a>
+        </li>
+      
+        <li>
+          <a href="../../2021/05/21/Nginx-learning-and-configuration/">Nginx的学习和配置</a>
+        </li>
+      
+        <li>
+          <a href="../../2021/04/21/gitbook-generation-and-deployment-/">gitbook的生成和部署</a>
+        </li>
+      
+    </ul>
+  </div>
+
+        <hr>
+    
+        <!-- Friends Blog -->
+
+<h5>FRIENDS</h5>
+<ul class="list-inline">
+
+    
+        <li><a href="https://cloud.tencent.com/developer/column/87421" target="_blank">云+社区</a></li>
+    
+        <li><a href="https://www.niewx.cn/mybook/" target="_blank">gitbook</a></li>
+    
+        <li><a href="https://github.com/nieweixing" target="_blank">vashon&#39;s Github</a></li>
+    
+        <li><a href="https://weibo.com/3264907804/profile?rig" target="_blank">weibo</a></li>
+    
+</ul>
+
+        <hr>
+    
+        
+    <h5>ARCHIVES</h5>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="../2021/08/">August 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="../2021/07/">July 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="../2021/06/">June 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="../2021/05/">May 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="../2021/04/">April 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="../2021/03/">March 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="../2021/01/">January 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="../2020/12/">December 2020</a><span class="archive-list-count">19</span></li><li class="archive-list-item"><a class="archive-list-link" href="../2020/11/">November 2020</a><span class="archive-list-count">15</span></li><li class="archive-list-item"><a class="archive-list-link" href="../2020/10/">October 2020</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="../2020/09/">September 2020</a><span class="archive-list-count">9</span></li><li class="archive-list-item"><a class="archive-list-link" href="../2020/08/">August 2020</a><span class="archive-list-count">11</span></li><li class="archive-list-item"><a class="archive-list-link" href="../2020/07/">July 2020</a><span class="archive-list-count">8</span></li><li class="archive-list-item"><a class="archive-list-link" href="../2020/06/">June 2020</a><span class="archive-list-count">10</span></li><li class="archive-list-item"><a class="archive-list-link" href="../2020/05/">May 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="../2020/01/">January 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="../2019/11/">November 2019</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+
+        <hr>
+    
+        <!-- Categories -->
+
+    <h5>categories</h5>
+    <div class="widget">
+      <ul>
+        
+          <a href="categories/#hexo"><li>hexo</li></a>
+        
+          <a href="categories/#Template"><li>Template</li></a>
+        
+          <a href="categories/#Kubernetes"><li>Kubernetes</li></a>
+        
+          <a href="categories/#TKE"><li>TKE</li></a>
+        
+          <a href="categories/#Markdown"><li>Markdown</li></a>
+        
+          <a href="categories/#腾讯云"><li>腾讯云</li></a>
+        
+          <a href="categories/#Kubernetes"><li>Kubernetes</li></a>
+        
+          <a href="categories/#Kubernetes"><li>Kubernetes</li></a>
+        
+          <a href="categories/#Docker"><li>Docker</li></a>
+        
+          <a href="categories/#Harbor"><li>Harbor</li></a>
+        
+          <a href="categories/#Monitor"><li>Monitor</li></a>
+        
+          <a href="categories/#Log"><li>Log</li></a>
+        
+          <a href="categories/#Devops"><li>Devops</li></a>
+        
+          <a href="categories/#linux"><li>linux</li></a>
+        
+          <a href="categories/#Helm"><li>Helm</li></a>
+        
+          <a href="categories/#TKE"><li>TKE</li></a>
+        
+          <a href="categories/#Docker"><li>Docker</li></a>
+        
+          <a href="categories/#crictl"><li>crictl</li></a>
+        
+          <a href="categories/#Monitor"><li>Monitor</li></a>
+        
+          <a href="categories/#Log"><li>Log</li></a>
+        
+          <a href="categories/#etcd"><li>etcd</li></a>
+        
+          <a href="categories/#Log"><li>Log</li></a>
+        
+          <a href="categories/#Istio"><li>Istio</li></a>
+        
+          <a href="categories/#Gitlab"><li>Gitlab</li></a>
+        
+          <a href="categories/#Kong"><li>Kong</li></a>
+        
+          <a href="categories/#openvpn"><li>openvpn</li></a>
+        
+          <a href="categories/#Monitor"><li>Monitor</li></a>
+        
+          <a href="categories/#Rancher"><li>Rancher</li></a>
+        
+          <a href="categories/#Gitbook"><li>Gitbook</li></a>
+        
+          <a href="categories/#Nginx"><li>Nginx</li></a>
+        
+          <a href="categories/#elasticsearch"><li>elasticsearch</li></a>
+        
+          <a href="categories/#python"><li>python</li></a>
+        
+          <a href="categories/#cert-manager"><li>cert-manager</li></a>
+        
+      </ul>
+    </div>
+
+        <hr>
+    
+</div>
+
+        
+    </div>
+</div>
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/nieweixing">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://twitter.com/nieweixing">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://www.facebook.com/nieweixing">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/nieweixing">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; 聂伟星 2021 
+                    <br>
+                    Powered by 
+                    <a href="https://github.com/dusign/hexo-theme-snail" target="_blank" rel="noopener">
+                        <i>hexo-theme-snail</i>
+                    </a> | 
+                    <iframe name="star" style="margin-left: 2px; margin-bottom:-5px;" frameborder="0" scrolling="0"
+                        width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=dusign&repo=hexo-theme-snail&type=star&count=true">
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+
+</footer>
+
+<!-- jQuery -->
+
+<script src="../../js/jquery.min.js"></script>
+
+
+<!-- Bootstrap Core JavaScript -->
+
+<script src="../../js/bootstrap.min.js"></script>
+
+
+<!-- Custom Theme JavaScript -->
+
+<script src="../../js/hux-blog.min.js"></script>
+
+
+<!-- Search -->
+
+<script src="../../js/search.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.niewx.cn/hexo/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = 'bfe4709ccd8c5c9e559c89f4fd0866f3';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Search -->
+
+    <script type="text/javascript">      
+        var search_path = "search.xml";
+        if (search_path.length == 0) {
+            search_path = "search.xml";
+        }
+    var path = "/" + search_path;
+    searchFunc(path, 'local-search-input', 'local-search-result');
+    </script>
+
+
+<!-- busuanzi -->
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+	<a id="rocket" href="#top" class=""></a>
+	<script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+
+    
+        <!-- background effects line -->
+        
+
+        
+            <script type="text/javascript" src="/js/mouse-click.js" content='[&quot;🌱&quot;,&quot;just do it&quot;,&quot;🍀&quot;]' color='[&quot;rgb(121,93,179)&quot; ,&quot;rgb(76,180,231)&quot; ,&quot;rgb(184,90,154)&quot;]'></script>
+        
+
+        <!-- background effects end -->
+    
+
+    <!--<script size="50" alpha='0.3' zIndex="-999" src="/js/ribbonStatic.js"></script>-->
+    
+        <script src="/js/ribbonDynamic.js"></script>
+    
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+
+</html>

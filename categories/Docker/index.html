@@ -1,0 +1,2348 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="baidu-site-verification" content="093lY4ziMu" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="description" content="聂伟星个人技术博客">
+    <meta name="keyword"  content="聂伟星，博客">
+    <link rel="shortcut icon" href="/img/ironman-draw.png">
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <!--<link href='http://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>-->
+    <title>
+        
+          聂伟星个人技术博客
+        
+    </title>
+
+    <link rel="canonical" href="https://www.niewx.cn/hexo/categories/Docker/">
+
+    <!-- Bootstrap Core CSS -->
+    
+<link rel="stylesheet" href="../../css/bootstrap.min.css">
+
+
+    <!-- Custom CSS --> 
+    
+        
+<link rel="stylesheet" href="../../css/dusign-light.css">
+
+        
+<link rel="stylesheet" href="../../css/dusign-common-light.css">
+
+        
+<link rel="stylesheet" href="../../css/font-awesome.css">
+
+        
+<link rel="stylesheet" href="../../css/toc.css">
+
+        <!-- background effects end -->
+    
+    
+    <!-- Pygments Highlight CSS -->
+    
+<link rel="stylesheet" href="../../css/highlight.css">
+
+
+    
+<link rel="stylesheet" href="../../css/widget.css">
+
+
+    
+<link rel="stylesheet" href="../../css/rocket.css">
+
+
+    
+<link rel="stylesheet" href="../../css/signature.css">
+
+
+    
+<link rel="stylesheet" href="../../css/fonts.googleapis.css">
+
+
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+    <!-- photography -->
+    
+<link rel="stylesheet" href="../../css/photography.css">
+
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- background effects start -->
+    
+    <!-- background effects end -->
+
+	<!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        
+            
+                background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('/undefined')
+                /*page*/
+            
+        
+    }
+    
+</style>
+
+<header class="intro-header" >
+    <!-- Signature -->
+    <div id="signature">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                
+                    <div class="site-heading">
+                        <h1>聂伟星</h1>
+                        <!--<hr class="small">-->
+                        <span id="subdusi" class="subheading">主要从事公有云、容器及k8s等运维工作，本人现负责腾讯云容器服务(TKE)问题处理，欢迎大家来到我的博客！</span>
+                    </div>
+                
+
+                </div>
+            </div>
+        </div>      
+    </div>
+
+    
+    <div class="waveWrapper">
+        <div class="wave wave_before" style="background-image: url('/img/wave-light.png')"></div>
+        <div class="wave wave_after" style="background-image: url('/img/wave-light.png')"></div>
+    </div>
+    
+</header>
+
+	
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">聂伟星</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archive/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/categories/">Categories</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/photography/">Photography</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                    
+                    <li>
+                        <a href="https://www.niewx.cn/mybook/" target="_blank">Chinese Blog</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    <!-- Main Content -->
+<div class="container">
+    <div class="row">
+        
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-1
+                col-md-8 col-md-offset-1
+                col-sm-12
+                col-xs-12
+                post-container
+            ">
+                
+<!-- Main Content -->
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+            <!-- 归档列表 -->
+            
+            
+
+             <!-- 归档列表 -->
+
+            
+            <div class="one-tag-list">
+                <span class="fa fa-calendar-times-o listing-seperator" id="2021">
+                    <span class="tag-text">2021</span>
+                </span>
+                <ul>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    08-07
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2021/08/07/cert-manager-issues-free-certificates-for-domain-names/" style="color: #0085a1">
+                        <span>
+                            cert-manager为域名签发免费证书
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    07-10
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2021/07/10/Use-python-to-convert-pdf-to-png-long-image/" style="color: #0085a1">
+                        <span>
+                            使用python脚本将pdf转png长图
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    06-12
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2021/06/12/use-operator-to-quickly-deploy-es-cluster-in-k8s/" style="color: #0085a1">
+                        <span>
+                            使用eck快速在k8s部署es集群
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    05-21
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2021/05/21/Nginx-learning-and-configuration/" style="color: #0085a1">
+                        <span>
+                            Nginx的学习和配置
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    04-21
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2021/04/21/gitbook-generation-and-deployment-/" style="color: #0085a1">
+                        <span>
+                            gitbook的生成和部署
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    04-16
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2021/04/16/k8s-deploy-rancher/" style="color: #0085a1">
+                        <span>
+                            k8s上部署rancher
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    04-08
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2021/04/08/k8s-deploy-thanos/" style="color: #0085a1">
+                        <span>
+                            k8s上部署thanos监控系统
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    03-25
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2021/03/25/Build-openvpn-intranet-access-vpc-on-cvm/" style="color: #0085a1">
+                        <span>
+                            腾讯云cvm上搭建openvpn内网访问vpc
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    03-19
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2021/03/19/How-does-istio's-VirtualService-limit-CORS-request-headers/" style="color: #0085a1">
+                        <span>
+                            istio之VirtualService如何限制CORS请求头
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    01-10
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2021/01/10/How-to-replace-the-expired-kubeadm-certificate/" style="color: #0085a1">
+                        <span>
+                            kubeadm证书过期如何替换
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                </ul>
+            </div>
+            
+            <div class="one-tag-list">
+                <span class="fa fa-calendar-times-o listing-seperator" id="2020">
+                    <span class="tag-text">2020</span>
+                </span>
+                <ul>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    12-25
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/12/25/How-to-control-the-startup-sequence-of-containers-in-pod-in-k8s/" style="color: #0085a1">
+                        <span>
+                            k8s中如何控制pod中容器的启动顺序
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    12-22
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/12/22/Build-Kong-Gateway-on-TKE/" style="color: #0085a1">
+                        <span>
+                            TKE上搭建kong网关
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    12-20
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/12/20/Build-an-enterprise-level-mirror-warehouse-Harbor-on-TKE/" style="color: #0085a1">
+                        <span>
+                            TKE上搭建企业级镜像仓库Harbor
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    12-14
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/12/14/Configure-security-policy-of-istio-entry-series/" style="color: #0085a1">
+                        <span>
+                            istio入门系列之配置安全策略
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    12-11
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/12/11/Improve-system-flexibility-of-istio-entry-series/" style="color: #0085a1">
+                        <span>
+                            istio入门系列之提升系统弹性能力
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    12-10
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/12/10/Automated-grayscale-release-of-istio-entry-series/" style="color: #0085a1">
+                        <span>
+                            istio入门系列之自动化灰度发布
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    12-09
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/12/09/Implement-CICD-of-gitlab-on-Kubernetes/" style="color: #0085a1">
+                        <span>
+                            Kubernetes上实现gitlab的CICD
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    12-08
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/12/08/Getting-started-in-actual-combat-of-istio-entry-series/" style="color: #0085a1">
+                        <span>
+                            istio入门系列之实战入门准备flux自动化部署
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    12-07
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/12/07/Security-authorization-configuration-of-istio-entry-series/" style="color: #0085a1">
+                        <span>
+                            istio入门系列之安全授权配置
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    12-07
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/12/07/TLS-security-authentication-configuration-of-istio-entry-series/" style="color: #0085a1">
+                        <span>
+                            istio入门系列之TLS安全认证的配置
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    12-06
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/12/06/Jaeger-distributed-tracking-of-istio-entry-series/" style="color: #0085a1">
+                        <span>
+                            istio入门系列之Jaeger分布式追踪
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    12-05
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/12/05/Get-Envoy-access-log-of-istio-entry-series/" style="color: #0085a1">
+                        <span>
+                            istio入门系列之获取Envoy访问日志
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    12-04
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/12/04/prometheus-and-grafana-of-istio-entry-series/" style="color: #0085a1">
+                        <span>
+                            istio入门系列之prometheus和grafana
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    12-04
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/12/04/Kiali-network-visualization-of-istio-entry-series/" style="color: #0085a1">
+                        <span>
+                            istio入门系列之Kiali网络可视化
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    12-03
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/12/03/Traffic-mirroring-of-istio-entry-series/" style="color: #0085a1">
+                        <span>
+                            istio入门系列之流量镜像
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    12-02
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/12/02/Fault-injection-of-istio-entry-series/" style="color: #0085a1">
+                        <span>
+                            istio入门系列之故障注入
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    12-02
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/12/02/Retry-after-timeout-of-istio-entry-series试/" style="color: #0085a1">
+                        <span>
+                            istio入门系列之超时重试
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    12-02
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/12/02/Fuse-of-istio-entry-series/" style="color: #0085a1">
+                        <span>
+                            istio入门系列之熔断
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    12-01
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/12/01/Traffic-shift-of-istio-entry-series/" style="color: #0085a1">
+                        <span>
+                            istio入门系列之流量转移
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    11-30
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/11/30/Gateway-gateway-of-istio-entry-series/" style="color: #0085a1">
+                        <span>
+                            istio入门系列之Gateway网关
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    11-30
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/11/30/ServiceEntry-of-istio-entry-series/" style="color: #0085a1">
+                        <span>
+                            istio入门系列之ServiceEntry
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    11-29
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/11/29/VirtualService-and-DestinationRule-of-istio-entry-series/" style="color: #0085a1">
+                        <span>
+                            istio入门系列之VirtualService和DestinationRule
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    11-28
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/11/28/Installation-and-deployment-of-istio-entry-series/" style="color: #0085a1">
+                        <span>
+                            istio入门系列之安装部署篇
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    11-28
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/11/28/Product-introduction-of-istio-entry-series/" style="color: #0085a1">
+                        <span>
+                            istio入门系列之产品介绍
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    11-26
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/11/26/fluent_bit-collects-different-business-logs/" style="color: #0085a1">
+                        <span>
+                            fluent-bit收集不同业务日志
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    11-26
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/11/26/The-externaltrafficpolicy-of-k8s-retains-the-client-source-ip/" style="color: #0085a1">
+                        <span>
+                            k8s之externalTrafficPolicy保留客户端源IP
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    11-25
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/11/25/kubectl-access-to-many-clusters/" style="color: #0085a1">
+                        <span>
+                            Kubernetes之多集群的访问
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    11-19
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/11/19/Etcd-database-of-Kubernetes/" style="color: #0085a1">
+                        <span>
+                            Kubernetes之etcd数据库
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    11-17
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/11/17/Pod-creation-process-in-Kubernetes/" style="color: #0085a1">
+                        <span>
+                            Kubernetes中pod的创建流程
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    11-16
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/11/16/securityContext-of-k8s/" style="color: #0085a1">
+                        <span>
+                            k8s之securityContext
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    11-11
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/11/11/How-to-read-k8s-source-code/" style="color: #0085a1">
+                        <span>
+                            如何加载编译k8s源码
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    11-07
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/11/07/About-the-kubernetes-certificate/" style="color: #0085a1">
+                        <span>
+                            关于Kubernetes证书的那点事
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    11-05
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/11/05/Log-aggregation-tool-Loki/" style="color: #0085a1">
+                        <span>
+                            TKE集群部署日志聚合工具Loki
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    11-01
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/11/01/kubewatch-monitors-k8s-cluster-resource-changes/" style="color: #0085a1">
+                        <span>
+                            kubewatch监控k8s集群资源变更
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    10-23
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/10/23/StatefulSet-controller-of-kubernetes/" style="color: #0085a1">
+                        <span>
+                            kubernetes之StatefulSet控制器
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    10-14
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/10/14/Force-delete-Terminating-ns/" style="color: #0085a1">
+                        <span>
+                            Kubernetes强制删除Terminating的ns
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    10-13
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/10/13/crictl-debug-Kubernetes-node/" style="color: #0085a1">
+                        <span>
+                            crictl调试Kubernetes节点
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    10-12
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/10/12/Build-a-Docker-private-repository/" style="color: #0085a1">
+                        <span>
+                            如何搭建docker私有镜像仓库
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    10-10
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/10/10/Access-to-external-service-copies-through-ExternalName-in-k8s/" style="color: #0085a1">
+                        <span>
+                            k8s中通过ExternalName访问外部服务
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    09-23
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/09/23/DockerFile-learning/" style="color: #0085a1">
+                        <span>
+                            DockerFile学习
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    09-22
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/09/22/Docker-commonly-used-commands/" style="color: #0085a1">
+                        <span>
+                            Docker常用命令及知识
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    09-22
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/09/22/About-the-use-of-postStart-and-preStop-on-TKE/" style="color: #0085a1">
+                        <span>
+                            TKE上关于postStart和preStop使用
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    09-20
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/09/20/Binary-deployment-k8s/" style="color: #0085a1">
+                        <span>
+                            二进制部署k8s
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    09-17
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/09/17/TKE-uses-self-built-NFS-persistent-storage/" style="color: #0085a1">
+                        <span>
+                            TKE使用自建NFS持久化存储
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    09-15
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/09/15/kubeadm-deploy-k8s/" style="color: #0085a1">
+                        <span>
+                            kubeadm部署k8s
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    09-11
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/09/11/Kubernetes-configures-hosts-to-resolve-domain-names-in-pod/" style="color: #0085a1">
+                        <span>
+                            Kubernetes在pod中配置hosts解析域名
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    09-11
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/09/11/Kubernetes'-helm-deployment-and-use/" style="color: #0085a1">
+                        <span>
+                            Kubernetes之helm部署使用
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    09-10
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/09/10/About-kubernetes-garbage-collection/" style="color: #0085a1">
+                        <span>
+                            关于kubernetes垃圾回收那点事
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    08-28
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/08/28/Ip-masq-agent-of-Kubernetes-plug-in/" style="color: #0085a1">
+                        <span>
+                            Kubernetes插件之ip-masq-agent
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    08-28
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/08/28/Common-commands-for-linux-positioning-problems/" style="color: #0085a1">
+                        <span>
+                            linux定位问题常用命令
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    08-27
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/08/27/Use-of-Kubectl-command-line-jsonpath/" style="color: #0085a1">
+                        <span>
+                            Kubectl命令行jsonpath的使用
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    08-26
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/08/26/Kubernetes-scheduling/" style="color: #0085a1">
+                        <span>
+                            Kubernetes之调度篇
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    08-23
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/08/23/RBAC-permission-management-of-Kubernetes/" style="color: #0085a1">
+                        <span>
+                            Kubernetes之RBAC权限管理
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    08-18
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/08/18/Dynamic-deployment-of-jenkins-slaves-on-TKE/" style="color: #0085a1">
+                        <span>
+                            TKE上动态部署jenkins slaves
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    08-14
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/08/14/TKE's-first-knowledge-of-container-detectors/" style="color: #0085a1">
+                        <span>
+                            Kubernetes之初识容器探测器
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    08-14
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/08/14/Self-made-CA-certificate-set-ssl-certificate/" style="color: #0085a1">
+                        <span>
+                            自制CA证书设置ssl证书
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    08-13
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/08/13/Deploy-metrics_server-on-TKE/" style="color: #0085a1">
+                        <span>
+                            TKE上部署metrics-server
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    08-07
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/08/07/Mount-files-to-CFS-subdirectory-in-TKE/" style="color: #0085a1">
+                        <span>
+                            TKE中挂载文件到CFS子目录
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    08-05
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/08/05/How-to-set-the-permission-of-TKE-mount-COS-bucket-container-directory/" style="color: #0085a1">
+                        <span>
+                            TKE挂载COS桶容器目录权限如何设置
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    07-31
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/07/31/Obtain-container-resource-configuration-on-the-node-in-TKE/" style="color: #0085a1">
+                        <span>
+                            TKE中在节点上获取容器资源配置
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    07-30
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/07/30/Build-dashboard-on-TKE/" style="color: #0085a1">
+                        <span>
+                            TKE上搭建集群Dashboard
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    07-28
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/07/28/Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/" style="color: #0085a1">
+                        <span>
+                            TKE中使用lb直连获取客户端真实IP
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    07-27
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/07/27/Deployment-in-the-TKE-cluster-uses-vpc-cni-mode/" style="color: #0085a1">
+                        <span>
+                            TKE集群中deployment使用vpc-cni模式
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    07-15
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/07/15/Use-of-configMap-in-TKE/" style="color: #0085a1">
+                        <span>
+                            TKE中configMap的使用
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    07-12
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/07/12/Harbor-builds-enterprise-docker-private-mirror-repository/" style="color: #0085a1">
+                        <span>
+                            harbor搭建企业docker私有镜像仓库
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    07-12
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/07/12/Deployment-and-use-of-Traefik1.7.17/" style="color: #0085a1">
+                        <span>
+                            Traefik1.7.17的部署使用
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    07-03
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/07/03/Vpc_cni-of-TKE-network-mode/" style="color: #0085a1">
+                        <span>
+                            TKE网络模式之vpc-cni
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    06-28
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/06/28/DNS-resolution-of-k8s/" style="color: #0085a1">
+                        <span>
+                            Kubernetes之DNS解析
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    06-11
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/06/11/Deploy-treafik2-on-TKE/" style="color: #0085a1">
+                        <span>
+                            TKE上部署treafik2
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    06-10
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/06/10/TKE-upgrade-node-version/" style="color: #0085a1">
+                        <span>
+                            TKE升级node节点版本
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    06-10
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/06/10/Build-EFK-log-collection-system-on-TKE/" style="color: #0085a1">
+                        <span>
+                            TKE上搭建EFK日志采集系统
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    06-10
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/06/10/Build-prometheus-on-TKE/" style="color: #0085a1">
+                        <span>
+                            TKE集群上搭建prometheus
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    06-08
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/06/08/TKE-study-notes/" style="color: #0085a1">
+                        <span>
+                            TKE学习笔记
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    06-05
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/06/05/TKE-operation-notes-04/" style="color: #0085a1">
+                        <span>
+                            TKE操作笔记04
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    06-03
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/06/03/TKE-operation-notes-03/" style="color: #0085a1">
+                        <span>
+                            TKE操作笔记03
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    06-02
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/06/02/TKE-operation-notes-02/" style="color: #0085a1">
+                        <span>
+                            TKE操作笔记02
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    06-01
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/06/01/TKE-operation-notes-01/" style="color: #0085a1">
+                        <span>
+                            TKE操作笔记01
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    05-10
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/05/10/k8s-one_click-deployment-script/" style="color: #0085a1">
+                        <span>
+                            kubernetes一键部署包
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    01-01
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2020/01/01/Article-template/" style="color: #0085a1">
+                        <span>
+                            Post文章模板
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                </ul>
+            </div>
+            
+            <div class="one-tag-list">
+                <span class="fa fa-calendar-times-o listing-seperator" id="2019">
+                    <span class="tag-text">2019</span>
+                </span>
+                <ul>
+                
+                  <!-- <li class="listing-item">
+                  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+                  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+                  </li> -->
+                 <li >
+                    11-01
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    <a href="/2019/11/01/Hexo-Theme-Snail/" style="color: #0085a1">
+                        <span>
+                            Hexo-Theme-Snail
+                        </span>
+                    </a>
+                    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
+                </li>
+                
+                </ul>
+            </div>
+            
+
+        </div>
+    </div>
+</div>
+            </div>
+
+            <!-- Sidebar Container -->
+<div class="
+    col-lg-3 col-lg-offset-0
+    col-md-3 col-md-offset-0
+    col-sm-12
+    col-xs-12
+    sidebar-container
+">
+    
+        
+<!--
+<h5>SEARCH</h5>
+<div class="search-article" class="tags">
+	<input id="search-kw" type="text" name="search_article" placeholder="Enter keywords for search" />
+	<div class="search-img">
+		<img 
+			src="/img/search.png" 
+			alt="search" 
+			onMouseOver="this.src='/img/search-focus.png'" 
+			onMouseOut="this.src='/img/search.png'"/>
+	</div>
+</div>-->
+
+<h5>SEARCH</h5>
+<div id="site_search">
+	<div class="form-group">
+		<input type="text" id="local-search-input" name="q" results="0" placeholder="search" class="st-search-input st-default-search-input form-control"/>
+	</div>  
+	<div id="local-search-result"></div>
+</div>
+
+        <hr>
+    
+        <!-- Featured Tags -->
+
+<section>
+    <!-- no hr -->
+    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+    <div class="tags">
+        
+            
+            <a href="/tags/#hexo-theme-snail" title="hexo-theme-snail" rel="1">hexo-theme-snail</a>
+            
+        
+            
+            <a href="/tags/#Template" title="Template" rel="1">Template</a>
+            
+        
+            
+            <a href="/tags/#Markdown" title="Markdown" rel="1">Markdown</a>
+            
+        
+            
+            <a href="/tags/#Kubernetes" title="Kubernetes" rel="75">Kubernetes</a>
+            
+        
+            
+            <a href="/tags/#Docker" title="Docker" rel="20">Docker</a>
+            
+        
+            
+            <a href="/tags/#TKE" title="TKE" rel="26">TKE</a>
+            
+        
+            
+            <a href="/tags/#EFK" title="EFK" rel="2">EFK</a>
+            
+        
+            
+            <a href="/tags/#Treafik2" title="Treafik2" rel="1">Treafik2</a>
+            
+        
+            
+            <a href="/tags/#Coredns" title="Coredns" rel="1">Coredns</a>
+            
+        
+            
+            <a href="/tags/#Treafik1.7" title="Treafik1.7" rel="1">Treafik1.7</a>
+            
+        
+            
+            <a href="/tags/#Harbor" title="Harbor" rel="2">Harbor</a>
+            
+        
+            
+            <a href="/tags/#configMap" title="configMap" rel="1">configMap</a>
+            
+        
+            
+            <a href="/tags/#Service" title="Service" rel="1">Service</a>
+            
+        
+            
+            <a href="/tags/#COS" title="COS" rel="1">COS</a>
+            
+        
+            
+            <a href="/tags/#Dashboard" title="Dashboard" rel="1">Dashboard</a>
+            
+        
+            
+            <a href="/tags/#NFS" title="NFS" rel="2">NFS</a>
+            
+        
+            
+            <a href="/tags/#Probe" title="Probe" rel="1">Probe</a>
+            
+        
+            
+            <a href="/tags/#Jenkins" title="Jenkins" rel="1">Jenkins</a>
+            
+        
+            
+            <a href="/tags/#RBAC" title="RBAC" rel="1">RBAC</a>
+            
+        
+            
+            <a href="/tags/#linux" title="linux" rel="3">linux</a>
+            
+        
+            
+            <a href="/tags/#ssl" title="ssl" rel="1">ssl</a>
+            
+        
+            
+            <a href="/tags/#kubectl" title="kubectl" rel="1">kubectl</a>
+            
+        
+            
+            <a href="/tags/#ip-masq-agent" title="ip-masq-agent" rel="1">ip-masq-agent</a>
+            
+        
+            
+            <a href="/tags/#Loki" title="Loki" rel="1">Loki</a>
+            
+        
+            
+            <a href="/tags/#Pod" title="Pod" rel="1">Pod</a>
+            
+        
+            
+            <a href="/tags/#etcd" title="etcd" rel="1">etcd</a>
+            
+        
+            
+            <a href="/tags/#securityContext" title="securityContext" rel="1">securityContext</a>
+            
+        
+            
+            <a href="/tags/#Go" title="Go" rel="1">Go</a>
+            
+        
+            
+            <a href="/tags/#externalTrafficPolicy" title="externalTrafficPolicy" rel="1">externalTrafficPolicy</a>
+            
+        
+            
+            <a href="/tags/#Fluent" title="Fluent" rel="1">Fluent</a>
+            
+        
+            
+            <a href="/tags/#kubeconfig" title="kubeconfig" rel="1">kubeconfig</a>
+            
+        
+            
+            <a href="/tags/#Istio" title="Istio" rel="21">Istio</a>
+            
+        
+            
+            <a href="/tags/#VirtualService" title="VirtualService" rel="2">VirtualService</a>
+            
+        
+            
+            <a href="/tags/#DestinationRule" title="DestinationRule" rel="1">DestinationRule</a>
+            
+        
+            
+            <a href="/tags/#Gateway" title="Gateway" rel="1">Gateway</a>
+            
+        
+            
+            <a href="/tags/#ServiceEntry" title="ServiceEntry" rel="1">ServiceEntry</a>
+            
+        
+            
+            <a href="/tags/#Kiali" title="Kiali" rel="1">Kiali</a>
+            
+        
+            
+            <a href="/tags/#Promnetheus" title="Promnetheus" rel="1">Promnetheus</a>
+            
+        
+            
+            <a href="/tags/#Grafana" title="Grafana" rel="1">Grafana</a>
+            
+        
+            
+            <a href="/tags/#Envoy" title="Envoy" rel="1">Envoy</a>
+            
+        
+            
+            <a href="/tags/#Jaeger" title="Jaeger" rel="1">Jaeger</a>
+            
+        
+            
+            <a href="/tags/#Flux" title="Flux" rel="1">Flux</a>
+            
+        
+            
+            <a href="/tags/#Flagger" title="Flagger" rel="1">Flagger</a>
+            
+        
+            
+            <a href="/tags/#Devops" title="Devops" rel="1">Devops</a>
+            
+        
+            
+            <a href="/tags/#Kong" title="Kong" rel="1">Kong</a>
+            
+        
+            
+            <a href="/tags/#Kubeadm" title="Kubeadm" rel="1">Kubeadm</a>
+            
+        
+            
+            <a href="/tags/#openvpn" title="openvpn" rel="1">openvpn</a>
+            
+        
+            
+            <a href="/tags/#thanos" title="thanos" rel="1">thanos</a>
+            
+        
+            
+            <a href="/tags/#prometheus" title="prometheus" rel="1">prometheus</a>
+            
+        
+            
+            <a href="/tags/#rancher" title="rancher" rel="1">rancher</a>
+            
+        
+            
+            <a href="/tags/#gitbook" title="gitbook" rel="1">gitbook</a>
+            
+        
+            
+            <a href="/tags/#Nginx" title="Nginx" rel="1">Nginx</a>
+            
+        
+            
+            <a href="/tags/#Elasticsearch" title="Elasticsearch" rel="1">Elasticsearch</a>
+            
+        
+            
+            <a href="/tags/#python" title="python" rel="1">python</a>
+            
+        
+            
+            <a href="/tags/#cert-manager" title="cert-manager" rel="1">cert-manager</a>
+            
+        
+    </div>
+</section>
+
+        <hr>
+    
+        <!-- Short About -->
+<section class="visible-md visible-lg">
+    <h5><a href="/about/">ABOUT ME</a></h5>
+    <div class="short-about">
+
+        
+            <img id = "avatar_pic" src="/img/ironman-draw.png" />
+        
+
+        
+            <p>Welcome to visit, I&#39;m vashon!</p>
+        
+
+        <!-- SNS Link -->
+        <ul class="list-inline">
+
+            
+                <li>
+                    <a target="_blank"  href="https://github.com/nieweixing">
+                        <span class="fa-stack fa-lg">
+                            <i class="fa fa-circle fa-stack-2x"></i>
+                            <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                        </span>
+                    </a>
+                </li>
+            
+
+            
+                <li>
+                    <a target="_blank" href="https://twitter.com/nieweixing">
+                        <span class="fa-stack fa-lg">
+                            <i class="fa fa-circle fa-stack-2x"></i>
+                            <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                        </span>
+                    </a>
+                </li>
+            
+
+            
+                <li>
+                    <a target="_blank" href="https://www.facebook.com/nieweixing">
+                        <span class="fa-stack fa-lg">
+                            <i class="fa fa-circle fa-stack-2x"></i>
+                            <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                        </span>
+                    </a>
+                </li>
+            
+
+            
+                <li>
+                    <a target="_blank" href="https://www.zhihu.com/people/nieweixing">
+                        <span class="fa-stack fa-lg">
+                            <i class="fa fa-circle fa-stack-2x"></i>
+                            <i class="fa  fa-stack-1x fa-inverse">知</i>
+                        </span>
+                    </a>
+                </li>
+            
+
+            
+
+            
+
+            
+
+        </ul>
+    </div>
+</section>
+        <hr>
+    
+        
+  <h5>VISITORS</h5>
+  <div class="widget">
+    <span>
+    	Viewed <b><i><span id="busuanzi_value_site_pv"><i class="fa fa-spinner fa-spin"></i></span></i></b> Times
+	</span>
+	<br/>
+	<span>
+		<b><i><span id="busuanzi_value_site_uv"><i class="fa fa-spinner fa-spin"></i></span></i></b> Visitors In Total
+	</span>
+  </div>
+
+        <hr>
+    
+        
+  <h5>RECENT POSTS</h5>
+  <div class="widget">
+    <ul>
+      
+        <li>
+          <a href="../../2021/08/07/cert-manager-issues-free-certificates-for-domain-names/">cert-manager为域名签发免费证书</a>
+        </li>
+      
+        <li>
+          <a href="../../2021/07/10/Use-python-to-convert-pdf-to-png-long-image/">使用python脚本将pdf转png长图</a>
+        </li>
+      
+        <li>
+          <a href="../../2021/06/12/use-operator-to-quickly-deploy-es-cluster-in-k8s/">使用eck快速在k8s部署es集群</a>
+        </li>
+      
+        <li>
+          <a href="../../2021/05/21/Nginx-learning-and-configuration/">Nginx的学习和配置</a>
+        </li>
+      
+        <li>
+          <a href="../../2021/04/21/gitbook-generation-and-deployment-/">gitbook的生成和部署</a>
+        </li>
+      
+    </ul>
+  </div>
+
+        <hr>
+    
+        <!-- Friends Blog -->
+
+<h5>FRIENDS</h5>
+<ul class="list-inline">
+
+    
+        <li><a href="https://cloud.tencent.com/developer/column/87421" target="_blank">云+社区</a></li>
+    
+        <li><a href="https://www.niewx.cn/mybook/" target="_blank">gitbook</a></li>
+    
+        <li><a href="https://github.com/nieweixing" target="_blank">vashon&#39;s Github</a></li>
+    
+        <li><a href="https://weibo.com/3264907804/profile?rig" target="_blank">weibo</a></li>
+    
+</ul>
+
+        <hr>
+    
+        
+    <h5>ARCHIVES</h5>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="../../archives/2021/08/">August 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="../../archives/2021/07/">July 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="../../archives/2021/06/">June 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="../../archives/2021/05/">May 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="../../archives/2021/04/">April 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="../../archives/2021/03/">March 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="../../archives/2021/01/">January 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="../../archives/2020/12/">December 2020</a><span class="archive-list-count">19</span></li><li class="archive-list-item"><a class="archive-list-link" href="../../archives/2020/11/">November 2020</a><span class="archive-list-count">15</span></li><li class="archive-list-item"><a class="archive-list-link" href="../../archives/2020/10/">October 2020</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="../../archives/2020/09/">September 2020</a><span class="archive-list-count">9</span></li><li class="archive-list-item"><a class="archive-list-link" href="../../archives/2020/08/">August 2020</a><span class="archive-list-count">11</span></li><li class="archive-list-item"><a class="archive-list-link" href="../../archives/2020/07/">July 2020</a><span class="archive-list-count">8</span></li><li class="archive-list-item"><a class="archive-list-link" href="../../archives/2020/06/">June 2020</a><span class="archive-list-count">10</span></li><li class="archive-list-item"><a class="archive-list-link" href="../../archives/2020/05/">May 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="../../archives/2020/01/">January 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="../../archives/2019/11/">November 2019</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+
+        <hr>
+    
+        <!-- Categories -->
+
+    <h5>categories</h5>
+    <div class="widget">
+      <ul>
+        
+          <a href="categories/#hexo"><li>hexo</li></a>
+        
+          <a href="categories/#Template"><li>Template</li></a>
+        
+          <a href="categories/#Kubernetes"><li>Kubernetes</li></a>
+        
+          <a href="categories/#TKE"><li>TKE</li></a>
+        
+          <a href="categories/#Markdown"><li>Markdown</li></a>
+        
+          <a href="categories/#腾讯云"><li>腾讯云</li></a>
+        
+          <a href="categories/#Kubernetes"><li>Kubernetes</li></a>
+        
+          <a href="categories/#Kubernetes"><li>Kubernetes</li></a>
+        
+          <a href="categories/#Docker"><li>Docker</li></a>
+        
+          <a href="categories/#Harbor"><li>Harbor</li></a>
+        
+          <a href="categories/#Monitor"><li>Monitor</li></a>
+        
+          <a href="categories/#Log"><li>Log</li></a>
+        
+          <a href="categories/#Devops"><li>Devops</li></a>
+        
+          <a href="categories/#linux"><li>linux</li></a>
+        
+          <a href="categories/#Helm"><li>Helm</li></a>
+        
+          <a href="categories/#TKE"><li>TKE</li></a>
+        
+          <a href="categories/#Docker"><li>Docker</li></a>
+        
+          <a href="categories/#crictl"><li>crictl</li></a>
+        
+          <a href="categories/#Monitor"><li>Monitor</li></a>
+        
+          <a href="categories/#Log"><li>Log</li></a>
+        
+          <a href="categories/#etcd"><li>etcd</li></a>
+        
+          <a href="categories/#Log"><li>Log</li></a>
+        
+          <a href="categories/#Istio"><li>Istio</li></a>
+        
+          <a href="categories/#Gitlab"><li>Gitlab</li></a>
+        
+          <a href="categories/#Kong"><li>Kong</li></a>
+        
+          <a href="categories/#openvpn"><li>openvpn</li></a>
+        
+          <a href="categories/#Monitor"><li>Monitor</li></a>
+        
+          <a href="categories/#Rancher"><li>Rancher</li></a>
+        
+          <a href="categories/#Gitbook"><li>Gitbook</li></a>
+        
+          <a href="categories/#Nginx"><li>Nginx</li></a>
+        
+          <a href="categories/#elasticsearch"><li>elasticsearch</li></a>
+        
+          <a href="categories/#python"><li>python</li></a>
+        
+          <a href="categories/#cert-manager"><li>cert-manager</li></a>
+        
+      </ul>
+    </div>
+
+        <hr>
+    
+</div>
+
+        
+    </div>
+</div>
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/nieweixing">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://twitter.com/nieweixing">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://www.facebook.com/nieweixing">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/nieweixing">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; 聂伟星 2021 
+                    <br>
+                    Powered by 
+                    <a href="https://github.com/dusign/hexo-theme-snail" target="_blank" rel="noopener">
+                        <i>hexo-theme-snail</i>
+                    </a> | 
+                    <iframe name="star" style="margin-left: 2px; margin-bottom:-5px;" frameborder="0" scrolling="0"
+                        width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=dusign&repo=hexo-theme-snail&type=star&count=true">
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+
+</footer>
+
+<!-- jQuery -->
+
+<script src="../../js/jquery.min.js"></script>
+
+
+<!-- Bootstrap Core JavaScript -->
+
+<script src="../../js/bootstrap.min.js"></script>
+
+
+<!-- Custom Theme JavaScript -->
+
+<script src="../../js/hux-blog.min.js"></script>
+
+
+<!-- Search -->
+
+<script src="../../js/search.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.niewx.cn/hexo/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = 'bfe4709ccd8c5c9e559c89f4fd0866f3';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Search -->
+
+    <script type="text/javascript">      
+        var search_path = "search.xml";
+        if (search_path.length == 0) {
+            search_path = "search.xml";
+        }
+    var path = "/" + search_path;
+    searchFunc(path, 'local-search-input', 'local-search-result');
+    </script>
+
+
+<!-- busuanzi -->
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+	<a id="rocket" href="#top" class=""></a>
+	<script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+
+    
+        <!-- background effects line -->
+        
+
+        
+            <script type="text/javascript" src="/js/mouse-click.js" content='[&quot;🌱&quot;,&quot;just do it&quot;,&quot;🍀&quot;]' color='[&quot;rgb(121,93,179)&quot; ,&quot;rgb(76,180,231)&quot; ,&quot;rgb(184,90,154)&quot;]'></script>
+        
+
+        <!-- background effects end -->
+    
+
+    <!--<script size="50" alpha='0.3' zIndex="-999" src="/js/ribbonStatic.js"></script>-->
+    
+        <script src="/js/ribbonDynamic.js"></script>
+    
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+
+</html>
