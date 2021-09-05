@@ -8,6 +8,13 @@
     </url>
     
     <url>
+        <loc>https://www.niewx.cn/404.html</loc>
+        <lastmod>2021-09-05T12:13:22.707Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    
+    <url>
         <loc>https://www.niewx.cn/tags/</loc>
         <lastmod>2021-09-04T12:59:09.934Z</lastmod>
         <changefreq>weekly</changefreq>
@@ -38,41 +45,6 @@
     <url>
         <loc>https://www.niewx.cn/photography/</loc>
         <lastmod>2021-09-04T10:28:08.227Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.8</priority>
-    </url>
-    
-    <url>
-        <loc>https://www.niewx.cn/nieweixing.github.io/</loc>
-        <lastmod>2021-09-04T05:45:54.040Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.8</priority>
-    </url>
-    
-    <url>
-        <loc>https://www.niewx.cn/nieweixing.github.io/google173cc413d10bd785.html</loc>
-        <lastmod>2021-09-04T05:45:54.040Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.8</priority>
-    </url>
-    
-    <url>
-        <loc>https://www.niewx.cn/nieweixing.github.io/baidu_verify_code-G0ODTfgR6s.html</loc>
-        <lastmod>2021-09-04T05:45:54.031Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.8</priority>
-    </url>
-    
-    <url>
-        <loc>https://www.niewx.cn/nieweixing.github.io/404.html</loc>
-        <lastmod>2021-09-04T05:45:52.903Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.8</priority>
-    </url>
-    
-    <url>
-        <loc>https://www.niewx.cn/404.html</loc>
-        <lastmod>2021-09-03T04:47:33.817Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
