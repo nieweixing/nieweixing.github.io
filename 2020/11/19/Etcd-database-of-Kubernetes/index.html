@@ -488,6 +488,21 @@
             <!-- Tabe of Content -->
             <!-- Table of Contents -->
 
+    
+      
+        <aside id="sidebar">
+          <div id="toc" class="toc-article">
+          <strong class="toc-title">Contents</strong>
+          
+            
+              <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#Docker-compose搭建etcd集群"><span class="toc-nav-number">1.</span> <span class="toc-nav-text">Docker-compose搭建etcd集群</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#二进制部署etcd集群"><span class="toc-nav-number">2.</span> <span class="toc-nav-text">二进制部署etcd集群</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#kubeadm集群如何使用etcd集群"><span class="toc-nav-number">3.</span> <span class="toc-nav-text">kubeadm集群如何使用etcd集群</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#新建一个2节点的-etcd-cluster"><span class="toc-nav-number">3.1.</span> <span class="toc-nav-text">新建一个2节点的 etcd cluster</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#查看-etcd-的状态"><span class="toc-nav-number">3.2.</span> <span class="toc-nav-text">查看 etcd 的状态</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#迁移原来-master-节点上的-etcd-数据到上面新建的-etcd-cluster-中"><span class="toc-nav-number">3.3.</span> <span class="toc-nav-text">迁移原来 master 节点上的 etcd 数据到上面新建的 etcd cluster 中</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#切换-kube-apiserver-使用新的-etcd-endpoint-地址"><span class="toc-nav-number">3.4.</span> <span class="toc-nav-text">切换 kube-apiserver 使用新的 etcd endpoint 地址</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#清理掉原来的单节点-etcd-服务"><span class="toc-nav-number">3.5.</span> <span class="toc-nav-text">清理掉原来的单节点 etcd 服务</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#重建一个-etcd-服务，加入新集群"><span class="toc-nav-number">3.6.</span> <span class="toc-nav-text">重建一个 etcd 服务，加入新集群</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#先配置-etcd-cluster-增加一个-member-用于后续操作"><span class="toc-nav-number">3.7.</span> <span class="toc-nav-text">先配置 etcd cluster 增加一个 member 用于后续操作</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#更新另外2个节点的-etcd-yaml-配置"><span class="toc-nav-number">3.8.</span> <span class="toc-nav-text">更新另外2个节点的 etcd.yaml 配置</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#kubeadm使用已有etcd集群"><span class="toc-nav-number">3.9.</span> <span class="toc-nav-text">kubeadm使用已有etcd集群</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#如何在k8s中搭建etcd集群"><span class="toc-nav-number">4.</span> <span class="toc-nav-text">如何在k8s中搭建etcd集群</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#etcdctl常用的命令"><span class="toc-nav-number">5.</span> <span class="toc-nav-text">etcdctl常用的命令</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#PUT-options"><span class="toc-nav-number">5.1.</span> <span class="toc-nav-text">PUT [options]  </span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#GET-options-range-end"><span class="toc-nav-number">5.2.</span> <span class="toc-nav-text">GET [options]  [range_end]</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#DEL-options-range-end"><span class="toc-nav-number">5.3.</span> <span class="toc-nav-text">DEL [options]  [range_end]</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#数据备份"><span class="toc-nav-number">5.4.</span> <span class="toc-nav-text">数据备份</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#数据恢复"><span class="toc-nav-number">5.5.</span> <span class="toc-nav-text">数据恢复</span></a></li></ol></li></ol>
+            
+          
+          </div>
+        </aside>
+      
+    
+
                 
             <!-- Sidebar Container -->
             <div class="
