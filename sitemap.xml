@@ -51,34 +51,6 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/nieweixing.github.io/index.html</loc>
-    
-    <lastmod>2021-09-04T05:45:54.040Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://www.niewx.cn/nieweixing.github.io/google173cc413d10bd785.html</loc>
-    
-    <lastmod>2021-09-04T05:45:54.040Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://www.niewx.cn/nieweixing.github.io/baidu_verify_code-G0ODTfgR6s.html</loc>
-    
-    <lastmod>2021-09-04T05:45:54.031Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://www.niewx.cn/nieweixing.github.io/404.html</loc>
-    
-    <lastmod>2021-09-04T05:45:52.903Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>https://www.niewx.cn/2021/08/07/cert-manager-issues-free-certificates-for-domain-names/</loc>
     
     <lastmod>2021-08-07T06:10:00.000Z</lastmod>
@@ -639,14 +611,14 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2020/06/10/Build-prometheus-on-TKE/</loc>
+    <loc>https://www.niewx.cn/2020/06/10/Build-EFK-log-collection-system-on-TKE/</loc>
     
     <lastmod>2020-06-10T06:10:00.000Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2020/06/10/Build-EFK-log-collection-system-on-TKE/</loc>
+    <loc>https://www.niewx.cn/2020/06/10/Build-prometheus-on-TKE/</loc>
     
     <lastmod>2020-06-10T06:10:00.000Z</lastmod>
     
