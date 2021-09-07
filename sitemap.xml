@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://www.niewx.cn/photography/index.html</loc>
+    
+    <lastmod>2021-09-07T14:37:19.712Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://www.niewx.cn/2019/11/01/Hexo-Theme-Snail/</loc>
     
     <lastmod>2021-09-05T13:33:37.386Z</lastmod>
@@ -40,13 +47,6 @@
     <loc>https://www.niewx.cn/about/index.html</loc>
     
     <lastmod>2021-09-04T10:29:57.475Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://www.niewx.cn/photography/index.html</loc>
-    
-    <lastmod>2021-09-04T10:28:08.227Z</lastmod>
     
   </url>
   
