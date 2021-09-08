@@ -1,18 +1,1 @@
-var toc = document.getElementById('toc')
-
-if (toc != null) {
-	window.addEventListener("scroll", scrollcatelogHandler);
-	var tocPosition = toc.offsetTop;
-	var height_header = $("#signature").height();
-	function scrollcatelogHandler(e) {
-		 var event = e || window.event,
-		     target = event.target || event.srcElement;
-		 var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-		 if (scrollTop >  tocPosition -60) {
-		     toc.classList.add("toc-fixed");
-		 } else {
-		     toc.classList.remove("toc-fixed");
-		 }
-	}
-}
-
+var tocPosition,height_header,toc=document.getElementById("toc");function scrollcatelogHandler(o){o=o||window.event,o.target||o.srcElement,o=document.documentElement.scrollTop||document.body.scrollTop;tocPosition-60<o?toc.classList.add("toc-fixed"):toc.classList.remove("toc-fixed")}null!=toc&&(window.addEventListener("scroll",scrollcatelogHandler),tocPosition=toc.offsetTop,height_header=$("#signature").height());
