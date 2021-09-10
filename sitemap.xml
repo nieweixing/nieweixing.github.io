@@ -289,14 +289,14 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2020/11/26/fluent_bit-collects-different-business-logs/</loc>
+    <loc>https://www.niewx.cn/2020/11/26/The-externaltrafficpolicy-of-k8s-retains-the-client-source-ip/</loc>
     
     <lastmod>2020-11-26T06:10:00.000Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2020/11/26/The-externaltrafficpolicy-of-k8s-retains-the-client-source-ip/</loc>
+    <loc>https://www.niewx.cn/2020/11/26/fluent_bit-collects-different-business-logs/</loc>
     
     <lastmod>2020-11-26T06:10:00.000Z</lastmod>
     
@@ -611,6 +611,13 @@
   </url>
   
   <url>
+    <loc>https://www.niewx.cn/2020/06/10/TKE-upgrade-node-version/</loc>
+    
+    <lastmod>2020-06-10T06:10:00.000Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://www.niewx.cn/2020/06/10/Build-EFK-log-collection-system-on-TKE/</loc>
     
     <lastmod>2020-06-10T06:10:00.000Z</lastmod>
@@ -619,13 +626,6 @@
   
   <url>
     <loc>https://www.niewx.cn/2020/06/10/Build-prometheus-on-TKE/</loc>
-    
-    <lastmod>2020-06-10T06:10:00.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://www.niewx.cn/2020/06/10/TKE-upgrade-node-version/</loc>
     
     <lastmod>2020-06-10T06:10:00.000Z</lastmod>
     

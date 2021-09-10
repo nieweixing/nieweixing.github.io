@@ -1,6 +1,6 @@
 #!/bin/bash
 
-hexo generate
+hexo clean && hexo generate
 cd ..
 cd nieweixing.github.io
 git pull
