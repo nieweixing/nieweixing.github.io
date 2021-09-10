@@ -224,7 +224,7 @@
     </url>
 
     <url>
-        <loc>https://www.niewx.cn/2020/12/02/Fuse-of-istio-entry-series/</loc>
+        <loc>https://www.niewx.cn/2020/12/02/Retry-after-timeout-of-istio-entry-series%E8%AF%95/</loc>
         <lastmod>2020-12-02T02:10:00.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
@@ -232,7 +232,7 @@
     </url>
 
     <url>
-        <loc>https://www.niewx.cn/2020/12/02/Retry-after-timeout-of-istio-entry-series%E8%AF%95/</loc>
+        <loc>https://www.niewx.cn/2020/12/02/Fuse-of-istio-entry-series/</loc>
         <lastmod>2020-12-02T02:10:00.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
@@ -288,7 +288,7 @@
     </url>
 
     <url>
-        <loc>https://www.niewx.cn/2020/11/26/fluent_bit-collects-different-business-logs/</loc>
+        <loc>https://www.niewx.cn/2020/11/26/The-externaltrafficpolicy-of-k8s-retains-the-client-source-ip/</loc>
         <lastmod>2020-11-26T06:10:00.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
@@ -296,7 +296,7 @@
     </url>
 
     <url>
-        <loc>https://www.niewx.cn/2020/11/26/The-externaltrafficpolicy-of-k8s-retains-the-client-source-ip/</loc>
+        <loc>https://www.niewx.cn/2020/11/26/fluent_bit-collects-different-business-logs/</loc>
         <lastmod>2020-11-26T06:10:00.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
@@ -528,7 +528,7 @@
     </url>
 
     <url>
-        <loc>https://www.niewx.cn/2020/08/14/Self-made-CA-certificate-set-ssl-certificate/</loc>
+        <loc>https://www.niewx.cn/2020/08/14/TKE%27s-first-knowledge-of-container-detectors/</loc>
         <lastmod>2020-08-14T06:10:00.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
@@ -536,7 +536,7 @@
     </url>
 
     <url>
-        <loc>https://www.niewx.cn/2020/08/14/TKE%27s-first-knowledge-of-container-detectors/</loc>
+        <loc>https://www.niewx.cn/2020/08/14/Self-made-CA-certificate-set-ssl-certificate/</loc>
         <lastmod>2020-08-14T06:10:00.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
