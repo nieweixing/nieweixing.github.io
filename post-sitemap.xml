@@ -8,8 +8,16 @@
     </url>
 
     <url>
+        <loc>https://www.niewx.cn/2021/09/11/Terraform-orchestrates-Tencent-Cloud-resources/</loc>
+        <lastmod>2021-09-11T14:26:12.301Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.6</priority>
+
+    </url>
+
+    <url>
         <loc>https://www.niewx.cn/2019/11/01/Hexo-Theme-Snail/</loc>
-        <lastmod>2021-09-05T13:33:37.386Z</lastmod>
+        <lastmod>2021-09-10T13:14:49.450Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
 
@@ -528,7 +536,7 @@
     </url>
 
     <url>
-        <loc>https://www.niewx.cn/2020/08/14/TKE%27s-first-knowledge-of-container-detectors/</loc>
+        <loc>https://www.niewx.cn/2020/08/14/Self-made-CA-certificate-set-ssl-certificate/</loc>
         <lastmod>2020-08-14T06:10:00.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
@@ -536,7 +544,7 @@
     </url>
 
     <url>
-        <loc>https://www.niewx.cn/2020/08/14/Self-made-CA-certificate-set-ssl-certificate/</loc>
+        <loc>https://www.niewx.cn/2020/08/14/TKE%27s-first-knowledge-of-container-detectors/</loc>
         <lastmod>2020-08-14T06:10:00.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>

@@ -1,3 +1,4 @@
+https://www.niewx.cn/2021/09/11/Terraform-orchestrates-Tencent-Cloud-resources/
 https://www.niewx.cn/2021/08/07/cert-manager-issues-free-certificates-for-domain-names/
 https://www.niewx.cn/2021/07/10/Use-python-to-convert-pdf-to-png-long-image/
 https://www.niewx.cn/2021/06/12/use-operator-to-quickly-deploy-es-cluster-in-k8s/
@@ -7,4 +8,3 @@ https://www.niewx.cn/2021/04/16/k8s-deploy-rancher/
 https://www.niewx.cn/2021/04/08/k8s-deploy-thanos/
 https://www.niewx.cn/2021/03/25/Build-openvpn-intranet-access-vpc-on-cvm/
 https://www.niewx.cn/2021/03/19/How-does-istio's-VirtualService-limit-CORS-request-headers/
-https://www.niewx.cn/2021/01/10/How-to-replace-the-expired-kubeadm-certificate/
