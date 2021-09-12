@@ -583,14 +583,14 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2020/07/12/Harbor-builds-enterprise-docker-private-mirror-repository/</loc>
+    <loc>https://www.niewx.cn/2020/07/12/Deployment-and-use-of-Traefik1.7.17/</loc>
     
     <lastmod>2020-07-12T06:10:00.000Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2020/07/12/Deployment-and-use-of-Traefik1.7.17/</loc>
+    <loc>https://www.niewx.cn/2020/07/12/Harbor-builds-enterprise-docker-private-mirror-repository/</loc>
     
     <lastmod>2020-07-12T06:10:00.000Z</lastmod>
     
@@ -618,6 +618,13 @@
   </url>
   
   <url>
+    <loc>https://www.niewx.cn/2020/06/10/TKE-upgrade-node-version/</loc>
+    
+    <lastmod>2020-06-10T06:10:00.000Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://www.niewx.cn/2020/06/10/Build-EFK-log-collection-system-on-TKE/</loc>
     
     <lastmod>2020-06-10T06:10:00.000Z</lastmod>
@@ -626,13 +633,6 @@
   
   <url>
     <loc>https://www.niewx.cn/2020/06/10/Build-prometheus-on-TKE/</loc>
-    
-    <lastmod>2020-06-10T06:10:00.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://www.niewx.cn/2020/06/10/TKE-upgrade-node-version/</loc>
     
     <lastmod>2020-06-10T06:10:00.000Z</lastmod>
     
