@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://www.niewx.cn/2021/09/14/The-elastic-cluster-collects-nginx-ingress-controller-access-logs/</loc>
+    <lastmod>2021-09-15</lastmod>
+  </url>
+  <url>
     <loc>https://www.niewx.cn/2021/09/11/Terraform-orchestrates-Tencent-Cloud-resources/</loc>
     <lastmod>2021-09-11</lastmod>
   </url>
@@ -145,11 +149,11 @@
     <lastmod>2020-11-28</lastmod>
   </url>
   <url>
-    <loc>https://www.niewx.cn/2020/11/26/fluent_bit-collects-different-business-logs/</loc>
+    <loc>https://www.niewx.cn/2020/11/26/The-externaltrafficpolicy-of-k8s-retains-the-client-source-ip/</loc>
     <lastmod>2020-11-26</lastmod>
   </url>
   <url>
-    <loc>https://www.niewx.cn/2020/11/26/The-externaltrafficpolicy-of-k8s-retains-the-client-source-ip/</loc>
+    <loc>https://www.niewx.cn/2020/11/26/fluent_bit-collects-different-business-logs/</loc>
     <lastmod>2020-11-26</lastmod>
   </url>
   <url>
@@ -309,11 +313,11 @@
     <lastmod>2020-07-15</lastmod>
   </url>
   <url>
-    <loc>https://www.niewx.cn/2020/07/12/Deployment-and-use-of-Traefik1.7.17/</loc>
+    <loc>https://www.niewx.cn/2020/07/12/Harbor-builds-enterprise-docker-private-mirror-repository/</loc>
     <lastmod>2020-07-12</lastmod>
   </url>
   <url>
-    <loc>https://www.niewx.cn/2020/07/12/Harbor-builds-enterprise-docker-private-mirror-repository/</loc>
+    <loc>https://www.niewx.cn/2020/07/12/Deployment-and-use-of-Traefik1.7.17/</loc>
     <lastmod>2020-07-12</lastmod>
   </url>
   <url>
