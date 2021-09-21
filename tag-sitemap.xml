@@ -3,6 +3,13 @@
 
 
     <url>
+        <loc>https://www.niewx.cn/tags/Kubernetes-ingress/</loc>
+        <lastmod>2021-09-15T06:14:29.269Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
         <loc>https://www.niewx.cn/tags/Terraform/</loc>
         <lastmod>2021-09-11T14:33:44.331Z</lastmod>
         <changefreq>weekly</changefreq>
@@ -178,6 +185,13 @@
     </url>
 
     <url>
+        <loc>https://www.niewx.cn/tags/Kiali/</loc>
+        <lastmod>2020-12-04T02:10:00.000Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
         <loc>https://www.niewx.cn/tags/Grafana/</loc>
         <lastmod>2020-12-04T02:10:00.000Z</lastmod>
         <changefreq>weekly</changefreq>
@@ -186,13 +200,6 @@
 
     <url>
         <loc>https://www.niewx.cn/tags/Promnetheus/</loc>
-        <lastmod>2020-12-04T02:10:00.000Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.2</priority>
-    </url>
-
-    <url>
-        <loc>https://www.niewx.cn/tags/Kiali/</loc>
         <lastmod>2020-12-04T02:10:00.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
@@ -318,14 +325,14 @@
     </url>
 
     <url>
-        <loc>https://www.niewx.cn/tags/ssl/</loc>
+        <loc>https://www.niewx.cn/tags/Probe/</loc>
         <lastmod>2020-08-14T06:10:00.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
 
     <url>
-        <loc>https://www.niewx.cn/tags/Probe/</loc>
+        <loc>https://www.niewx.cn/tags/ssl/</loc>
         <lastmod>2020-08-14T06:10:00.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
