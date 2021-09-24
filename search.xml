@@ -654,6 +654,35 @@
     
     
     <entry>
+      <title>istio入门系列之Kiali网络可视化</title>
+      <link href="/2020/12/04/Kiali-network-visualization-of-istio-entry-series/"/>
+      <url>/2020/12/04/Kiali-network-visualization-of-istio-entry-series/</url>
+      
+        <content type="html"><![CDATA[<p>Kiali组件，使用基于 Web 的图形用户界面来查看网格和 Istio 配置对象的服务图。 使用 Kiali Public API 返回的 JSON 数据生成图形数据。</p><p>Kiali拥有如下的功能</p><p><img src="1.png" alt="upload-image"></p><p>Kiali的架构如下</p><p><img src="2.png" alt="upload-image"></p><p>istio中的组件web界面命令行打开方式</p><figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">[root@VM-0-13-centos</span> <span class="string">treafik]# istioctl dashboard</span></span><br><span class="line"><span class="attr">Access</span> <span class="string">to Istio web UIs</span></span><br><span class="line"></span><br><span class="line"><span class="attr">Usage</span>:<span class="string"></span></span><br><span class="line">  <span class="attr">istioctl</span> <span class="string">dashboard [flags]</span></span><br><span class="line">  <span class="attr">istioctl</span> <span class="string">dashboard [command]</span></span><br><span class="line"></span><br><span class="line"><span class="attr">Aliases</span>:<span class="string"></span></span><br><span class="line">  <span class="meta">dashboard,</span> <span class="string">dash, d</span></span><br><span class="line"></span><br><span class="line"><span class="attr">Available</span> <span class="string">Commands:</span></span><br><span class="line">  <span class="attr">controlz</span>    <span class="string">Open ControlZ web UI</span></span><br><span class="line">  <span class="attr">envoy</span>       <span class="string">Open Envoy admin web UI</span></span><br><span class="line">  <span class="attr">grafana</span>     <span class="string">Open Grafana web UI</span></span><br><span class="line">  <span class="attr">jaeger</span>      <span class="string">Open Jaeger web UI</span></span><br><span class="line">  <span class="attr">kiali</span>       <span class="string">Open Kiali web UI</span></span><br><span class="line">  <span class="attr">prometheus</span>  <span class="string">Open Prometheus web UI</span></span><br><span class="line">  <span class="attr">zipkin</span>      <span class="string">Open Zipkin web UI</span></span><br></pre></td></tr></table></figure><p>进入web界面，我们可以在Application中查看应用情况</p><p><img src="3.png" alt="upload-image"></p><p>可以到Graph中查看对应服务的调用拓扑图</p><p><img src="4.png" alt="upload-image"></p><p>可以在service中查看对应的service情况和所配置的VirtualService和DestinationRule</p><p><img src="5.png" alt="upload-image"></p><p>我们还可以在service中查看对应服务的访问情况</p><p><img src="6.png" alt="upload-image"></p><p><img src="7.png" alt="upload-image"></p><p>我们还可以对istio的配置进行检查，我们在istio config页面对istio的配置进行检查修改，查看到有红色感叹号的说明配置异常，点击进去看</p><p><img src="8.png" alt="upload-image"></p><p>我们按照提示修改后然后保存重新加载即可</p><p><img src="9.png" alt="upload-image"></p><p><img src="10.png" alt="upload-image"></p><p>这里修改后，这个DestinationRule显示正常</p><p>删除kiali的方式，可以执行如下命令</p><figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl <span class="keyword">delete</span> <span class="keyword">all</span>,secrets,<span class="keyword">sa</span>,configmaps,deployments,ingresses,clusterroles,clusterrolebindings,customresourcedefinitions --selector=app=kiali -n istio-<span class="built_in">system</span></span><br></pre></td></tr></table></figure>]]></content>
+      
+      
+      <categories>
+          
+          <category> Istio </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Kubernetes </tag>
+            
+            <tag> Istio </tag>
+            
+            <tag> Kiali </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>istio入门系列之prometheus和grafana</title>
       <link href="/2020/12/04/prometheus-and-grafana-of-istio-entry-series/"/>
       <url>/2020/12/04/prometheus-and-grafana-of-istio-entry-series/</url>
@@ -677,35 +706,6 @@
             <tag> Promnetheus </tag>
             
             <tag> Grafana </tag>
-            
-        </tags>
-      
-    </entry>
-    
-    
-    
-    <entry>
-      <title>istio入门系列之Kiali网络可视化</title>
-      <link href="/2020/12/04/Kiali-network-visualization-of-istio-entry-series/"/>
-      <url>/2020/12/04/Kiali-network-visualization-of-istio-entry-series/</url>
-      
-        <content type="html"><![CDATA[<p>Kiali组件，使用基于 Web 的图形用户界面来查看网格和 Istio 配置对象的服务图。 使用 Kiali Public API 返回的 JSON 数据生成图形数据。</p><p>Kiali拥有如下的功能</p><p><img src="1.png" alt="upload-image"></p><p>Kiali的架构如下</p><p><img src="2.png" alt="upload-image"></p><p>istio中的组件web界面命令行打开方式</p><figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">[root@VM-0-13-centos</span> <span class="string">treafik]# istioctl dashboard</span></span><br><span class="line"><span class="attr">Access</span> <span class="string">to Istio web UIs</span></span><br><span class="line"></span><br><span class="line"><span class="attr">Usage</span>:<span class="string"></span></span><br><span class="line">  <span class="attr">istioctl</span> <span class="string">dashboard [flags]</span></span><br><span class="line">  <span class="attr">istioctl</span> <span class="string">dashboard [command]</span></span><br><span class="line"></span><br><span class="line"><span class="attr">Aliases</span>:<span class="string"></span></span><br><span class="line">  <span class="meta">dashboard,</span> <span class="string">dash, d</span></span><br><span class="line"></span><br><span class="line"><span class="attr">Available</span> <span class="string">Commands:</span></span><br><span class="line">  <span class="attr">controlz</span>    <span class="string">Open ControlZ web UI</span></span><br><span class="line">  <span class="attr">envoy</span>       <span class="string">Open Envoy admin web UI</span></span><br><span class="line">  <span class="attr">grafana</span>     <span class="string">Open Grafana web UI</span></span><br><span class="line">  <span class="attr">jaeger</span>      <span class="string">Open Jaeger web UI</span></span><br><span class="line">  <span class="attr">kiali</span>       <span class="string">Open Kiali web UI</span></span><br><span class="line">  <span class="attr">prometheus</span>  <span class="string">Open Prometheus web UI</span></span><br><span class="line">  <span class="attr">zipkin</span>      <span class="string">Open Zipkin web UI</span></span><br></pre></td></tr></table></figure><p>进入web界面，我们可以在Application中查看应用情况</p><p><img src="3.png" alt="upload-image"></p><p>可以到Graph中查看对应服务的调用拓扑图</p><p><img src="4.png" alt="upload-image"></p><p>可以在service中查看对应的service情况和所配置的VirtualService和DestinationRule</p><p><img src="5.png" alt="upload-image"></p><p>我们还可以在service中查看对应服务的访问情况</p><p><img src="6.png" alt="upload-image"></p><p><img src="7.png" alt="upload-image"></p><p>我们还可以对istio的配置进行检查，我们在istio config页面对istio的配置进行检查修改，查看到有红色感叹号的说明配置异常，点击进去看</p><p><img src="8.png" alt="upload-image"></p><p>我们按照提示修改后然后保存重新加载即可</p><p><img src="9.png" alt="upload-image"></p><p><img src="10.png" alt="upload-image"></p><p>这里修改后，这个DestinationRule显示正常</p><p>删除kiali的方式，可以执行如下命令</p><figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl <span class="keyword">delete</span> <span class="keyword">all</span>,secrets,<span class="keyword">sa</span>,configmaps,deployments,ingresses,clusterroles,clusterrolebindings,customresourcedefinitions --selector=app=kiali -n istio-<span class="built_in">system</span></span><br></pre></td></tr></table></figure>]]></content>
-      
-      
-      <categories>
-          
-          <category> Istio </category>
-          
-      </categories>
-      
-      
-        <tags>
-            
-            <tag> Kubernetes </tag>
-            
-            <tag> Istio </tag>
-            
-            <tag> Kiali </tag>
             
         </tags>
       
