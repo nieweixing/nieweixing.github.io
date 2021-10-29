@@ -2,16 +2,23 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://www.niewx.cn/2019/11/01/Hexo-Theme-Snail/</loc>
+    
+    <lastmod>2021-10-29T08:43:23.992Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://www.niewx.cn/2021/10/29/Container-log-storage-description-of-pod-in-k8s/</loc>
     
-    <lastmod>2021-10-29T08:33:19.607Z</lastmod>
+    <lastmod>2021-10-29T08:43:21.574Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://www.niewx.cn/2021/09/14/The-elastic-cluster-collects-nginx-ingress-controller-access-logs/</loc>
     
-    <lastmod>2021-10-29T05:51:41.221Z</lastmod>
+    <lastmod>2021-10-29T08:43:19.599Z</lastmod>
     
   </url>
   
@@ -26,13 +33,6 @@
     <loc>https://www.niewx.cn/2021/09/11/Terraform-orchestrates-Tencent-Cloud-resources/</loc>
     
     <lastmod>2021-09-11T14:33:44.331Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://www.niewx.cn/2019/11/01/Hexo-Theme-Snail/</loc>
-    
-    <lastmod>2021-09-10T13:14:49.450Z</lastmod>
     
   </url>
   
@@ -226,14 +226,14 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2020/12/04/Kiali-network-visualization-of-istio-entry-series/</loc>
+    <loc>https://www.niewx.cn/2020/12/04/prometheus-and-grafana-of-istio-entry-series/</loc>
     
     <lastmod>2020-12-04T02:10:00.000Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2020/12/04/prometheus-and-grafana-of-istio-entry-series/</loc>
+    <loc>https://www.niewx.cn/2020/12/04/Kiali-network-visualization-of-istio-entry-series/</loc>
     
     <lastmod>2020-12-04T02:10:00.000Z</lastmod>
     
@@ -254,14 +254,14 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2020/12/02/Retry-after-timeout-of-istio-entry-series%25E8%25AF%2595/</loc>
+    <loc>https://www.niewx.cn/2020/12/02/Fuse-of-istio-entry-series/</loc>
     
     <lastmod>2020-12-02T02:10:00.000Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2020/12/02/Fuse-of-istio-entry-series/</loc>
+    <loc>https://www.niewx.cn/2020/12/02/Retry-after-timeout-of-istio-entry-series%25E8%25AF%2595/</loc>
     
     <lastmod>2020-12-02T02:10:00.000Z</lastmod>
     
