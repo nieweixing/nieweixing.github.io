@@ -2,16 +2,23 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>https://www.niewx.cn/photography/index.html</loc>
+    <loc>https://www.niewx.cn/2021/10/29/Container-log-storage-description-of-pod-in-k8s/</loc>
     
-    <lastmod>2021-09-21T10:06:42.059Z</lastmod>
+    <lastmod>2021-10-29T08:33:19.607Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://www.niewx.cn/2021/09/14/The-elastic-cluster-collects-nginx-ingress-controller-access-logs/</loc>
     
-    <lastmod>2021-09-15T06:14:29.269Z</lastmod>
+    <lastmod>2021-10-29T05:51:41.221Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://www.niewx.cn/photography/index.html</loc>
+    
+    <lastmod>2021-09-21T10:06:42.059Z</lastmod>
     
   </url>
   
@@ -247,14 +254,14 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2020/12/02/Fuse-of-istio-entry-series/</loc>
+    <loc>https://www.niewx.cn/2020/12/02/Retry-after-timeout-of-istio-entry-series%25E8%25AF%2595/</loc>
     
     <lastmod>2020-12-02T02:10:00.000Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2020/12/02/Retry-after-timeout-of-istio-entry-series%25E8%25AF%2595/</loc>
+    <loc>https://www.niewx.cn/2020/12/02/Fuse-of-istio-entry-series/</loc>
     
     <lastmod>2020-12-02T02:10:00.000Z</lastmod>
     
@@ -471,14 +478,14 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2020/08/28/Ip-masq-agent-of-Kubernetes-plug-in/</loc>
+    <loc>https://www.niewx.cn/2020/08/28/Common-commands-for-linux-positioning-problems/</loc>
     
     <lastmod>2020-08-28T06:10:00.000Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2020/08/28/Common-commands-for-linux-positioning-problems/</loc>
+    <loc>https://www.niewx.cn/2020/08/28/Ip-masq-agent-of-Kubernetes-plug-in/</loc>
     
     <lastmod>2020-08-28T06:10:00.000Z</lastmod>
     
@@ -590,14 +597,14 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2020/07/12/Harbor-builds-enterprise-docker-private-mirror-repository/</loc>
+    <loc>https://www.niewx.cn/2020/07/12/Deployment-and-use-of-Traefik1.7.17/</loc>
     
     <lastmod>2020-07-12T06:10:00.000Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2020/07/12/Deployment-and-use-of-Traefik1.7.17/</loc>
+    <loc>https://www.niewx.cn/2020/07/12/Harbor-builds-enterprise-docker-private-mirror-repository/</loc>
     
     <lastmod>2020-07-12T06:10:00.000Z</lastmod>
     
