@@ -1,3 +1,4 @@
+https://www.niewx.cn/2021/11/09/Use-Nginx-Ingress-to-expose-TCP-and-udp-services/
 https://www.niewx.cn/2021/11/01/How-to-get-an-alert-through-PrometheusAlert/
 https://www.niewx.cn/2021/10/29/Container-log-storage-description-of-pod-in-k8s/
 https://www.niewx.cn/2021/09/14/The-elastic-cluster-collects-nginx-ingress-controller-access-logs/
@@ -7,4 +8,3 @@ https://www.niewx.cn/2021/07/10/Use-python-to-convert-pdf-to-png-long-image/
 https://www.niewx.cn/2021/06/12/use-operator-to-quickly-deploy-es-cluster-in-k8s/
 https://www.niewx.cn/2021/05/21/Nginx-learning-and-configuration/
 https://www.niewx.cn/2021/04/21/gitbook-generation-and-deployment-/
-https://www.niewx.cn/2021/04/16/k8s-deploy-rancher/
