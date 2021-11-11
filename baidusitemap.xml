@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://www.niewx.cn/2021/11/11/How-to-configure-nginx-ingress-log-format/</loc>
+    <lastmod>2021-11-11</lastmod>
+  </url>
+  <url>
     <loc>https://www.niewx.cn/2021/11/09/Use-Nginx-Ingress-to-expose-TCP-and-udp-services/</loc>
-    <lastmod>2021-11-09</lastmod>
+    <lastmod>2021-11-11</lastmod>
   </url>
   <url>
     <loc>https://www.niewx.cn/2021/11/01/How-to-get-an-alert-through-PrometheusAlert/</loc>
@@ -113,11 +117,11 @@
     <lastmod>2020-12-05</lastmod>
   </url>
   <url>
-    <loc>https://www.niewx.cn/2020/12/04/prometheus-and-grafana-of-istio-entry-series/</loc>
+    <loc>https://www.niewx.cn/2020/12/04/Kiali-network-visualization-of-istio-entry-series/</loc>
     <lastmod>2020-12-04</lastmod>
   </url>
   <url>
-    <loc>https://www.niewx.cn/2020/12/04/Kiali-network-visualization-of-istio-entry-series/</loc>
+    <loc>https://www.niewx.cn/2020/12/04/prometheus-and-grafana-of-istio-entry-series/</loc>
     <lastmod>2020-12-04</lastmod>
   </url>
   <url>
@@ -129,11 +133,11 @@
     <lastmod>2020-12-02</lastmod>
   </url>
   <url>
-    <loc>https://www.niewx.cn/2020/12/02/Fuse-of-istio-entry-series/</loc>
+    <loc>https://www.niewx.cn/2020/12/02/Retry-after-timeout-of-istio-entry-series%E8%AF%95/</loc>
     <lastmod>2020-12-02</lastmod>
   </url>
   <url>
-    <loc>https://www.niewx.cn/2020/12/02/Retry-after-timeout-of-istio-entry-series%E8%AF%95/</loc>
+    <loc>https://www.niewx.cn/2020/12/02/Fuse-of-istio-entry-series/</loc>
     <lastmod>2020-12-02</lastmod>
   </url>
   <url>
@@ -161,11 +165,11 @@
     <lastmod>2020-11-28</lastmod>
   </url>
   <url>
-    <loc>https://www.niewx.cn/2020/11/26/fluent_bit-collects-different-business-logs/</loc>
+    <loc>https://www.niewx.cn/2020/11/26/The-externaltrafficpolicy-of-k8s-retains-the-client-source-ip/</loc>
     <lastmod>2020-11-26</lastmod>
   </url>
   <url>
-    <loc>https://www.niewx.cn/2020/11/26/The-externaltrafficpolicy-of-k8s-retains-the-client-source-ip/</loc>
+    <loc>https://www.niewx.cn/2020/11/26/fluent_bit-collects-different-business-logs/</loc>
     <lastmod>2020-11-26</lastmod>
   </url>
   <url>
