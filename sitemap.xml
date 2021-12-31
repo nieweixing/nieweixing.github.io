@@ -4,7 +4,7 @@
   <url>
     <loc>https://www.niewx.cn/2021/12/29/Getting-started-with-microservice-gateway-APISIX/</loc>
     
-    <lastmod>2021-12-31T15:27:48.075Z</lastmod>
+    <lastmod>2021-12-31T15:30:04.861Z</lastmod>
     
   </url>
   
@@ -261,14 +261,14 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2020/12/04/Kiali-network-visualization-of-istio-entry-series/</loc>
+    <loc>https://www.niewx.cn/2020/12/04/prometheus-and-grafana-of-istio-entry-series/</loc>
     
     <lastmod>2020-12-04T02:10:00.000Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2020/12/04/prometheus-and-grafana-of-istio-entry-series/</loc>
+    <loc>https://www.niewx.cn/2020/12/04/Kiali-network-visualization-of-istio-entry-series/</loc>
     
     <lastmod>2020-12-04T02:10:00.000Z</lastmod>
     
@@ -667,14 +667,14 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2020/06/10/Build-EFK-log-collection-system-on-TKE/</loc>
+    <loc>https://www.niewx.cn/2020/06/10/Build-prometheus-on-TKE/</loc>
     
     <lastmod>2020-06-10T06:10:00.000Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2020/06/10/Build-prometheus-on-TKE/</loc>
+    <loc>https://www.niewx.cn/2020/06/10/Build-EFK-log-collection-system-on-TKE/</loc>
     
     <lastmod>2020-06-10T06:10:00.000Z</lastmod>
     
