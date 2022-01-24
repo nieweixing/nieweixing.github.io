@@ -4,7 +4,7 @@
   <url>
     <loc>https://www.niewx.cn/2022/01/13/This-article-will-take-you-to-get-the-rbac-authentication-of-k8s/</loc>
     
-    <lastmod>2022-01-17T03:21:25.708Z</lastmod>
+    <lastmod>2022-01-24T15:38:31.499Z</lastmod>
     
   </url>
   
@@ -296,14 +296,14 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2020/12/02/Retry-after-timeout-of-istio-entry-series%25E8%25AF%2595/</loc>
+    <loc>https://www.niewx.cn/2020/12/02/Fuse-of-istio-entry-series/</loc>
     
     <lastmod>2020-12-02T02:10:00.000Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2020/12/02/Fuse-of-istio-entry-series/</loc>
+    <loc>https://www.niewx.cn/2020/12/02/Retry-after-timeout-of-istio-entry-series%25E8%25AF%2595/</loc>
     
     <lastmod>2020-12-02T02:10:00.000Z</lastmod>
     
@@ -562,14 +562,14 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2020/08/14/TKE's-first-knowledge-of-container-detectors/</loc>
+    <loc>https://www.niewx.cn/2020/08/14/Self-made-CA-certificate-set-ssl-certificate/</loc>
     
     <lastmod>2020-08-14T06:10:00.000Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2020/08/14/Self-made-CA-certificate-set-ssl-certificate/</loc>
+    <loc>https://www.niewx.cn/2020/08/14/TKE's-first-knowledge-of-container-detectors/</loc>
     
     <lastmod>2020-08-14T06:10:00.000Z</lastmod>
     
@@ -674,6 +674,13 @@
   </url>
   
   <url>
+    <loc>https://www.niewx.cn/2020/06/10/Build-prometheus-on-TKE/</loc>
+    
+    <lastmod>2020-06-10T06:10:00.000Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://www.niewx.cn/2020/06/10/Build-EFK-log-collection-system-on-TKE/</loc>
     
     <lastmod>2020-06-10T06:10:00.000Z</lastmod>
@@ -682,13 +689,6 @@
   
   <url>
     <loc>https://www.niewx.cn/2020/06/10/TKE-upgrade-node-version/</loc>
-    
-    <lastmod>2020-06-10T06:10:00.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://www.niewx.cn/2020/06/10/Build-prometheus-on-TKE/</loc>
     
     <lastmod>2020-06-10T06:10:00.000Z</lastmod>
     
