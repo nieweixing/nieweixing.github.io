@@ -8,8 +8,80 @@
     </url>
 
     <url>
+        <loc>https://www.niewx.cn/2022/01/13/This-article-will-take-you-to-get-the-rbac-authentication-of-k8s/</loc>
+        <lastmod>2022-01-24T15:38:31.499Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.6</priority>
+
+    </url>
+
+    <url>
+        <loc>https://www.niewx.cn/2021/12/29/Getting-started-with-microservice-gateway-APISIX/</loc>
+        <lastmod>2022-01-01T08:07:09.490Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.6</priority>
+
+    </url>
+
+    <url>
+        <loc>https://www.niewx.cn/2021/10/29/Container-log-storage-description-of-pod-in-k8s/</loc>
+        <lastmod>2021-12-31T09:31:00.476Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.6</priority>
+
+    </url>
+
+    <url>
+        <loc>https://www.niewx.cn/2021/12/22/k8s-collects-business-logs-through-elk-kafka/</loc>
+        <lastmod>2021-12-22T12:03:37.633Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.6</priority>
+
+    </url>
+
+    <url>
+        <loc>https://www.niewx.cn/2021/11/11/How-to-configure-nginx-ingress-log-format/</loc>
+        <lastmod>2021-12-22T09:14:33.238Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.6</priority>
+
+    </url>
+
+    <url>
+        <loc>https://www.niewx.cn/2021/08/07/cert-manager-issues-free-certificates-for-domain-names/</loc>
+        <lastmod>2021-12-05T06:10:00.000Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.6</priority>
+
+    </url>
+
+    <url>
+        <loc>https://www.niewx.cn/2021/11/09/Use-Nginx-Ingress-to-expose-TCP-and-udp-services/</loc>
+        <lastmod>2021-11-11T07:00:36.136Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.6</priority>
+
+    </url>
+
+    <url>
+        <loc>https://www.niewx.cn/2021/11/01/How-to-get-an-alert-through-PrometheusAlert/</loc>
+        <lastmod>2021-11-01T08:06:24.389Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.6</priority>
+
+    </url>
+
+    <url>
+        <loc>https://www.niewx.cn/2019/11/01/Hexo-Theme-Snail/</loc>
+        <lastmod>2021-10-29T08:43:23.992Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.6</priority>
+
+    </url>
+
+    <url>
         <loc>https://www.niewx.cn/2021/09/14/The-elastic-cluster-collects-nginx-ingress-controller-access-logs/</loc>
-        <lastmod>2021-09-15T06:14:29.269Z</lastmod>
+        <lastmod>2021-10-29T08:43:19.599Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
 
@@ -18,22 +90,6 @@
     <url>
         <loc>https://www.niewx.cn/2021/09/11/Terraform-orchestrates-Tencent-Cloud-resources/</loc>
         <lastmod>2021-09-11T14:33:44.331Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.6</priority>
-
-    </url>
-
-    <url>
-        <loc>https://www.niewx.cn/2019/11/01/Hexo-Theme-Snail/</loc>
-        <lastmod>2021-09-10T13:14:49.450Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.6</priority>
-
-    </url>
-
-    <url>
-        <loc>https://www.niewx.cn/2021/08/07/cert-manager-issues-free-certificates-for-domain-names/</loc>
-        <lastmod>2021-08-07T06:10:00.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
 
@@ -208,7 +264,7 @@
     </url>
 
     <url>
-        <loc>https://www.niewx.cn/2020/12/04/prometheus-and-grafana-of-istio-entry-series/</loc>
+        <loc>https://www.niewx.cn/2020/12/04/Kiali-network-visualization-of-istio-entry-series/</loc>
         <lastmod>2020-12-04T02:10:00.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
@@ -216,7 +272,7 @@
     </url>
 
     <url>
-        <loc>https://www.niewx.cn/2020/12/04/Kiali-network-visualization-of-istio-entry-series/</loc>
+        <loc>https://www.niewx.cn/2020/12/04/prometheus-and-grafana-of-istio-entry-series/</loc>
         <lastmod>2020-12-04T02:10:00.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
@@ -304,7 +360,7 @@
     </url>
 
     <url>
-        <loc>https://www.niewx.cn/2020/11/26/The-externaltrafficpolicy-of-k8s-retains-the-client-source-ip/</loc>
+        <loc>https://www.niewx.cn/2020/11/26/fluent_bit-collects-different-business-logs/</loc>
         <lastmod>2020-11-26T06:10:00.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
@@ -312,7 +368,7 @@
     </url>
 
     <url>
-        <loc>https://www.niewx.cn/2020/11/26/fluent_bit-collects-different-business-logs/</loc>
+        <loc>https://www.niewx.cn/2020/11/26/The-externaltrafficpolicy-of-k8s-retains-the-client-source-ip/</loc>
         <lastmod>2020-11-26T06:10:00.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
@@ -672,7 +728,7 @@
     </url>
 
     <url>
-        <loc>https://www.niewx.cn/2020/06/10/Build-prometheus-on-TKE/</loc>
+        <loc>https://www.niewx.cn/2020/06/10/Build-EFK-log-collection-system-on-TKE/</loc>
         <lastmod>2020-06-10T06:10:00.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
@@ -680,7 +736,7 @@
     </url>
 
     <url>
-        <loc>https://www.niewx.cn/2020/06/10/Build-EFK-log-collection-system-on-TKE/</loc>
+        <loc>https://www.niewx.cn/2020/06/10/Build-prometheus-on-TKE/</loc>
         <lastmod>2020-06-10T06:10:00.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
