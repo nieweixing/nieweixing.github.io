@@ -264,7 +264,7 @@
     </url>
 
     <url>
-        <loc>https://www.niewx.cn/2020/12/04/Kiali-network-visualization-of-istio-entry-series/</loc>
+        <loc>https://www.niewx.cn/2020/12/04/prometheus-and-grafana-of-istio-entry-series/</loc>
         <lastmod>2020-12-04T02:10:00.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
@@ -272,7 +272,7 @@
     </url>
 
     <url>
-        <loc>https://www.niewx.cn/2020/12/04/prometheus-and-grafana-of-istio-entry-series/</loc>
+        <loc>https://www.niewx.cn/2020/12/04/Kiali-network-visualization-of-istio-entry-series/</loc>
         <lastmod>2020-12-04T02:10:00.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
@@ -600,7 +600,7 @@
     </url>
 
     <url>
-        <loc>https://www.niewx.cn/2020/08/14/Self-made-CA-certificate-set-ssl-certificate/</loc>
+        <loc>https://www.niewx.cn/2020/08/14/TKE%27s-first-knowledge-of-container-detectors/</loc>
         <lastmod>2020-08-14T06:10:00.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
@@ -608,7 +608,7 @@
     </url>
 
     <url>
-        <loc>https://www.niewx.cn/2020/08/14/TKE%27s-first-knowledge-of-container-detectors/</loc>
+        <loc>https://www.niewx.cn/2020/08/14/Self-made-CA-certificate-set-ssl-certificate/</loc>
         <lastmod>2020-08-14T06:10:00.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
