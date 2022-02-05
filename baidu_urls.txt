@@ -1,3 +1,4 @@
+https://www.niewx.cn/2022/02/05/k8s-builds-nacos/
 https://www.niewx.cn/2022/01/13/This-article-will-take-you-to-get-the-rbac-authentication-of-k8s/
 https://www.niewx.cn/2021/12/29/Getting-started-with-microservice-gateway-APISIX/
 https://www.niewx.cn/2021/12/22/k8s-collects-business-logs-through-elk-kafka/
@@ -7,4 +8,3 @@ https://www.niewx.cn/2021/11/01/How-to-get-an-alert-through-PrometheusAlert/
 https://www.niewx.cn/2021/10/29/Container-log-storage-description-of-pod-in-k8s/
 https://www.niewx.cn/2021/09/14/The-elastic-cluster-collects-nginx-ingress-controller-access-logs/
 https://www.niewx.cn/2021/09/11/Terraform-orchestrates-Tencent-Cloud-resources/
-https://www.niewx.cn/2021/08/07/cert-manager-issues-free-certificates-for-domain-names/
