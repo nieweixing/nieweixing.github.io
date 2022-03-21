@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://www.niewx.cn/2022/03/21/Kubernetes-deploys-mysql-master-slave-cluster/</loc>
+    
+    <lastmod>2022-03-21T03:08:51.168Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://www.niewx.cn/2022/01/13/This-article-will-take-you-to-get-the-rbac-authentication-of-k8s/</loc>
     
     <lastmod>2022-02-22T08:31:28.122Z</lastmod>
@@ -534,14 +541,14 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2020/08/28/Common-commands-for-linux-positioning-problems/</loc>
+    <loc>https://www.niewx.cn/2020/08/28/Ip-masq-agent-of-Kubernetes-plug-in/</loc>
     
     <lastmod>2020-08-28T06:10:00.000Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2020/08/28/Ip-masq-agent-of-Kubernetes-plug-in/</loc>
+    <loc>https://www.niewx.cn/2020/08/28/Common-commands-for-linux-positioning-problems/</loc>
     
     <lastmod>2020-08-28T06:10:00.000Z</lastmod>
     
@@ -576,14 +583,14 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2020/08/14/TKE's-first-knowledge-of-container-detectors/</loc>
+    <loc>https://www.niewx.cn/2020/08/14/Self-made-CA-certificate-set-ssl-certificate/</loc>
     
     <lastmod>2020-08-14T06:10:00.000Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2020/08/14/Self-made-CA-certificate-set-ssl-certificate/</loc>
+    <loc>https://www.niewx.cn/2020/08/14/TKE's-first-knowledge-of-container-detectors/</loc>
     
     <lastmod>2020-08-14T06:10:00.000Z</lastmod>
     
@@ -695,14 +702,14 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2020/06/10/Build-prometheus-on-TKE/</loc>
+    <loc>https://www.niewx.cn/2020/06/10/TKE-upgrade-node-version/</loc>
     
     <lastmod>2020-06-10T06:10:00.000Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2020/06/10/TKE-upgrade-node-version/</loc>
+    <loc>https://www.niewx.cn/2020/06/10/Build-prometheus-on-TKE/</loc>
     
     <lastmod>2020-06-10T06:10:00.000Z</lastmod>
     
