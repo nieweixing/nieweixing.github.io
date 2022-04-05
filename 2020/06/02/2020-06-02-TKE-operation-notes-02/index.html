@@ -19,50 +19,50 @@
     <meta name="description" content="本次笔记主要讲述了如何在腾讯云控制台创建并使用你的第一个kubernetes集群，创建过程中每个步骤的区别以及如何选择，保证自己的集群资源达到最优。 使用TKE的优势TKE集群类型TKE CVM容器集群支持以下两种类型：  托管集群（Master、Etcd 腾讯云容器服务管理） 独立部署集群（Master、Etcd 采用用户自有主机搭建）  如果你需要对master的组件和ETCD有一定的订制，可">
 <meta property="og:type" content="article">
 <meta property="og:title" content="TKE操作笔记02">
-<meta property="og:url" content="http://example.com/2020/06/02/2020-06-02-TKE-operation-notes-02/index.html">
+<meta property="og:url" content="https://www.niewx.cn/2020/06/02/2020-06-02-TKE-operation-notes-02/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="本次笔记主要讲述了如何在腾讯云控制台创建并使用你的第一个kubernetes集群，创建过程中每个步骤的区别以及如何选择，保证自己的集群资源达到最优。 使用TKE的优势TKE集群类型TKE CVM容器集群支持以下两种类型：  托管集群（Master、Etcd 腾讯云容器服务管理） 独立部署集群（Master、Etcd 采用用户自有主机搭建）  如果你需要对master的组件和ETCD有一定的订制，可">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/img/2020-06-02-TKE-operation-notes-02/1.png">
-<meta property="og:image" content="http://example.com/img/2020-06-02-TKE-operation-notes-02/2.png">
-<meta property="og:image" content="http://example.com/img/2020-06-02-TKE-operation-notes-02/3.png">
-<meta property="og:image" content="http://example.com/img/2020-06-02-TKE-operation-notes-02/4.png">
-<meta property="og:image" content="http://example.com/img/2020-06-02-TKE-operation-notes-02/5.png">
-<meta property="og:image" content="http://example.com/img/2020-06-02-TKE-operation-notes-02/6.png">
-<meta property="og:image" content="http://example.com/img/2020-06-02-TKE-operation-notes-02/7.png">
-<meta property="og:image" content="http://example.com/img/2020-06-02-TKE-operation-notes-02/8.png">
-<meta property="og:image" content="http://example.com/img/2020-06-02-TKE-operation-notes-02/9.png">
-<meta property="og:image" content="http://example.com/img/2020-06-02-TKE-operation-notes-02/10.png">
-<meta property="og:image" content="http://example.com/img/2020-06-02-TKE-operation-notes-02/11.png">
-<meta property="og:image" content="http://example.com/img/2020-06-02-TKE-operation-notes-02/12.png">
-<meta property="og:image" content="http://example.com/img/2020-06-02-TKE-operation-notes-02/13.png">
-<meta property="og:image" content="http://example.com/img/2020-06-02-TKE-operation-notes-02/14.png">
-<meta property="og:image" content="http://example.com/img/2020-06-02-TKE-operation-notes-02/15.png">
-<meta property="og:image" content="http://example.com/img/2020-06-02-TKE-operation-notes-02/16.png">
-<meta property="og:image" content="http://example.com/img/2020-06-02-TKE-operation-notes-02/17.png">
-<meta property="og:image" content="http://example.com/img/2020-06-02-TKE-operation-notes-02/18.png">
-<meta property="og:image" content="http://example.com/img/2020-06-02-TKE-operation-notes-02/19.png">
-<meta property="og:image" content="http://example.com/img/2020-06-02-TKE-operation-notes-02/20.png">
-<meta property="og:image" content="http://example.com/img/2020-06-02-TKE-operation-notes-02/21.png">
-<meta property="og:image" content="http://example.com/img/2020-06-02-TKE-operation-notes-02/22.png">
-<meta property="og:image" content="http://example.com/img/2020-06-02-TKE-operation-notes-02/23.png">
-<meta property="og:image" content="http://example.com/img/2020-06-02-TKE-operation-notes-02/24.png">
-<meta property="og:image" content="http://example.com/img/2020-06-02-TKE-operation-notes-02/25.png">
-<meta property="og:image" content="http://example.com/img/2020-06-02-TKE-operation-notes-02/26.png">
-<meta property="og:image" content="http://example.com/img/2020-06-02-TKE-operation-notes-02/27.png">
-<meta property="og:image" content="http://example.com/img/2020-06-02-TKE-operation-notes-02/28.png">
-<meta property="og:image" content="http://example.com/img/2020-06-02-TKE-operation-notes-02/29.png">
-<meta property="og:image" content="http://example.com/img/2020-06-02-TKE-operation-notes-02/30.png">
-<meta property="og:image" content="http://example.com/img/2020-06-02-TKE-operation-notes-02/31.png">
-<meta property="og:image" content="http://example.com/img/2020-06-02-TKE-operation-notes-02/32.png">
-<meta property="og:image" content="http://example.com/img/2020-06-02-TKE-operation-notes-02/33.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-02-TKE-operation-notes-02/1.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-02-TKE-operation-notes-02/2.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-02-TKE-operation-notes-02/3.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-02-TKE-operation-notes-02/4.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-02-TKE-operation-notes-02/5.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-02-TKE-operation-notes-02/6.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-02-TKE-operation-notes-02/7.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-02-TKE-operation-notes-02/8.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-02-TKE-operation-notes-02/9.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-02-TKE-operation-notes-02/10.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-02-TKE-operation-notes-02/11.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-02-TKE-operation-notes-02/12.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-02-TKE-operation-notes-02/13.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-02-TKE-operation-notes-02/14.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-02-TKE-operation-notes-02/15.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-02-TKE-operation-notes-02/16.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-02-TKE-operation-notes-02/17.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-02-TKE-operation-notes-02/18.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-02-TKE-operation-notes-02/19.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-02-TKE-operation-notes-02/20.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-02-TKE-operation-notes-02/21.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-02-TKE-operation-notes-02/22.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-02-TKE-operation-notes-02/23.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-02-TKE-operation-notes-02/24.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-02-TKE-operation-notes-02/25.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-02-TKE-operation-notes-02/26.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-02-TKE-operation-notes-02/27.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-02-TKE-operation-notes-02/28.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-02-TKE-operation-notes-02/29.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-02-TKE-operation-notes-02/30.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-02-TKE-operation-notes-02/31.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-02-TKE-operation-notes-02/32.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-02-TKE-operation-notes-02/33.png">
 <meta property="article:published_time" content="2020-06-02T06:10:00.000Z">
 <meta property="article:modified_time" content="2020-07-22T06:10:00.000Z">
 <meta property="article:author" content="VashonNie">
 <meta property="article:tag" content="Kubernetes">
 <meta property="article:tag" content="TKE">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="http://example.com/img/2020-06-02-TKE-operation-notes-02/1.png">
+<meta name="twitter:image" content="https://www.niewx.cn/img/2020-06-02-TKE-operation-notes-02/1.png">
   
   
   <title>TKE操作笔记02 - Hexo</title>
@@ -108,7 +108,7 @@
 
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
-    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":"www.niewx.cn","path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+    var CONFIG = {"hostname":"www.niewx.cn","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":"www.niewx.cn","path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
@@ -209,6 +209,46 @@
                 <i class="iconfont icon-link-fill"></i>
                 友链
               </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" target="_self" href="javascript:;" role="button"
+                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="iconfont icon-books"></i>
+                文档
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="https://www.niewx.cn/mybook/">
+                    
+                    运维笔记
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/column/87421">
+                    
+                    云+社区文档
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="https://www.niewx.cn/question/">
+                    
+                    运维问题集锦
+                  </a>
+                
+              </div>
             </li>
           
         
@@ -601,7 +641,7 @@
   <div class="license-box my-3">
     <div class="license-title">
       <div>TKE操作笔记02</div>
-      <div>http://example.com/2020/06/02/2020-06-02-TKE-operation-notes-02/</div>
+      <div>https://www.niewx.cn/2020/06/02/2020-06-02-TKE-operation-notes-02/</div>
     </div>
     <div class="license-meta">
       
@@ -787,8 +827,7 @@
     <div class="footer-inner">
   
     <div class="footer-content">
-       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>
-<div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> </div>
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> </br> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> </div>
     </div>
   
   

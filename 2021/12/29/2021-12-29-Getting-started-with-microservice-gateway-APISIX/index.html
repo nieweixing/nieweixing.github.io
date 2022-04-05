@@ -19,41 +19,41 @@
     <meta name="description" content="APISIX 是一个云原生、高性能、可扩展的微服务 API 开源网关，基于OpenResty(Nginx+Lua)和etcd来实现，对比传统的API网关，具有动态路由和热插件加载的特点。系统本身自带前端，可以手动配置路由、负载均衡、限速限流、熔断、金丝雀发布、身份验证、可监控等插件，操作方便。可以使用Apache APISIX来处理传统的南北流量，以及服务之间的东西流量。它也可以用作k8s入口控制">
 <meta property="og:type" content="article">
 <meta property="og:title" content="微服务网关APISIX入门">
-<meta property="og:url" content="http://example.com/2021/12/29/2021-12-29-Getting-started-with-microservice-gateway-APISIX/index.html">
+<meta property="og:url" content="https://www.niewx.cn/2021/12/29/2021-12-29-Getting-started-with-microservice-gateway-APISIX/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="APISIX 是一个云原生、高性能、可扩展的微服务 API 开源网关，基于OpenResty(Nginx+Lua)和etcd来实现，对比传统的API网关，具有动态路由和热插件加载的特点。系统本身自带前端，可以手动配置路由、负载均衡、限速限流、熔断、金丝雀发布、身份验证、可监控等插件，操作方便。可以使用Apache APISIX来处理传统的南北流量，以及服务之间的东西流量。它也可以用作k8s入口控制">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/1.JPG">
-<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/2.png">
-<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/2.JPG">
-<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/3.JPG">
-<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/4.JPG">
-<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/5.JPG">
-<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/6.JPG">
-<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/7.JPG">
-<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/8.JPG">
-<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/9.JPG">
-<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/10.JPG">
-<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/11.JPG">
-<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/12.JPG">
-<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/13.JPG">
-<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/14.JPG">
-<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/15.JPG">
-<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/16.JPG">
-<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/17.JPG">
-<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/18.JPG">
-<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/19.JPG">
-<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/20.JPG">
-<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/21.JPG">
-<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/22.JPG">
-<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/23.JPG">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/1.JPG">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/2.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/2.JPG">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/3.JPG">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/4.JPG">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/5.JPG">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/6.JPG">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/7.JPG">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/8.JPG">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/9.JPG">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/10.JPG">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/11.JPG">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/12.JPG">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/13.JPG">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/14.JPG">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/15.JPG">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/16.JPG">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/17.JPG">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/18.JPG">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/19.JPG">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/20.JPG">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/21.JPG">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/22.JPG">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/23.JPG">
 <meta property="article:published_time" content="2021-12-29T12:20:48.000Z">
 <meta property="article:modified_time" content="2022-04-05T03:45:26.091Z">
 <meta property="article:author" content="VashonNie">
 <meta property="article:tag" content="Kubernetes">
 <meta property="article:tag" content="apisix">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/1.JPG">
+<meta name="twitter:image" content="https://www.niewx.cn/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/1.JPG">
   
   
   <title>微服务网关APISIX入门 - Hexo</title>
@@ -99,7 +99,7 @@
 
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
-    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":"www.niewx.cn","path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+    var CONFIG = {"hostname":"www.niewx.cn","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":"www.niewx.cn","path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
@@ -200,6 +200,46 @@
                 <i class="iconfont icon-link-fill"></i>
                 友链
               </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" target="_self" href="javascript:;" role="button"
+                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="iconfont icon-books"></i>
+                文档
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="https://www.niewx.cn/mybook/">
+                    
+                    运维笔记
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/column/87421">
+                    
+                    云+社区文档
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="https://www.niewx.cn/question/">
+                    
+                    运维问题集锦
+                  </a>
+                
+              </div>
             </li>
           
         
@@ -454,7 +494,7 @@
   <div class="license-box my-3">
     <div class="license-title">
       <div>微服务网关APISIX入门</div>
-      <div>http://example.com/2021/12/29/2021-12-29-Getting-started-with-microservice-gateway-APISIX/</div>
+      <div>https://www.niewx.cn/2021/12/29/2021-12-29-Getting-started-with-microservice-gateway-APISIX/</div>
     </div>
     <div class="license-meta">
       
@@ -640,8 +680,7 @@
     <div class="footer-inner">
   
     <div class="footer-content">
-       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>
-<div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> </div>
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> </br> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> </div>
     </div>
   
   

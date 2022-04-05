@@ -19,17 +19,17 @@
     <meta name="description" content="kubelet 使用存活探测器来知道什么时候要重启容器。例如，存活探测器可以捕捉到死锁（应用程序在运行，但是无法继续执行后面的步骤）。这样的情况下重启容器有助于让应用程序在有问题的情况下更可用。 kubelet 使用就绪探测器可以知道容器什么时候准备好了并可以开始接受请求流量， 当一个 Pod 内的所有容器都准备好了，才能把这个 Pod 看作就绪了。这种信号的一个用途就是控制哪个 Pod 作为 S">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Kubernetes之初识容器探测器">
-<meta property="og:url" content="http://example.com/2020/08/14/2020-08-14-TKE's-first-knowledge-of-container-detectors/index.html">
+<meta property="og:url" content="https://www.niewx.cn/2020/08/14/2020-08-14-TKE's-first-knowledge-of-container-detectors/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="kubelet 使用存活探测器来知道什么时候要重启容器。例如，存活探测器可以捕捉到死锁（应用程序在运行，但是无法继续执行后面的步骤）。这样的情况下重启容器有助于让应用程序在有问题的情况下更可用。 kubelet 使用就绪探测器可以知道容器什么时候准备好了并可以开始接受请求流量， 当一个 Pod 内的所有容器都准备好了，才能把这个 Pod 看作就绪了。这种信号的一个用途就是控制哪个 Pod 作为 S">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/img/TKE">
-<meta property="og:image" content="http://example.com/img/TKE">
-<meta property="og:image" content="http://example.com/img/TKE">
-<meta property="og:image" content="http://example.com/img/TKE">
-<meta property="og:image" content="http://example.com/img/TKE">
-<meta property="og:image" content="http://example.com/img/TKE">
-<meta property="og:image" content="http://example.com/img/TKE">
+<meta property="og:image" content="https://www.niewx.cn/img/TKE">
+<meta property="og:image" content="https://www.niewx.cn/img/TKE">
+<meta property="og:image" content="https://www.niewx.cn/img/TKE">
+<meta property="og:image" content="https://www.niewx.cn/img/TKE">
+<meta property="og:image" content="https://www.niewx.cn/img/TKE">
+<meta property="og:image" content="https://www.niewx.cn/img/TKE">
+<meta property="og:image" content="https://www.niewx.cn/img/TKE">
 <meta property="article:published_time" content="2020-08-14T06:10:00.000Z">
 <meta property="article:modified_time" content="2020-08-14T06:10:00.000Z">
 <meta property="article:author" content="VashonNie">
@@ -37,7 +37,7 @@
 <meta property="article:tag" content="TKE">
 <meta property="article:tag" content="Probe">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="http://example.com/img/TKE">
+<meta name="twitter:image" content="https://www.niewx.cn/img/TKE">
   
   
   <title>Kubernetes之初识容器探测器 - Hexo</title>
@@ -83,7 +83,7 @@
 
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
-    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":"www.niewx.cn","path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+    var CONFIG = {"hostname":"www.niewx.cn","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":"www.niewx.cn","path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
@@ -184,6 +184,46 @@
                 <i class="iconfont icon-link-fill"></i>
                 友链
               </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" target="_self" href="javascript:;" role="button"
+                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="iconfont icon-books"></i>
+                文档
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="https://www.niewx.cn/mybook/">
+                    
+                    运维笔记
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/column/87421">
+                    
+                    云+社区文档
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="https://www.niewx.cn/question/">
+                    
+                    运维问题集锦
+                  </a>
+                
+              </div>
             </li>
           
         
@@ -444,7 +484,7 @@
   <div class="license-box my-3">
     <div class="license-title">
       <div>Kubernetes之初识容器探测器</div>
-      <div>http://example.com/2020/08/14/2020-08-14-TKE&#39;s-first-knowledge-of-container-detectors/</div>
+      <div>https://www.niewx.cn/2020/08/14/2020-08-14-TKE&#39;s-first-knowledge-of-container-detectors/</div>
     </div>
     <div class="license-meta">
       
@@ -630,8 +670,7 @@
     <div class="footer-inner">
   
     <div class="footer-content">
-       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>
-<div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> </div>
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> </br> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> </div>
     </div>
   
   

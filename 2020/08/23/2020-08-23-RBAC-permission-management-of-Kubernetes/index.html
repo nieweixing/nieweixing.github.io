@@ -19,36 +19,36 @@
     <meta name="description" content="本篇文章主要介绍了Kubernetes中RBAC权限控制使用。 RBAC简介   RBAC（Role-Based Access Control）  基于角色的权限控制。通过角色关联用户、角色关联权限的方式间接赋予用户权限。在 Kubernetes 中，RBAC 是通过 rbac.authorization.k8s.io API Group 实现的，即允许集群管理员通过 Kubernetes API">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Kubernetes之RBAC权限管理">
-<meta property="og:url" content="http://example.com/2020/08/23/2020-08-23-RBAC-permission-management-of-Kubernetes/index.html">
+<meta property="og:url" content="https://www.niewx.cn/2020/08/23/2020-08-23-RBAC-permission-management-of-Kubernetes/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="本篇文章主要介绍了Kubernetes中RBAC权限控制使用。 RBAC简介   RBAC（Role-Based Access Control）  基于角色的权限控制。通过角色关联用户、角色关联权限的方式间接赋予用户权限。在 Kubernetes 中，RBAC 是通过 rbac.authorization.k8s.io API Group 实现的，即允许集群管理员通过 Kubernetes API">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/img/2020-08-23-RBAC-permission-management-of-Kubernetes/1.png">
-<meta property="og:image" content="http://example.com/img/2020-08-23-RBAC-permission-management-of-Kubernetes/1-2.png">
-<meta property="og:image" content="http://example.com/img/2020-08-23-RBAC-permission-management-of-Kubernetes/2.png">
-<meta property="og:image" content="http://example.com/img/2020-08-23-RBAC-permission-management-of-Kubernetes/3.png">
-<meta property="og:image" content="http://example.com/img/2020-08-23-RBAC-permission-management-of-Kubernetes/4.png">
-<meta property="og:image" content="http://example.com/img/2020-08-23-RBAC-permission-management-of-Kubernetes/5.png">
-<meta property="og:image" content="http://example.com/img/2020-08-23-RBAC-permission-management-of-Kubernetes/6.png">
-<meta property="og:image" content="http://example.com/img/2020-08-23-RBAC-permission-management-of-Kubernetes/7.png">
-<meta property="og:image" content="http://example.com/img/2020-08-23-RBAC-permission-management-of-Kubernetes/8.png">
-<meta property="og:image" content="http://example.com/img/2020-08-23-RBAC-permission-management-of-Kubernetes/9.png">
-<meta property="og:image" content="http://example.com/img/2020-08-23-RBAC-permission-management-of-Kubernetes/10.png">
-<meta property="og:image" content="http://example.com/img/2020-08-23-RBAC-permission-management-of-Kubernetes/11.png">
-<meta property="og:image" content="http://example.com/img/2020-08-23-RBAC-permission-management-of-Kubernetes/12.png">
-<meta property="og:image" content="http://example.com/img/2020-08-23-RBAC-permission-management-of-Kubernetes/13.png">
-<meta property="og:image" content="http://example.com/img/2020-08-23-RBAC-permission-management-of-Kubernetes/14.png">
-<meta property="og:image" content="http://example.com/img/2020-08-23-RBAC-permission-management-of-Kubernetes/15.png">
-<meta property="og:image" content="http://example.com/img/2020-08-23-RBAC-permission-management-of-Kubernetes/16.png">
-<meta property="og:image" content="http://example.com/img/2020-08-23-RBAC-permission-management-of-Kubernetes/17.png">
-<meta property="og:image" content="http://example.com/img/2020-08-23-RBAC-permission-management-of-Kubernetes/18.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-08-23-RBAC-permission-management-of-Kubernetes/1.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-08-23-RBAC-permission-management-of-Kubernetes/1-2.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-08-23-RBAC-permission-management-of-Kubernetes/2.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-08-23-RBAC-permission-management-of-Kubernetes/3.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-08-23-RBAC-permission-management-of-Kubernetes/4.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-08-23-RBAC-permission-management-of-Kubernetes/5.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-08-23-RBAC-permission-management-of-Kubernetes/6.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-08-23-RBAC-permission-management-of-Kubernetes/7.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-08-23-RBAC-permission-management-of-Kubernetes/8.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-08-23-RBAC-permission-management-of-Kubernetes/9.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-08-23-RBAC-permission-management-of-Kubernetes/10.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-08-23-RBAC-permission-management-of-Kubernetes/11.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-08-23-RBAC-permission-management-of-Kubernetes/12.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-08-23-RBAC-permission-management-of-Kubernetes/13.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-08-23-RBAC-permission-management-of-Kubernetes/14.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-08-23-RBAC-permission-management-of-Kubernetes/15.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-08-23-RBAC-permission-management-of-Kubernetes/16.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-08-23-RBAC-permission-management-of-Kubernetes/17.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-08-23-RBAC-permission-management-of-Kubernetes/18.png">
 <meta property="article:published_time" content="2020-08-23T06:10:00.000Z">
 <meta property="article:modified_time" content="2020-08-23T06:10:00.000Z">
 <meta property="article:author" content="VashonNie">
 <meta property="article:tag" content="Kubernetes">
 <meta property="article:tag" content="RBAC">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="http://example.com/img/2020-08-23-RBAC-permission-management-of-Kubernetes/1.png">
+<meta name="twitter:image" content="https://www.niewx.cn/img/2020-08-23-RBAC-permission-management-of-Kubernetes/1.png">
   
   
   <title>Kubernetes之RBAC权限管理 - Hexo</title>
@@ -94,7 +94,7 @@
 
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
-    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":"www.niewx.cn","path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+    var CONFIG = {"hostname":"www.niewx.cn","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":"www.niewx.cn","path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
@@ -195,6 +195,46 @@
                 <i class="iconfont icon-link-fill"></i>
                 友链
               </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" target="_self" href="javascript:;" role="button"
+                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="iconfont icon-books"></i>
+                文档
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="https://www.niewx.cn/mybook/">
+                    
+                    运维笔记
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/column/87421">
+                    
+                    云+社区文档
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="https://www.niewx.cn/question/">
+                    
+                    运维问题集锦
+                  </a>
+                
+              </div>
             </li>
           
         
@@ -388,7 +428,7 @@
 <figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs dts"><span class="hljs-symbol">apiVersion:</span> rbac.authorization.k8s.io/v1<br><span class="hljs-meta"># 这个集群角色绑定允许 <span class="hljs-string">&quot;manager&quot;</span> 组中的任何用户读取任意命名空间中 <span class="hljs-string">&quot;secrets&quot;</span>。</span><br><span class="hljs-symbol">kind:</span> ClusterRoleBinding<br><span class="hljs-symbol">metadata:</span><br><span class="hljs-symbol">  name:</span> read-secrets-global<br><span class="hljs-symbol">subjects:</span><br>- kind: Group<br><span class="hljs-symbol">  name:</span> manager <span class="hljs-meta"># 名称区分大小写</span><br><span class="hljs-symbol">  apiGroup:</span> rbac.authorization.k8s.io<br><span class="hljs-symbol">roleRef:</span><br><span class="hljs-symbol">  kind:</span> ClusterRole<br><span class="hljs-symbol">  name:</span> secret-reader<br><span class="hljs-symbol">  apiGroup:</span> rbac.authorization.k8s.io<br></code></pre></td></tr></table></figure>
 
 <h1 id="Kubernetes中的用户和组"><a href="#Kubernetes中的用户和组" class="headerlink" title="Kubernetes中的用户和组"></a>Kubernetes中的用户和组</h1><p>RoleBinding 或者 ClusterRoleBinding 需要绑定角色到 主体。 主体可以是组，用户或者服务账户。</p>
-<p>用户是由字符串表示，它们可以是普通的用户名，像 “alice”，或者是 邮件格式 “<a href="mailto:&#x62;&#111;&#x62;&#64;&#x65;&#x78;&#x61;&#109;&#x70;&#108;&#101;&#x2e;&#99;&#111;&#x6d;">&#x62;&#111;&#x62;&#64;&#x65;&#x78;&#x61;&#109;&#x70;&#108;&#101;&#x2e;&#99;&#111;&#x6d;</a>“，或者是数字ID。由 Kubernetes 管理员配置身份认证模块 需要的格式。RBAC 鉴权系统不对格式作任何要求，但是前缀 system: 是 Kubernetes 系统保留的， 所以管理员要确保配置的用户名不能出现上述前缀格式。</p>
+<p>用户是由字符串表示，它们可以是普通的用户名，像 “alice”，或者是 邮件格式 “<a href="mailto:&#98;&#111;&#98;&#x40;&#101;&#x78;&#97;&#x6d;&#x70;&#x6c;&#x65;&#x2e;&#x63;&#x6f;&#109;">&#98;&#111;&#98;&#x40;&#101;&#x78;&#97;&#x6d;&#x70;&#x6c;&#x65;&#x2e;&#x63;&#x6f;&#109;</a>“，或者是数字ID。由 Kubernetes 管理员配置身份认证模块 需要的格式。RBAC 鉴权系统不对格式作任何要求，但是前缀 system: 是 Kubernetes 系统保留的， 所以管理员要确保配置的用户名不能出现上述前缀格式。</p>
 <p>用户组信息是 Kubernetes 现在提供的一种身份验证模块，与用户一样，对组的字符串没有格式要求， 只是不能使用保留的前缀 system: 。</p>
 <p>K8S中有两种用户(User)</p>
 <ul>
@@ -435,7 +475,7 @@
 <figure class="highlight n1ql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs n1ql">kubectl <span class="hljs-keyword">create</span> clusterrolebinding serviceaccounts-<span class="hljs-keyword">cluster</span>-admin \<br>  --clusterrole=<span class="hljs-keyword">cluster</span>-admin \<br>  --<span class="hljs-keyword">group</span>=<span class="hljs-keyword">system</span>:serviceaccounts<br></code></pre></td></tr></table></figure>
 
 <h2 id="绑定用户和组示例"><a href="#绑定用户和组示例" class="headerlink" title="绑定用户和组示例"></a>绑定用户和组示例</h2><p>下面的示例只是展示 RoleBinding 中 subjects 的部分。</p>
-<p>用户的名称为 “<a href="mailto:&#97;&#x6c;&#x69;&#99;&#x65;&#x40;&#x65;&#x78;&#97;&#x6d;&#112;&#x6c;&#101;&#x2e;&#x63;&#x6f;&#x6d;">&#97;&#x6c;&#x69;&#99;&#x65;&#x40;&#x65;&#x78;&#97;&#x6d;&#112;&#x6c;&#101;&#x2e;&#x63;&#x6f;&#x6d;</a>“:</p>
+<p>用户的名称为 “<a href="mailto:&#97;&#108;&#105;&#99;&#x65;&#x40;&#101;&#120;&#97;&#x6d;&#x70;&#108;&#x65;&#x2e;&#x63;&#x6f;&#109;">&#97;&#108;&#105;&#99;&#x65;&#x40;&#101;&#120;&#97;&#x6d;&#x70;&#108;&#x65;&#x2e;&#x63;&#x6f;&#109;</a>“:</p>
 <figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs crmsh">subjects:<br>- kind: <span class="hljs-keyword">User</span><br>  <span class="hljs-title">name</span>: <span class="hljs-string">&quot;alice@example.com&quot;</span><br>  apiGroup: rbac.authorization.k8s.io<br></code></pre></td></tr></table></figure>
 
 <p>组的名称为 “frontend-admins”:</p>
@@ -959,7 +999,7 @@
   <div class="license-box my-3">
     <div class="license-title">
       <div>Kubernetes之RBAC权限管理</div>
-      <div>http://example.com/2020/08/23/2020-08-23-RBAC-permission-management-of-Kubernetes/</div>
+      <div>https://www.niewx.cn/2020/08/23/2020-08-23-RBAC-permission-management-of-Kubernetes/</div>
     </div>
     <div class="license-meta">
       
@@ -1145,8 +1185,7 @@
     <div class="footer-inner">
   
     <div class="footer-content">
-       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>
-<div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> </div>
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> </br> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> </div>
     </div>
   
   

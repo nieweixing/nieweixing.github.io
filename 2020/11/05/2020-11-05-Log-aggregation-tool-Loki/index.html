@@ -19,34 +19,34 @@
     <meta name="description" content="本文章简要介绍了如何在腾讯云的TKE集群中搭建Loki日志采集工具。 Loki日志系统介绍Loki是受Prometheus启发的水平可扩展，高度可用的多租户日志聚合系统。它的设计具有很高的成本效益，并且易于操作。它不索引日志的内容，而是为每个日志流设置一组标签。 与其他日志聚合系统相比，Loki的特点  不对日志进行全文本索引。通过存储压缩的，非结构化的日志以及仅索引元数据，Loki更加易于操作且">
 <meta property="og:type" content="article">
 <meta property="og:title" content="TKE集群部署日志聚合工具Loki">
-<meta property="og:url" content="http://example.com/2020/11/05/2020-11-05-Log-aggregation-tool-Loki/index.html">
+<meta property="og:url" content="https://www.niewx.cn/2020/11/05/2020-11-05-Log-aggregation-tool-Loki/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="本文章简要介绍了如何在腾讯云的TKE集群中搭建Loki日志采集工具。 Loki日志系统介绍Loki是受Prometheus启发的水平可扩展，高度可用的多租户日志聚合系统。它的设计具有很高的成本效益，并且易于操作。它不索引日志的内容，而是为每个日志流设置一组标签。 与其他日志聚合系统相比，Loki的特点  不对日志进行全文本索引。通过存储压缩的，非结构化的日志以及仅索引元数据，Loki更加易于操作且">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/img/2020-11-05-Log-aggregation-tool-Loki/1.png">
-<meta property="og:image" content="http://example.com/img/2020-11-05-Log-aggregation-tool-Loki/2.png">
-<meta property="og:image" content="http://example.com/img/2020-11-05-Log-aggregation-tool-Loki/3.png">
-<meta property="og:image" content="http://example.com/img/2020-11-05-Log-aggregation-tool-Loki/4.png">
-<meta property="og:image" content="http://example.com/img/2020-11-05-Log-aggregation-tool-Loki/5.png">
-<meta property="og:image" content="http://example.com/img/2020-11-05-Log-aggregation-tool-Loki/6.png">
-<meta property="og:image" content="http://example.com/img/2020-11-05-Log-aggregation-tool-Loki/7.png">
-<meta property="og:image" content="http://example.com/img/2020-11-05-Log-aggregation-tool-Loki/8.png">
-<meta property="og:image" content="http://example.com/img/2020-11-05-Log-aggregation-tool-Loki/9.png">
-<meta property="og:image" content="http://example.com/img/2020-11-05-Log-aggregation-tool-Loki/10.png">
-<meta property="og:image" content="http://example.com/img/2020-11-05-Log-aggregation-tool-Loki/11.png">
-<meta property="og:image" content="http://example.com/img/2020-11-05-Log-aggregation-tool-Loki/12.png">
-<meta property="og:image" content="http://example.com/img/2020-11-05-Log-aggregation-tool-Loki/13.png">
-<meta property="og:image" content="http://example.com/img/2020-11-05-Log-aggregation-tool-Loki/14.png">
-<meta property="og:image" content="http://example.com/img/2020-11-05-Log-aggregation-tool-Loki/15.png">
-<meta property="og:image" content="http://example.com/img/2020-11-05-Log-aggregation-tool-Loki/16.png">
-<meta property="og:image" content="http://example.com/img/2020-11-05-Log-aggregation-tool-Loki/17.png">
-<meta property="og:image" content="http://example.com/img/2020-11-05-Log-aggregation-tool-Loki/18.png">
-<meta property="og:image" content="http://example.com/img/2020-11-05-Log-aggregation-tool-Loki/19.png">
-<meta property="og:image" content="http://example.com/img/2020-11-05-Log-aggregation-tool-Loki/20.png">
-<meta property="og:image" content="http://example.com/img/2020-11-05-Log-aggregation-tool-Loki/21.png">
-<meta property="og:image" content="http://example.com/img/2020-11-05-Log-aggregation-tool-Loki/22.png">
-<meta property="og:image" content="http://example.com/img/2020-11-05-Log-aggregation-tool-Loki/23.png">
-<meta property="og:image" content="http://example.com/img/2020-11-05-Log-aggregation-tool-Loki/24.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-11-05-Log-aggregation-tool-Loki/1.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-11-05-Log-aggregation-tool-Loki/2.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-11-05-Log-aggregation-tool-Loki/3.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-11-05-Log-aggregation-tool-Loki/4.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-11-05-Log-aggregation-tool-Loki/5.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-11-05-Log-aggregation-tool-Loki/6.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-11-05-Log-aggregation-tool-Loki/7.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-11-05-Log-aggregation-tool-Loki/8.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-11-05-Log-aggregation-tool-Loki/9.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-11-05-Log-aggregation-tool-Loki/10.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-11-05-Log-aggregation-tool-Loki/11.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-11-05-Log-aggregation-tool-Loki/12.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-11-05-Log-aggregation-tool-Loki/13.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-11-05-Log-aggregation-tool-Loki/14.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-11-05-Log-aggregation-tool-Loki/15.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-11-05-Log-aggregation-tool-Loki/16.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-11-05-Log-aggregation-tool-Loki/17.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-11-05-Log-aggregation-tool-Loki/18.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-11-05-Log-aggregation-tool-Loki/19.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-11-05-Log-aggregation-tool-Loki/20.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-11-05-Log-aggregation-tool-Loki/21.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-11-05-Log-aggregation-tool-Loki/22.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-11-05-Log-aggregation-tool-Loki/23.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-11-05-Log-aggregation-tool-Loki/24.png">
 <meta property="article:published_time" content="2020-11-05T06:10:00.000Z">
 <meta property="article:modified_time" content="2020-11-05T06:10:00.000Z">
 <meta property="article:author" content="VashonNie">
@@ -54,7 +54,7 @@
 <meta property="article:tag" content="TKE">
 <meta property="article:tag" content="Loki">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="http://example.com/img/2020-11-05-Log-aggregation-tool-Loki/1.png">
+<meta name="twitter:image" content="https://www.niewx.cn/img/2020-11-05-Log-aggregation-tool-Loki/1.png">
   
   
   <title>TKE集群部署日志聚合工具Loki - Hexo</title>
@@ -100,7 +100,7 @@
 
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
-    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":"www.niewx.cn","path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+    var CONFIG = {"hostname":"www.niewx.cn","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":"www.niewx.cn","path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
@@ -201,6 +201,46 @@
                 <i class="iconfont icon-link-fill"></i>
                 友链
               </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" target="_self" href="javascript:;" role="button"
+                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="iconfont icon-books"></i>
+                文档
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="https://www.niewx.cn/mybook/">
+                    
+                    运维笔记
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/column/87421">
+                    
+                    云+社区文档
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="https://www.niewx.cn/question/">
+                    
+                    运维问题集锦
+                  </a>
+                
+              </div>
             </li>
           
         
@@ -482,7 +522,7 @@
   <div class="license-box my-3">
     <div class="license-title">
       <div>TKE集群部署日志聚合工具Loki</div>
-      <div>http://example.com/2020/11/05/2020-11-05-Log-aggregation-tool-Loki/</div>
+      <div>https://www.niewx.cn/2020/11/05/2020-11-05-Log-aggregation-tool-Loki/</div>
     </div>
     <div class="license-meta">
       
@@ -668,8 +708,7 @@
     <div class="footer-inner">
   
     <div class="footer-content">
-       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>
-<div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> </div>
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> </br> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> </div>
     </div>
   
   

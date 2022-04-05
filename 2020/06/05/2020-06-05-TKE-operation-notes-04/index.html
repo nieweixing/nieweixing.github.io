@@ -19,50 +19,50 @@
     <meta name="description" content="本周讲述了在TKE上如何监控集群并发送告警，简单部署wordpress到集群中 TKE监控使用和查看良好的监控环境为腾讯云容器服务高可靠性、高可用性和高性能提供重要保证。您可以方便为不同资源收集不同维度的监控数据，能方便掌握资源的使用状况，轻松定位故障。 腾讯云容器服务提供集群、节点、工作负载、Pod、Container 5个层面的监控数据收集和展示功能。 收集监控数据有助于您建立容器集群性能的正">
 <meta property="og:type" content="article">
 <meta property="og:title" content="TKE操作笔记04">
-<meta property="og:url" content="http://example.com/2020/06/05/2020-06-05-TKE-operation-notes-04/index.html">
+<meta property="og:url" content="https://www.niewx.cn/2020/06/05/2020-06-05-TKE-operation-notes-04/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="本周讲述了在TKE上如何监控集群并发送告警，简单部署wordpress到集群中 TKE监控使用和查看良好的监控环境为腾讯云容器服务高可靠性、高可用性和高性能提供重要保证。您可以方便为不同资源收集不同维度的监控数据，能方便掌握资源的使用状况，轻松定位故障。 腾讯云容器服务提供集群、节点、工作负载、Pod、Container 5个层面的监控数据收集和展示功能。 收集监控数据有助于您建立容器集群性能的正">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/1.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/2.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/3.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/4.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/5.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/6.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/7.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/8.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/9.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/10.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/11.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/12.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/13.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/14.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/15.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/16.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/17.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/18.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/19.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/20.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/21.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/22.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/23.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/24.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/25.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/26.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/27.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/28.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/29.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/30.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/31.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/32.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/33.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/34.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/35.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/36.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/37.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/38.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/39.png">
-<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/40.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/1.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/2.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/3.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/4.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/5.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/6.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/7.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/8.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/9.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/10.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/11.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/12.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/13.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/14.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/15.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/16.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/17.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/18.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/19.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/20.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/21.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/22.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/23.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/24.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/25.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/26.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/27.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/28.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/29.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/30.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/31.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/32.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/33.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/34.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/35.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/36.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/37.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/38.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/39.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/40.png">
 <meta property="article:published_time" content="2020-06-05T06:10:00.000Z">
 <meta property="article:modified_time" content="2020-06-05T06:10:00.000Z">
 <meta property="article:author" content="VashonNie">
@@ -70,7 +70,7 @@
 <meta property="article:tag" content="Docker">
 <meta property="article:tag" content="TKE">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/1.png">
+<meta name="twitter:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/1.png">
   
   
   <title>TKE操作笔记04 - Hexo</title>
@@ -116,7 +116,7 @@
 
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
-    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":"www.niewx.cn","path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+    var CONFIG = {"hostname":"www.niewx.cn","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":"www.niewx.cn","path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
@@ -217,6 +217,46 @@
                 <i class="iconfont icon-link-fill"></i>
                 友链
               </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" target="_self" href="javascript:;" role="button"
+                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="iconfont icon-books"></i>
+                文档
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="https://www.niewx.cn/mybook/">
+                    
+                    运维笔记
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/column/87421">
+                    
+                    云+社区文档
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="https://www.niewx.cn/question/">
+                    
+                    运维问题集锦
+                  </a>
+                
+              </div>
             </li>
           
         
@@ -490,7 +530,7 @@
   <div class="license-box my-3">
     <div class="license-title">
       <div>TKE操作笔记04</div>
-      <div>http://example.com/2020/06/05/2020-06-05-TKE-operation-notes-04/</div>
+      <div>https://www.niewx.cn/2020/06/05/2020-06-05-TKE-operation-notes-04/</div>
     </div>
     <div class="license-meta">
       
@@ -676,8 +716,7 @@
     <div class="footer-inner">
   
     <div class="footer-content">
-       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>
-<div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> </div>
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> </br> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> </div>
     </div>
   
   

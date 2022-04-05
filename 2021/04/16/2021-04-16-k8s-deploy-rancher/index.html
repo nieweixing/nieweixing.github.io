@@ -19,31 +19,31 @@
     <meta name="description" content="Rancher简介Rancher是一个开源的企业级容器管理平台。通过Rancher，企业再也不必自己使用一系列的开源软件去从头搭建容器服务平台。Rancher提供了在生产环境中使用的管理Docker和Kubernetes的全栈化容器部署与管理平台。 Rancher由以下四个部分组成：  基础设施编排  Rancher可以使用任何公有云或者私有云的Linux主机资源。Linux主机可以是虚拟机，也可">
 <meta property="og:type" content="article">
 <meta property="og:title" content="k8s上部署rancher">
-<meta property="og:url" content="http://example.com/2021/04/16/2021-04-16-k8s-deploy-rancher/index.html">
+<meta property="og:url" content="https://www.niewx.cn/2021/04/16/2021-04-16-k8s-deploy-rancher/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="Rancher简介Rancher是一个开源的企业级容器管理平台。通过Rancher，企业再也不必自己使用一系列的开源软件去从头搭建容器服务平台。Rancher提供了在生产环境中使用的管理Docker和Kubernetes的全栈化容器部署与管理平台。 Rancher由以下四个部分组成：  基础设施编排  Rancher可以使用任何公有云或者私有云的Linux主机资源。Linux主机可以是虚拟机，也可">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/img/2021-04-16-k8s-deploy-rancher/1.png">
-<meta property="og:image" content="http://example.com/img/2021-04-16-k8s-deploy-rancher/2.png">
-<meta property="og:image" content="http://example.com/img/2021-04-16-k8s-deploy-rancher/3.png">
-<meta property="og:image" content="http://example.com/img/2021-04-16-k8s-deploy-rancher/4.png">
-<meta property="og:image" content="http://example.com/img/2021-04-16-k8s-deploy-rancher/5.png">
-<meta property="og:image" content="http://example.com/img/2021-04-16-k8s-deploy-rancher/6.png">
-<meta property="og:image" content="http://example.com/img/2021-04-16-k8s-deploy-rancher/8.png">
-<meta property="og:image" content="http://example.com/img/2021-04-16-k8s-deploy-rancher/9.png">
-<meta property="og:image" content="http://example.com/img/2021-04-16-k8s-deploy-rancher/7.png">
-<meta property="og:image" content="http://example.com/img/2021-04-16-k8s-deploy-rancher/10.png">
-<meta property="og:image" content="http://example.com/img/2021-04-16-k8s-deploy-rancher/11.png">
-<meta property="og:image" content="http://example.com/img/2021-04-16-k8s-deploy-rancher/12.png">
-<meta property="og:image" content="http://example.com/img/2021-04-16-k8s-deploy-rancher/13.png">
-<meta property="og:image" content="http://example.com/img/2021-04-16-k8s-deploy-rancher/14.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-04-16-k8s-deploy-rancher/1.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-04-16-k8s-deploy-rancher/2.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-04-16-k8s-deploy-rancher/3.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-04-16-k8s-deploy-rancher/4.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-04-16-k8s-deploy-rancher/5.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-04-16-k8s-deploy-rancher/6.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-04-16-k8s-deploy-rancher/8.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-04-16-k8s-deploy-rancher/9.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-04-16-k8s-deploy-rancher/7.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-04-16-k8s-deploy-rancher/10.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-04-16-k8s-deploy-rancher/11.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-04-16-k8s-deploy-rancher/12.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-04-16-k8s-deploy-rancher/13.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-04-16-k8s-deploy-rancher/14.png">
 <meta property="article:published_time" content="2021-04-16T06:10:00.000Z">
 <meta property="article:modified_time" content="2021-04-16T06:10:00.000Z">
 <meta property="article:author" content="VashonNie">
 <meta property="article:tag" content="Kubernetes">
 <meta property="article:tag" content="rancher">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="http://example.com/img/2021-04-16-k8s-deploy-rancher/1.png">
+<meta name="twitter:image" content="https://www.niewx.cn/img/2021-04-16-k8s-deploy-rancher/1.png">
   
   
   <title>k8s上部署rancher - Hexo</title>
@@ -89,7 +89,7 @@
 
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
-    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":"www.niewx.cn","path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+    var CONFIG = {"hostname":"www.niewx.cn","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":"www.niewx.cn","path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
@@ -190,6 +190,46 @@
                 <i class="iconfont icon-link-fill"></i>
                 友链
               </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" target="_self" href="javascript:;" role="button"
+                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="iconfont icon-books"></i>
+                文档
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="https://www.niewx.cn/mybook/">
+                    
+                    运维笔记
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/column/87421">
+                    
+                    云+社区文档
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="https://www.niewx.cn/question/">
+                    
+                    运维问题集锦
+                  </a>
+                
+              </div>
             </li>
           
         
@@ -418,7 +458,7 @@
   <div class="license-box my-3">
     <div class="license-title">
       <div>k8s上部署rancher</div>
-      <div>http://example.com/2021/04/16/2021-04-16-k8s-deploy-rancher/</div>
+      <div>https://www.niewx.cn/2021/04/16/2021-04-16-k8s-deploy-rancher/</div>
     </div>
     <div class="license-meta">
       
@@ -604,8 +644,7 @@
     <div class="footer-inner">
   
     <div class="footer-content">
-       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>
-<div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> </div>
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> </br> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> </div>
     </div>
   
   

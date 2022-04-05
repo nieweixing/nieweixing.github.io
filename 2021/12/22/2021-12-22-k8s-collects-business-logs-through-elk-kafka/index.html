@@ -19,20 +19,20 @@
     <meta name="description" content="本文介绍如何在k8s集群中通过filebeat采集日志，然后通过kafka将日志发给logstash，logstash存到elasticsearch，最后再通过kibana进行展示检索。 部署kafka部署kafka我们通过helm直接部署到k8s集群中，如果是使用的tke集群，直接将应用部署到tke集群中即可。 12helm repo add bitnami https:&#x2F;&#x2F;charts.bit">
 <meta property="og:type" content="article">
 <meta property="og:title" content="k8s通过elk+kafka采集业务日志">
-<meta property="og:url" content="http://example.com/2021/12/22/2021-12-22-k8s-collects-business-logs-through-elk-kafka/index.html">
+<meta property="og:url" content="https://www.niewx.cn/2021/12/22/2021-12-22-k8s-collects-business-logs-through-elk-kafka/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="本文介绍如何在k8s集群中通过filebeat采集日志，然后通过kafka将日志发给logstash，logstash存到elasticsearch，最后再通过kibana进行展示检索。 部署kafka部署kafka我们通过helm直接部署到k8s集群中，如果是使用的tke集群，直接将应用部署到tke集群中即可。 12helm repo add bitnami https:&#x2F;&#x2F;charts.bit">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/img/2021-12-22-k8s-collects-business-logs-through-elk-kafka/1.JPG">
-<meta property="og:image" content="http://example.com/img/2021-12-22-k8s-collects-business-logs-through-elk-kafka/2.JPG">
-<meta property="og:image" content="http://example.com/img/2021-12-22-k8s-collects-business-logs-through-elk-kafka/3.JPG">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-12-22-k8s-collects-business-logs-through-elk-kafka/1.JPG">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-12-22-k8s-collects-business-logs-through-elk-kafka/2.JPG">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-12-22-k8s-collects-business-logs-through-elk-kafka/3.JPG">
 <meta property="article:published_time" content="2021-12-22T09:00:52.000Z">
 <meta property="article:modified_time" content="2022-04-05T03:45:17.359Z">
 <meta property="article:author" content="VashonNie">
 <meta property="article:tag" content="elk">
 <meta property="article:tag" content="kafka">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="http://example.com/img/2021-12-22-k8s-collects-business-logs-through-elk-kafka/1.JPG">
+<meta name="twitter:image" content="https://www.niewx.cn/img/2021-12-22-k8s-collects-business-logs-through-elk-kafka/1.JPG">
   
   
   <title>k8s通过elk+kafka采集业务日志 - Hexo</title>
@@ -78,7 +78,7 @@
 
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
-    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":"www.niewx.cn","path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+    var CONFIG = {"hostname":"www.niewx.cn","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":"www.niewx.cn","path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
@@ -179,6 +179,46 @@
                 <i class="iconfont icon-link-fill"></i>
                 友链
               </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" target="_self" href="javascript:;" role="button"
+                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="iconfont icon-books"></i>
+                文档
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="https://www.niewx.cn/mybook/">
+                    
+                    运维笔记
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/column/87421">
+                    
+                    云+社区文档
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="https://www.niewx.cn/question/">
+                    
+                    运维问题集锦
+                  </a>
+                
+              </div>
             </li>
           
         
@@ -308,7 +348,7 @@
 
 <p>这里可以参考上面命令创建主题，还有一些其他常用的命令。</p>
 <h1 id="部署filebeat"><a href="#部署filebeat" class="headerlink" title="部署filebeat"></a>部署filebeat</h1><p>这里不是filebeat的方式有2种，一种是通过sidecar的方式采集单个业务的日志，还有一种是通过DaemonSet的方式采集所有的容器日志。</p>
-<h2 id="sidecar部署filebeat"><a href="#sidecar部署filebeat" class="headerlink" title="sidecar部署filebeat"></a>sidecar部署filebeat</h2><p>这里我们通过sidecar的方式部署，采集下nginx日志，具体部署可以参考文档<a target="_blank" rel="noopener" href="https://www.niewx.cn/mybook/k8s/userd-filebeat-as-sidecar-collect-log.html">https://www.niewx.cn/mybook/k8s/userd-filebeat-as-sidecar-collect-log.html</a></p>
+<h2 id="sidecar部署filebeat"><a href="#sidecar部署filebeat" class="headerlink" title="sidecar部署filebeat"></a>sidecar部署filebeat</h2><p>这里我们通过sidecar的方式部署，采集下nginx日志，具体部署可以参考文档<a href="https://www.niewx.cn/mybook/k8s/userd-filebeat-as-sidecar-collect-log.html">https://www.niewx.cn/mybook/k8s/userd-filebeat-as-sidecar-collect-log.html</a></p>
 <p>这里我们需要改动下filebeat的配置，文档中是投递到es，现在我们要投递到kafka。</p>
 <figure class="highlight nestedtext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><code class="hljs nestedtext"><span class="hljs-attribute">apiVersion</span><span class="hljs-punctuation">:</span> <span class="hljs-string">v1</span><br><span class="hljs-attribute">data</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-attribute">filebeat.yml</span><span class="hljs-punctuation">:</span> <span class="hljs-string">|-</span><br>    <span class="hljs-attribute">filebeat.inputs</span><span class="hljs-punctuation">:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">type: log</span><br>        <span class="hljs-attribute">paths</span><span class="hljs-punctuation">:</span><br>          <span class="hljs-bullet">-</span> <span class="hljs-string">/var/log/nginx/access.log</span><br>        <span class="hljs-comment"># tags: [&quot;access&quot;]</span><br>        <span class="hljs-attribute">fields</span><span class="hljs-punctuation">:</span><br>          <span class="hljs-attribute">app</span><span class="hljs-punctuation">:</span> <span class="hljs-string">www</span><br>          <span class="hljs-attribute">type</span><span class="hljs-punctuation">:</span> <span class="hljs-string">nginx-access</span><br>        <span class="hljs-attribute">fields_under_root</span><span class="hljs-punctuation">:</span> <span class="hljs-string">true</span><br><br>    <span class="hljs-attribute">setup.ilm.enabled</span><span class="hljs-punctuation">:</span> <span class="hljs-string">false</span><br>    <span class="hljs-attribute">setup.template.name</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;nginx-access&quot;</span><br>    <span class="hljs-attribute">setup.template.pattern</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;nginx-access-*&quot;</span><br><br>    <span class="hljs-attribute">output</span><span class="hljs-punctuation">:</span><br>      <span class="hljs-attribute">kafka</span><span class="hljs-punctuation">:</span><br>        <span class="hljs-attribute">enabled</span><span class="hljs-punctuation">:</span> <span class="hljs-string">true</span><br>        <span class="hljs-attribute">hosts</span><span class="hljs-punctuation">:</span> <span class="hljs-string">[&quot;10.0.0.187:9092&quot;]</span><br>        <span class="hljs-attribute">topic</span><span class="hljs-punctuation">:</span> <span class="hljs-string">log-nginx</span><br>        <span class="hljs-attribute">max_message_bytes</span><span class="hljs-punctuation">:</span> <span class="hljs-string">5242880</span><br>        <span class="hljs-attribute">partition.round_robin</span><span class="hljs-punctuation">:</span><br>          <span class="hljs-attribute">reachable_only</span><span class="hljs-punctuation">:</span> <span class="hljs-string">true</span><br>        <span class="hljs-attribute">keep-alive</span><span class="hljs-punctuation">:</span> <span class="hljs-string">120</span><br>        <span class="hljs-attribute">required_acks</span><span class="hljs-punctuation">:</span> <span class="hljs-string">1</span><br><br>    <span class="hljs-comment">#  output.elasticsearch:</span><br>    <span class="hljs-comment">#  hosts: [&#x27;elasticsearch-master.log:9200&#x27;]</span><br>    <span class="hljs-comment">#  index: &quot;nginx-access-%&#123;+yyyy.MM.dd&#125;&quot;</span><br><span class="hljs-attribute">kind</span><span class="hljs-punctuation">:</span> <span class="hljs-string">ConfigMap</span><br><span class="hljs-attribute">metadata</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-attribute">name</span><span class="hljs-punctuation">:</span> <span class="hljs-string">filebeat-nginx-config</span><br>  <span class="hljs-attribute">namespace</span><span class="hljs-punctuation">:</span> <span class="hljs-string">log</span><br></code></pre></td></tr></table></figure>
 
@@ -389,7 +429,7 @@
   <div class="license-box my-3">
     <div class="license-title">
       <div>k8s通过elk+kafka采集业务日志</div>
-      <div>http://example.com/2021/12/22/2021-12-22-k8s-collects-business-logs-through-elk-kafka/</div>
+      <div>https://www.niewx.cn/2021/12/22/2021-12-22-k8s-collects-business-logs-through-elk-kafka/</div>
     </div>
     <div class="license-meta">
       
@@ -575,8 +615,7 @@
     <div class="footer-inner">
   
     <div class="footer-content">
-       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>
-<div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> </div>
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> </br> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> </div>
     </div>
   
   

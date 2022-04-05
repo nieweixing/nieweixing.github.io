@@ -19,7 +19,7 @@
     <meta name="description" content="etcd是CoreOS团队于2013年6月发起的开源项目，它的目标是构建一个高可用的分布式键值(key-value)数据库。etcd内部采用raft协议作为一致性算法，etcd基于Go语言实现。 etcd作为服务发现系统，有以下的特点：  简单：安装配置简单，而且提供了HTTP API进行交互，使用也很简单 安全：支持SSL证书验证 快速：根据官方提供的benchmark数据，单实例支持每秒2k+">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Kubernetes之etcd数据库">
-<meta property="og:url" content="http://example.com/2020/11/19/2020-11-19-Etcd-database-of-Kubernetes/index.html">
+<meta property="og:url" content="https://www.niewx.cn/2020/11/19/2020-11-19-Etcd-database-of-Kubernetes/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="etcd是CoreOS团队于2013年6月发起的开源项目，它的目标是构建一个高可用的分布式键值(key-value)数据库。etcd内部采用raft协议作为一致性算法，etcd基于Go语言实现。 etcd作为服务发现系统，有以下的特点：  简单：安装配置简单，而且提供了HTTP API进行交互，使用也很简单 安全：支持SSL证书验证 快速：根据官方提供的benchmark数据，单实例支持每秒2k+">
 <meta property="og:locale" content="zh_CN">
@@ -74,7 +74,7 @@
 
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
-    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":"www.niewx.cn","path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+    var CONFIG = {"hostname":"www.niewx.cn","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":"www.niewx.cn","path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
@@ -175,6 +175,46 @@
                 <i class="iconfont icon-link-fill"></i>
                 友链
               </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" target="_self" href="javascript:;" role="button"
+                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="iconfont icon-books"></i>
+                文档
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="https://www.niewx.cn/mybook/">
+                    
+                    运维笔记
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/column/87421">
+                    
+                    云+社区文档
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="https://www.niewx.cn/question/">
+                    
+                    运维问题集锦
+                  </a>
+                
+              </div>
             </li>
           
         
@@ -325,10 +365,10 @@
 <p>然后docker-compose运行etcd的yaml文件，并且插入数据进行检查验证</p>
 <figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs awk">[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">13</span>-centos docker-compose]<span class="hljs-comment"># docker-compose up -d</span><br><span class="hljs-regexp">//</span>查看集群节点状态<br>[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">13</span>-centos docker-compose]<span class="hljs-comment"># etcdctl --endpoints 127.0.0.1:32771 member list</span><br>ade526d28b1f92f7, started, etcd1, http:<span class="hljs-regexp">//</span>etcd1:<span class="hljs-number">2380</span>, http:<span class="hljs-regexp">//</span><span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span>:<span class="hljs-number">2379</span>, false<br>bd388e7810915853, started, etcd3, http:<span class="hljs-regexp">//</span>etcd3:<span class="hljs-number">2380</span>, http:<span class="hljs-regexp">//</span><span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span>:<span class="hljs-number">2379</span>, false<br>d282ac2ce600c1ce, started, etcd2, http:<span class="hljs-regexp">//</span>etcd2:<span class="hljs-number">2380</span>, http:<span class="hljs-regexp">//</span><span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span>:<span class="hljs-number">2379</span>, false<br><span class="hljs-regexp">//</span>给etcd1节点插入数据<br>[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">13</span>-centos docker-compose]<span class="hljs-comment"># curl -L http://127.0.0.1:32771/v2/keys/etcd -XPUT -d value=&quot;Hello etcd1&quot;</span><br>&#123;<span class="hljs-string">&quot;action&quot;</span>:<span class="hljs-string">&quot;set&quot;</span>,<span class="hljs-string">&quot;node&quot;</span>:&#123;<span class="hljs-string">&quot;key&quot;</span>:<span class="hljs-string">&quot;/etcd&quot;</span>,<span class="hljs-string">&quot;value&quot;</span>:<span class="hljs-string">&quot;Hello etcd1&quot;</span>,<span class="hljs-string">&quot;modifiedIndex&quot;</span>:<span class="hljs-number">8</span>,<span class="hljs-string">&quot;createdIndex&quot;</span>:<span class="hljs-number">8</span>&#125;&#125;<br><span class="hljs-regexp">//</span>检查在etcd2中是否能够查到<br>[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">13</span>-centos docker-compose]<span class="hljs-comment"># curl -L http://127.0.0.1:32773/v2/keys/etcd</span><br>&#123;<span class="hljs-string">&quot;action&quot;</span>:<span class="hljs-string">&quot;get&quot;</span>,<span class="hljs-string">&quot;node&quot;</span>:&#123;<span class="hljs-string">&quot;key&quot;</span>:<span class="hljs-string">&quot;/etcd&quot;</span>,<span class="hljs-string">&quot;value&quot;</span>:<span class="hljs-string">&quot;Hello etcd1&quot;</span>,<span class="hljs-string">&quot;modifiedIndex&quot;</span>:<span class="hljs-number">8</span>,<span class="hljs-string">&quot;createdIndex&quot;</span>:<span class="hljs-number">8</span>&#125;&#125;<br><span class="hljs-regexp">//</span>检查在etcd3中是否能够查到<br>[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">13</span>-centos docker-compose]<span class="hljs-comment"># curl -L http://127.0.0.1:32769/v2/keys/etcd</span><br>&#123;<span class="hljs-string">&quot;action&quot;</span>:<span class="hljs-string">&quot;get&quot;</span>,<span class="hljs-string">&quot;node&quot;</span>:&#123;<span class="hljs-string">&quot;key&quot;</span>:<span class="hljs-string">&quot;/etcd&quot;</span>,<span class="hljs-string">&quot;value&quot;</span>:<span class="hljs-string">&quot;Hello etcd1&quot;</span>,<span class="hljs-string">&quot;modifiedIndex&quot;</span>:<span class="hljs-number">8</span>,<span class="hljs-string">&quot;createdIndex&quot;</span>:<span class="hljs-number">8</span>&#125;&#125;<br></code></pre></td></tr></table></figure>
 
-<h1 id="二进制部署etcd集群"><a href="#二进制部署etcd集群" class="headerlink" title="二进制部署etcd集群"></a>二进制部署etcd集群</h1><p>这个可以参考之前的文章 二进制搭建k8s集群  <a target="_blank" rel="noopener" href="https://www.niewx.cn/kubernetes/docker/2020/09/20/%E4%BA%8C%E8%BF%9B%E5%88%B6%E9%83%A8%E7%BD%B2k8s/">https://www.niewx.cn/kubernetes/docker/2020/09/20/%E4%BA%8C%E8%BF%9B%E5%88%B6%E9%83%A8%E7%BD%B2k8s/</a></p>
+<h1 id="二进制部署etcd集群"><a href="#二进制部署etcd集群" class="headerlink" title="二进制部署etcd集群"></a>二进制部署etcd集群</h1><p>这个可以参考之前的文章 二进制搭建k8s集群  <a href="https://www.niewx.cn/kubernetes/docker/2020/09/20/%E4%BA%8C%E8%BF%9B%E5%88%B6%E9%83%A8%E7%BD%B2k8s/">https://www.niewx.cn/kubernetes/docker/2020/09/20/%E4%BA%8C%E8%BF%9B%E5%88%B6%E9%83%A8%E7%BD%B2k8s/</a></p>
 <p>其中部署etcd集群章节有说明如何搭建</p>
-<h1 id="kubeadm集群如何使用etcd集群"><a href="#kubeadm集群如何使用etcd集群" class="headerlink" title="kubeadm集群如何使用etcd集群"></a>kubeadm集群如何使用etcd集群</h1><p>一般我们如果通过kubeadm创建的集群都是单节点的etcd，那么如何配置一个高可用的etcd集群给kubeadm的集群。首先你需要通过kubeadm搭建一个集群，你可以参考文章进行部署<a target="_blank" rel="noopener" href="https://www.niewx.cn/kubernetes/docker/2020/09/15/kubeadm%E9%83%A8%E7%BD%B2k8s/">https://www.niewx.cn/kubernetes/docker/2020/09/15/kubeadm%E9%83%A8%E7%BD%B2k8s/</a></p>
-<p>也可以通过<a target="_blank" rel="noopener" href="https://www.niewx.cn/kubernetes/docker/2020/05/10/k8s%E4%B8%80%E9%94%AE%E9%83%A8%E7%BD%B2%E8%84%9A%E6%9C%AC/">https://www.niewx.cn/kubernetes/docker/2020/05/10/k8s%E4%B8%80%E9%94%AE%E9%83%A8%E7%BD%B2%E8%84%9A%E6%9C%AC/</a> 一键部署包进行安装，这里就不细说了</p>
+<h1 id="kubeadm集群如何使用etcd集群"><a href="#kubeadm集群如何使用etcd集群" class="headerlink" title="kubeadm集群如何使用etcd集群"></a>kubeadm集群如何使用etcd集群</h1><p>一般我们如果通过kubeadm创建的集群都是单节点的etcd，那么如何配置一个高可用的etcd集群给kubeadm的集群。首先你需要通过kubeadm搭建一个集群，你可以参考文章进行部署<a href="https://www.niewx.cn/kubernetes/docker/2020/09/15/kubeadm%E9%83%A8%E7%BD%B2k8s/">https://www.niewx.cn/kubernetes/docker/2020/09/15/kubeadm%E9%83%A8%E7%BD%B2k8s/</a></p>
+<p>也可以通过<a href="https://www.niewx.cn/kubernetes/docker/2020/05/10/k8s%E4%B8%80%E9%94%AE%E9%83%A8%E7%BD%B2%E8%84%9A%E6%9C%AC/">https://www.niewx.cn/kubernetes/docker/2020/05/10/k8s%E4%B8%80%E9%94%AE%E9%83%A8%E7%BD%B2%E8%84%9A%E6%9C%AC/</a> 一键部署包进行安装，这里就不细说了</p>
 <p>集群部署好之后，我们下面来部署etcd集群，并接入对应的集群中，大致步骤如下</p>
 <ul>
 <li>新建一个 2 节点的 etcd cluster</li>
@@ -455,7 +495,7 @@
   <div class="license-box my-3">
     <div class="license-title">
       <div>Kubernetes之etcd数据库</div>
-      <div>http://example.com/2020/11/19/2020-11-19-Etcd-database-of-Kubernetes/</div>
+      <div>https://www.niewx.cn/2020/11/19/2020-11-19-Etcd-database-of-Kubernetes/</div>
     </div>
     <div class="license-meta">
       
@@ -641,8 +681,7 @@
     <div class="footer-inner">
   
     <div class="footer-content">
-       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>
-<div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> </div>
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> </br> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> </div>
     </div>
   
   

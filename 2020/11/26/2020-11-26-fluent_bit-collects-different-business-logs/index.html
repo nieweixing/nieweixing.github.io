@@ -19,15 +19,15 @@
     <meta name="description" content="我们将服务部署在k8s中，通常需要收集业务日志进行分析，那么现在常用的日志采集是怎么做的呢，一般来说是搭建EFK系统来采集日志，今天我们来说说如何采集k8s中的不同业务日志然后投递到es不同的索引，然后通过kibana进行分析和查看。 对于EFK的搭建，我们这里不做具体的讲解，大家可参考 https:&#x2F;&#x2F;www.niewx.cn&#x2F;2020&#x2F;06&#x2F;10&#x2F;Build-EFK-log-collectio">
 <meta property="og:type" content="article">
 <meta property="og:title" content="fluent-bit收集不同业务日志">
-<meta property="og:url" content="http://example.com/2020/11/26/2020-11-26-fluent_bit-collects-different-business-logs/index.html">
+<meta property="og:url" content="https://www.niewx.cn/2020/11/26/2020-11-26-fluent_bit-collects-different-business-logs/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="我们将服务部署在k8s中，通常需要收集业务日志进行分析，那么现在常用的日志采集是怎么做的呢，一般来说是搭建EFK系统来采集日志，今天我们来说说如何采集k8s中的不同业务日志然后投递到es不同的索引，然后通过kibana进行分析和查看。 对于EFK的搭建，我们这里不做具体的讲解，大家可参考 https:&#x2F;&#x2F;www.niewx.cn&#x2F;2020&#x2F;06&#x2F;10&#x2F;Build-EFK-log-collectio">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/img/2020-11-26-fluent_bit-collects-different-business-logs/1.png">
-<meta property="og:image" content="http://example.com/img/2020-11-26-fluent_bit-collects-different-business-logs/2.png">
-<meta property="og:image" content="http://example.com/img/2020-11-26-fluent_bit-collects-different-business-logs/3.png">
-<meta property="og:image" content="http://example.com/img/2020-11-26-fluent_bit-collects-different-business-logs/4.png">
-<meta property="og:image" content="http://example.com/img/2020-11-26-fluent_bit-collects-different-business-logs/5.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-11-26-fluent_bit-collects-different-business-logs/1.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-11-26-fluent_bit-collects-different-business-logs/2.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-11-26-fluent_bit-collects-different-business-logs/3.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-11-26-fluent_bit-collects-different-business-logs/4.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-11-26-fluent_bit-collects-different-business-logs/5.png">
 <meta property="article:published_time" content="2020-11-26T06:10:00.000Z">
 <meta property="article:modified_time" content="2020-11-26T06:10:00.000Z">
 <meta property="article:author" content="VashonNie">
@@ -35,7 +35,7 @@
 <meta property="article:tag" content="EFK">
 <meta property="article:tag" content="Fluent">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="http://example.com/img/2020-11-26-fluent_bit-collects-different-business-logs/1.png">
+<meta name="twitter:image" content="https://www.niewx.cn/img/2020-11-26-fluent_bit-collects-different-business-logs/1.png">
   
   
   <title>fluent-bit收集不同业务日志 - Hexo</title>
@@ -81,7 +81,7 @@
 
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
-    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":"www.niewx.cn","path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+    var CONFIG = {"hostname":"www.niewx.cn","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":"www.niewx.cn","path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
@@ -182,6 +182,46 @@
                 <i class="iconfont icon-link-fill"></i>
                 友链
               </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" target="_self" href="javascript:;" role="button"
+                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="iconfont icon-books"></i>
+                文档
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="https://www.niewx.cn/mybook/">
+                    
+                    运维笔记
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/column/87421">
+                    
+                    云+社区文档
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="https://www.niewx.cn/question/">
+                    
+                    运维问题集锦
+                  </a>
+                
+              </div>
             </li>
           
         
@@ -303,7 +343,7 @@
             <div class="markdown-body">
               
               <p>我们将服务部署在k8s中，通常需要收集业务日志进行分析，那么现在常用的日志采集是怎么做的呢，一般来说是搭建EFK系统来采集日志，今天我们来说说如何采集k8s中的不同业务日志然后投递到es不同的索引，然后通过kibana进行分析和查看。</p>
-<p>对于EFK的搭建，我们这里不做具体的讲解，大家可参考 <a target="_blank" rel="noopener" href="https://www.niewx.cn/2020/06/10/Build-EFK-log-collection-system-on-TKE/">https://www.niewx.cn/2020/06/10/Build-EFK-log-collection-system-on-TKE/</a> , 今天我们主要来讲一下如何采集不同业务日志进行分析。</p>
+<p>对于EFK的搭建，我们这里不做具体的讲解，大家可参考 <a href="https://www.niewx.cn/2020/06/10/Build-EFK-log-collection-system-on-TKE/">https://www.niewx.cn/2020/06/10/Build-EFK-log-collection-system-on-TKE/</a> , 今天我们主要来讲一下如何采集不同业务日志进行分析。</p>
 <p>这里我们一共采集3类日志，分别是nginx日志、golang的日志、以及k8s的系统日志，一般我们采集的业务日志都是将业务日志挂载到节点，然后fluent-bit去采集节点上的日志文件，输出到es，通过kibana展示和查询。</p>
 <h1 id="fluent-bit的部署"><a href="#fluent-bit的部署" class="headerlink" title="fluent-bit的部署"></a>fluent-bit的部署</h1><p>我们这里简单说下fluent-bit的部署,我们通过helm部署。</p>
 <figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs arduino">$ helm install --name my-release stable/fluent-bit<br></code></pre></td></tr></table></figure>
@@ -415,7 +455,7 @@
   <div class="license-box my-3">
     <div class="license-title">
       <div>fluent-bit收集不同业务日志</div>
-      <div>http://example.com/2020/11/26/2020-11-26-fluent_bit-collects-different-business-logs/</div>
+      <div>https://www.niewx.cn/2020/11/26/2020-11-26-fluent_bit-collects-different-business-logs/</div>
     </div>
     <div class="license-meta">
       
@@ -601,8 +641,7 @@
     <div class="footer-inner">
   
     <div class="footer-content">
-       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>
-<div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> </div>
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> </br> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> </div>
     </div>
   
   
