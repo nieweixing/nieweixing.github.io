@@ -3,7 +3,7 @@
 hexo clean && hexo generate
 cd ..
 cd nieweixing.github.io
-# git pull
+git pull
 cd ..
 cp -fr ./public/* ./nieweixing.github.io/
 cd nieweixing.github.io

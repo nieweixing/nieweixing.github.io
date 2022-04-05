@@ -13,7 +13,7 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   
   <meta name="theme-color" content="#2f4154">
-  <meta name="author" content="John Doe">
+  <meta name="author" content="VashonNie">
   <meta name="keywords" content="">
   
     <meta name="description" content="本文将介绍如何在k8s上搭建一个主从的mysql集群，该集群满足如下要求  搭建一个主从复制（Master-Slave）的MySQL集群 从节点可以水平扩展 所有的写操作只能在主节点上执行 读操作可以在主从节点上执行 从节点能同步主节点的数据  创建主从的configmap123456789101112131415161718apiVersion: v1kind: ConfigMapmetadat">
@@ -25,7 +25,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2022-03-21T01:28:48.000Z">
 <meta property="article:modified_time" content="2022-03-21T03:09:58.290Z">
-<meta property="article:author" content="John Doe">
+<meta property="article:author" content="VashonNie">
 <meta property="article:tag" content="Kubernetes">
 <meta property="article:tag" content="mysql">
 <meta name="twitter:card" content="summary_large_image">
@@ -68,7 +68,7 @@
 
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
-    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":"www.niewx.cn","path":"/","ignore_local":false}},"search_path":"/local-search.xml"};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":"www.niewx.cn","path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
@@ -210,7 +210,7 @@
     
       <span class="post-meta mr-2">
         <i class="iconfont icon-author" aria-hidden="true"></i>
-        John Doe
+        VashonNie
       </span>
     
     
@@ -369,7 +369,7 @@
       
         <div class="license-meta-item">
           <div>作者</div>
-          <div>John Doe</div>
+          <div>VashonNie</div>
         </div>
       
       
@@ -427,6 +427,34 @@
             </div>
 
             
+  <article id="comments" lazyload>
+    
+  <div id="valine"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#valine', function() {
+      Fluid.utils.createScript('https://lib.baomitu.com/valine/1.4.16/Valine.min.js', function() {
+        var options = Object.assign(
+          {"appId":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","appKey":"TuwIbmst7Q1N12V1EgEfVgDm","path":"window.location.pathname","placeholder":null,"avatar":"retro","meta":["nick","mail","link"],"requiredFields":[],"pageSize":10,"lang":"zh-CN","highlight":false,"recordIP":false,"serverURLs":"","emojiCDN":null,"emojiMaps":null,"enableQQ":false},
+          {
+            el: "#valine",
+            path: window.location.pathname
+          }
+        )
+        new Valine(options);
+        Fluid.utils.waitElementVisible('#valine .vcontent', () => {
+          var imgSelector = '#valine .vcontent img:not(.vemoji)';
+          Fluid.plugins.imageCaption(imgSelector);
+          Fluid.plugins.fancyBox(imgSelector);
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
           </article>
         </div>
       </div>

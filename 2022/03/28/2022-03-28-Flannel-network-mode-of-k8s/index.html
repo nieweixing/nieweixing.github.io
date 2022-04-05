@@ -13,7 +13,7 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   
   <meta name="theme-color" content="#2f4154">
-  <meta name="author" content="John Doe">
+  <meta name="author" content="VashonNie">
   <meta name="keywords" content="">
   
     <meta name="description" content="Flannel是为Kubernetes设计的一种简单易用的容器网络解决方案，将所有的Pod都组织在同一个子网的虚拟大二层网络中。Flannel支持的后端转发方式有许多种，本文将介绍其中两种，VXLAN以及host-gw。 什么是vxlanVXLAN（Virtual eXtensible Local Area Network，虚拟扩展局域网），是由IETF定义的NVO3（Network Virtua">
@@ -29,7 +29,7 @@
 <meta property="og:image" content="http://example.com/img/2022-03-28-Flannel-network-mode-of-k8s/4.png">
 <meta property="article:published_time" content="2022-03-28T07:19:52.000Z">
 <meta property="article:modified_time" content="2022-04-05T03:46:37.661Z">
-<meta property="article:author" content="John Doe">
+<meta property="article:author" content="VashonNie">
 <meta property="article:tag" content="Kubernetes">
 <meta property="article:tag" content="flannel">
 <meta name="twitter:card" content="summary_large_image">
@@ -73,7 +73,7 @@
 
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
-    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":"www.niewx.cn","path":"/","ignore_local":false}},"search_path":"/local-search.xml"};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":"www.niewx.cn","path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
@@ -215,7 +215,7 @@
     
       <span class="post-meta mr-2">
         <i class="iconfont icon-author" aria-hidden="true"></i>
-        John Doe
+        VashonNie
       </span>
     
     
@@ -390,7 +390,7 @@
       
         <div class="license-meta-item">
           <div>作者</div>
-          <div>John Doe</div>
+          <div>VashonNie</div>
         </div>
       
       
@@ -448,6 +448,34 @@
             </div>
 
             
+  <article id="comments" lazyload>
+    
+  <div id="valine"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#valine', function() {
+      Fluid.utils.createScript('https://lib.baomitu.com/valine/1.4.16/Valine.min.js', function() {
+        var options = Object.assign(
+          {"appId":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","appKey":"TuwIbmst7Q1N12V1EgEfVgDm","path":"window.location.pathname","placeholder":null,"avatar":"retro","meta":["nick","mail","link"],"requiredFields":[],"pageSize":10,"lang":"zh-CN","highlight":false,"recordIP":false,"serverURLs":"","emojiCDN":null,"emojiMaps":null,"enableQQ":false},
+          {
+            el: "#valine",
+            path: window.location.pathname
+          }
+        )
+        new Valine(options);
+        Fluid.utils.waitElementVisible('#valine .vcontent', () => {
+          var imgSelector = '#valine .vcontent img:not(.vemoji)';
+          Fluid.plugins.imageCaption(imgSelector);
+          Fluid.plugins.fancyBox(imgSelector);
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
           </article>
         </div>
       </div>
