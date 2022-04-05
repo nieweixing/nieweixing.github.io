@@ -1,0 +1,800 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="VashonNie">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="本章我们来讲讲如何通过istio来给业务pod进行安全的配置。istio的安全配置对于业务是透明的，istio的安全架构如下，主要是在istiod里进行认证和授权。   首先我们给demo下的httpbin这个服务配置一个安全策略，这里默认访问策略是拒绝所有访问 1234567891011kubectl apply -f - &lt;&lt;EOFapiVersion: security.isti">
+<meta property="og:type" content="article">
+<meta property="og:title" content="istio入门系列之配置安全策略">
+<meta property="og:url" content="http://example.com/2020/12/14/2020-12-14-Configure-security-policy-of-istio-entry-series/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="本章我们来讲讲如何通过istio来给业务pod进行安全的配置。istio的安全配置对于业务是透明的，istio的安全架构如下，主要是在istiod里进行认证和授权。   首先我们给demo下的httpbin这个服务配置一个安全策略，这里默认访问策略是拒绝所有访问 1234567891011kubectl apply -f - &lt;&lt;EOFapiVersion: security.isti">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/2020-12-14-Configure-security-policy-of-istio-entry-series/1.png">
+<meta property="article:published_time" content="2020-12-14T06:10:00.000Z">
+<meta property="article:modified_time" content="2020-12-14T06:10:00.000Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="Kubernetes">
+<meta property="article:tag" content="Istio">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://example.com/img/2020-12-14-Configure-security-policy-of-istio-entry-series/1.png">
+  
+  
+  <title>istio入门系列之配置安全策略 - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":"www.niewx.cn","path":"/","ignore_local":false}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>聂伟星</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="istio入门系列之配置安全策略"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-author" aria-hidden="true"></i>
+        VashonNie
+      </span>
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2020-12-14 14:10" pubdate>
+          2020年12月14日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          7.6k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          64 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">istio入门系列之配置安全策略</h1>
+            
+            <div class="markdown-body">
+              
+              <p>本章我们来讲讲如何通过istio来给业务pod进行安全的配置。istio的安全配置对于业务是透明的，istio的安全架构如下，主要是在istiod里进行认证和授权。</p>
+<p><img src="/img/2020-12-14-Configure-security-policy-of-istio-entry-series/1.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>首先我们给demo下的httpbin这个服务配置一个安全策略，这里默认访问策略是拒绝所有访问</p>
+<figure class="highlight nestedtext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs nestedtext"><span class="hljs-attribute">kubectl apply -f - &lt;&lt;EOF</span><br><span class="hljs-attribute">apiVersion</span><span class="hljs-punctuation">:</span> <span class="hljs-string">security.istio.io/v1beta1</span><br><span class="hljs-attribute">kind</span><span class="hljs-punctuation">:</span> <span class="hljs-string">AuthorizationPolicy</span><br><span class="hljs-attribute">metadata</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-attribute">name</span><span class="hljs-punctuation">:</span> <span class="hljs-string">httpbin</span><br>  <span class="hljs-attribute">namespace</span><span class="hljs-punctuation">:</span> <span class="hljs-string">demo</span><br><span class="hljs-attribute">spec</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-attribute">selector</span><span class="hljs-punctuation">:</span><br>    <span class="hljs-attribute">matchLabels</span><span class="hljs-punctuation">:</span><br>      <span class="hljs-attribute">app</span><span class="hljs-punctuation">:</span> <span class="hljs-string">httpbin</span><br>EOF<br></code></pre></td></tr></table></figure>
+
+<p>下面我们通过sleep服务来测试下是否可以访问到httpbin</p>
+<figure class="highlight llvm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs llvm">[root<span class="hljs-title">@VM-0-13-centos</span> istio<span class="hljs-number">-1.5</span>.<span class="hljs-number">1</span>]# kubectl get pod -n demo<br>NAME                          READY   STATUS    RESTARTS   AGE<br>httpbin<span class="hljs-number">-5</span>f<span class="hljs-number">48</span>f<span class="hljs-number">6</span><span class="hljs-keyword">c</span><span class="hljs-number">76</span>b-q<span class="hljs-number">5</span>rvv      <span class="hljs-number">2</span>/<span class="hljs-number">2</span>     Running   <span class="hljs-number">0</span>          <span class="hljs-number">6</span>d<span class="hljs-number">2</span>h<br>httpbin-v<span class="hljs-number">2</span><span class="hljs-number">-5</span>bd<span class="hljs-number">46</span>f<span class="hljs-number">68</span>f<span class="hljs-number">9</span>-fjp<span class="hljs-number">84</span>   <span class="hljs-number">2</span>/<span class="hljs-number">2</span>     Running   <span class="hljs-number">0</span>          <span class="hljs-number">47</span>h<br>sleep<span class="hljs-number">-5</span>b<span class="hljs-number">7</span>bf<span class="hljs-number">56</span><span class="hljs-keyword">c</span><span class="hljs-number">54</span>-bhsk<span class="hljs-number">8</span>        <span class="hljs-number">2</span>/<span class="hljs-number">2</span>     Running   <span class="hljs-number">0</span>          <span class="hljs-number">6</span>d<span class="hljs-number">2</span>h<br>[root<span class="hljs-title">@VM-0-13-centos</span> istio<span class="hljs-number">-1.5</span>.<span class="hljs-number">1</span>]# kubectl exec -it sleep<span class="hljs-number">-5</span>b<span class="hljs-number">7</span>bf<span class="hljs-number">56</span><span class="hljs-keyword">c</span><span class="hljs-number">54</span>-bhsk<span class="hljs-number">8</span> -n demo -<span class="hljs-keyword">c</span> sleep -- curl http://httpbin.demo:<span class="hljs-number">8000</span>/get<br>RBAC: access denied[root<span class="hljs-title">@VM-0-13-centos</span> istio<span class="hljs-number">-1.5</span>.<span class="hljs-number">1</span>]# kubectl exec -it sleep<span class="hljs-number">-5</span>b<span class="hljs-number">7</span>bf<span class="hljs-number">56</span><span class="hljs-keyword">c</span><span class="hljs-number">54</span>-bhsk<span class="hljs-number">8</span> -n demo -<span class="hljs-keyword">c</span> sleep -- curl http://httpbin-v<span class="hljs-number">2</span>.demo:<span class="hljs-number">8000</span>/get<br>&#123;<br>  <span class="hljs-string">&quot;args&quot;</span>: &#123;&#125;<span class="hljs-punctuation">,</span> <br>  <span class="hljs-string">&quot;headers&quot;</span>: &#123;<br>    <span class="hljs-string">&quot;Accept&quot;</span>: <span class="hljs-string">&quot;*/*&quot;</span><span class="hljs-punctuation">,</span> <br>    <span class="hljs-string">&quot;Content-Length&quot;</span>: <span class="hljs-string">&quot;0&quot;</span><span class="hljs-punctuation">,</span> <br>    <span class="hljs-string">&quot;Host&quot;</span>: <span class="hljs-string">&quot;httpbin-v2.demo:8000&quot;</span><span class="hljs-punctuation">,</span> <br>    <span class="hljs-string">&quot;User-Agent&quot;</span>: <span class="hljs-string">&quot;curl/7.69.1&quot;</span><span class="hljs-punctuation">,</span> <br>    <span class="hljs-string">&quot;X-B3-Sampled&quot;</span>: <span class="hljs-string">&quot;0&quot;</span><span class="hljs-punctuation">,</span> <br>    <span class="hljs-string">&quot;X-B3-Spanid&quot;</span>: <span class="hljs-string">&quot;8fda928356944839&quot;</span><span class="hljs-punctuation">,</span> <br>    <span class="hljs-string">&quot;X-B3-Traceid&quot;</span>: <span class="hljs-string">&quot;724aa8178d074e838fda928356944839&quot;</span><span class="hljs-punctuation">,</span> <br>    <span class="hljs-string">&quot;X-Envoy-Attempt-Count&quot;</span>: <span class="hljs-string">&quot;1&quot;</span><span class="hljs-punctuation">,</span> <br>    <span class="hljs-string">&quot;X-Envoy-Decorator-Operation&quot;</span>: <span class="hljs-string">&quot;httpbin-v2.demo.svc.cluster.local:8000/*&quot;</span><span class="hljs-punctuation">,</span> <br>    <span class="hljs-string">&quot;X-Envoy-Peer-Metadata&quot;</span>: <span class="hljs-string">&quot;ChoKCkNMVVNURVJfSUQSDBoKS3ViZXJuZXRlcwobCgxJTlNUQU5DRV9JUFMSCxoJMTAuMC4xLjMyCt0BCgZMQUJFTFMS0gEqzwEKDgoDYXBwEgcaBXNsZWVwChcKDGlzdGlvLmlvL3JldhIHGgUxLTYtOQohChFwb2QtdGVtcGxhdGUtaGFzaBIMGgo1YjdiZjU2YzU0CiQKGXNlY3VyaXR5LmlzdGlvLmlvL3Rsc01vZGUSBxoFaXN0aW8KKgofc2VydmljZS5pc3Rpby5pby9jYW5vbmljYWwtbmFtZRIHGgVzbGVlcAovCiNzZXJ2aWNlLmlzdGlvLmlvL2Nhbm9uaWNhbC1yZXZpc2lvbhIIGgZsYXRlc3QKGgoHTUVTSF9JRBIPGg1jbHVzdGVyLmxvY2FsCiAKBE5BTUUSGBoWc2xlZXAtNWI3YmY1NmM1NC1iaHNrOAoTCglOQU1FU1BBQ0USBhoEZGVtbwpGCgVPV05FUhI9GjtrdWJlcm5ldGVzOi8vYXBpcy9hcHBzL3YxL25hbWVzcGFjZXMvZGVtby9kZXBsb3ltZW50cy9zbGVlcAoaCg9TRVJWSUNFX0FDQ09VTlQSBxoFc2xlZXAKGAoNV09SS0xPQURfTkFNRRIHGgVzbGVlcA==&quot;</span><span class="hljs-punctuation">,</span> <br>    <span class="hljs-string">&quot;X-Envoy-Peer-Metadata-Id&quot;</span>: <span class="hljs-string">&quot;sidecar~10.0.1.32~sleep-5b7bf56c54-bhsk8.demo~demo.svc.cluster.local&quot;</span><br>  &#125;<span class="hljs-punctuation">,</span> <br>  <span class="hljs-string">&quot;origin&quot;</span>: <span class="hljs-string">&quot;127.0.0.1&quot;</span><span class="hljs-punctuation">,</span> <br>  <span class="hljs-string">&quot;url&quot;</span>: <span class="hljs-string">&quot;http://httpbin-v2.demo:8000/get&quot;</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>我们部署了v1和v2这2个版本的httpbin，发现只有httpbin-v2可以访问到</p>
+<p>下面我们制定下只允许在demo这个namespace下和demo这个命名空间下拥有sleep这个sa身份的才能访问</p>
+<figure class="highlight nestedtext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs nestedtext"><span class="hljs-attribute">kubectl apply -f - &lt;&lt;EOF</span><br><span class="hljs-attribute">apiVersion</span><span class="hljs-punctuation">:</span> <span class="hljs-string">security.istio.io/v1beta1</span><br><span class="hljs-attribute">kind</span><span class="hljs-punctuation">:</span> <span class="hljs-string">AuthorizationPolicy</span><br><span class="hljs-attribute">metadata</span><span class="hljs-punctuation">:</span><br> <span class="hljs-attribute">name</span><span class="hljs-punctuation">:</span> <span class="hljs-string">httpbin</span><br> <span class="hljs-attribute">namespace</span><span class="hljs-punctuation">:</span> <span class="hljs-string">demo</span><br><span class="hljs-attribute">spec</span><span class="hljs-punctuation">:</span><br> <span class="hljs-attribute">action</span><span class="hljs-punctuation">:</span> <span class="hljs-string">ALLOW</span><br> <span class="hljs-attribute">rules</span><span class="hljs-punctuation">:</span><br> <span class="hljs-bullet">-</span> <span class="hljs-string">from:</span><br>   <span class="hljs-bullet">-</span> <span class="hljs-string">source:</span><br>       <span class="hljs-attribute">principals</span><span class="hljs-punctuation">:</span> <span class="hljs-string">[&quot;cluster.local/ns/demo/sa/sleep&quot;]</span><br>   <span class="hljs-bullet">-</span> <span class="hljs-string">source:</span><br>       <span class="hljs-attribute">namespaces</span><span class="hljs-punctuation">:</span> <span class="hljs-string">[&quot;demo&quot;]</span><br>EOF<br></code></pre></td></tr></table></figure>
+
+<p>下面我们测试下，分别通过demo和nwxdemo中这2个命名空间下的sleep服务来访问下demo下的httpbin服务</p>
+<figure class="highlight llvm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs llvm">[root<span class="hljs-title">@VM-0-13-centos</span> istio<span class="hljs-number">-1.5</span>.<span class="hljs-number">1</span>]# kubectl exec -it sleep<span class="hljs-number">-5</span>b<span class="hljs-number">7</span>bf<span class="hljs-number">56</span><span class="hljs-keyword">c</span><span class="hljs-number">54</span>-bhsk<span class="hljs-number">8</span> -n demo -<span class="hljs-keyword">c</span> sleep -- curl http://httpbin.demo:<span class="hljs-number">8000</span>/get<br>&#123;<br>  <span class="hljs-string">&quot;args&quot;</span>: &#123;&#125;<span class="hljs-punctuation">,</span> <br>  <span class="hljs-string">&quot;headers&quot;</span>: &#123;<br>    <span class="hljs-string">&quot;Accept&quot;</span>: <span class="hljs-string">&quot;*/*&quot;</span><span class="hljs-punctuation">,</span> <br>    <span class="hljs-string">&quot;Content-Length&quot;</span>: <span class="hljs-string">&quot;0&quot;</span><span class="hljs-punctuation">,</span> <br>    <span class="hljs-string">&quot;Host&quot;</span>: <span class="hljs-string">&quot;httpbin.demo:8000&quot;</span><span class="hljs-punctuation">,</span> <br>    <span class="hljs-string">&quot;User-Agent&quot;</span>: <span class="hljs-string">&quot;curl/7.69.1&quot;</span><span class="hljs-punctuation">,</span> <br>    <span class="hljs-string">&quot;X-B3-Parentspanid&quot;</span>: <span class="hljs-string">&quot;408e7d7f4363a9bf&quot;</span><span class="hljs-punctuation">,</span> <br>    <span class="hljs-string">&quot;X-B3-Sampled&quot;</span>: <span class="hljs-string">&quot;0&quot;</span><span class="hljs-punctuation">,</span> <br>    <span class="hljs-string">&quot;X-B3-Spanid&quot;</span>: <span class="hljs-string">&quot;89c42647d4f04419&quot;</span><span class="hljs-punctuation">,</span> <br>    <span class="hljs-string">&quot;X-B3-Traceid&quot;</span>: <span class="hljs-string">&quot;7f9fb7b5cffbb30b408e7d7f4363a9bf&quot;</span><span class="hljs-punctuation">,</span> <br>    <span class="hljs-string">&quot;X-Envoy-Attempt-Count&quot;</span>: <span class="hljs-string">&quot;1&quot;</span><span class="hljs-punctuation">,</span> <br>    <span class="hljs-string">&quot;X-Forwarded-Client-Cert&quot;</span>: <span class="hljs-string">&quot;By=spiffe://cluster.local/ns/demo/sa/httpbin;Hash=8047b0dc92219d97bf966222da87d61ac7c857f8a562f487f7a44e936da499e0;Subject=\&quot;</span>\<span class="hljs-string">&quot;;URI=spiffe://cluster.local/ns/demo/sa/sleep&quot;</span><br>  &#125;<span class="hljs-punctuation">,</span> <br>  <span class="hljs-string">&quot;origin&quot;</span>: <span class="hljs-string">&quot;127.0.0.1&quot;</span><span class="hljs-punctuation">,</span> <br>  <span class="hljs-string">&quot;url&quot;</span>: <span class="hljs-string">&quot;http://httpbin.demo:8000/get&quot;</span><br>&#125;<br>[root<span class="hljs-title">@VM-0-13-centos</span> istio<span class="hljs-number">-1.5</span>.<span class="hljs-number">1</span>]# kubectl exec -it sleep<span class="hljs-number">-5</span>b<span class="hljs-number">7</span>bf<span class="hljs-number">56</span><span class="hljs-keyword">c</span><span class="hljs-number">54</span>-fh<span class="hljs-number">29</span>m -n nwxdemo -<span class="hljs-keyword">c</span> sleep -- curl http://httpbin.demo:<span class="hljs-number">8000</span>/get<br>RBAC: access denied<br></code></pre></td></tr></table></figure>
+
+<p>可以发下只有demo下的pod才有访问权限。</p>
+<p>接下来我们放通下nwxdemo下的sleep服务访问权限</p>
+<figure class="highlight nestedtext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs nestedtext"><span class="hljs-attribute">kubectl apply -f - &lt;&lt;EOF</span><br><span class="hljs-attribute">apiVersion</span><span class="hljs-punctuation">:</span> <span class="hljs-string">security.istio.io/v1beta1</span><br><span class="hljs-attribute">kind</span><span class="hljs-punctuation">:</span> <span class="hljs-string">AuthorizationPolicy</span><br><span class="hljs-attribute">metadata</span><span class="hljs-punctuation">:</span><br> <span class="hljs-attribute">name</span><span class="hljs-punctuation">:</span> <span class="hljs-string">httpbin</span><br> <span class="hljs-attribute">namespace</span><span class="hljs-punctuation">:</span> <span class="hljs-string">demo</span><br><span class="hljs-attribute">spec</span><span class="hljs-punctuation">:</span><br> <span class="hljs-attribute">action</span><span class="hljs-punctuation">:</span> <span class="hljs-string">ALLOW</span><br> <span class="hljs-attribute">rules</span><span class="hljs-punctuation">:</span><br> <span class="hljs-bullet">-</span> <span class="hljs-string">from:</span><br>   <span class="hljs-bullet">-</span> <span class="hljs-string">source:</span><br>       <span class="hljs-attribute">principals</span><span class="hljs-punctuation">:</span> <span class="hljs-string">[&quot;cluster.local/ns/nwxdemo/sa/sleep&quot;]</span><br>   <span class="hljs-bullet">-</span> <span class="hljs-string">source:</span><br>       <span class="hljs-attribute">namespaces</span><span class="hljs-punctuation">:</span> <span class="hljs-string">[&quot;demo&quot;]</span><br>EOF<br></code></pre></td></tr></table></figure>
+
+<p>我们放通nwxdemo下拥有sleep这个sa的服务允许访问就行。</p>
+<p>下面我们配置下限制只能访问httpbin特定的接口</p>
+<figure class="highlight nestedtext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs nestedtext"><span class="hljs-attribute">kubectl apply -f - &lt;&lt;EOF</span><br><span class="hljs-attribute">apiVersion</span><span class="hljs-punctuation">:</span> <span class="hljs-string">security.istio.io/v1beta1</span><br><span class="hljs-attribute">kind</span><span class="hljs-punctuation">:</span> <span class="hljs-string">AuthorizationPolicy</span><br><span class="hljs-attribute">metadata</span><span class="hljs-punctuation">:</span><br> <span class="hljs-attribute">name</span><span class="hljs-punctuation">:</span> <span class="hljs-string">httpbin</span><br> <span class="hljs-attribute">namespace</span><span class="hljs-punctuation">:</span> <span class="hljs-string">demo</span><br><span class="hljs-attribute">spec</span><span class="hljs-punctuation">:</span><br> <span class="hljs-attribute">action</span><span class="hljs-punctuation">:</span> <span class="hljs-string">ALLOW</span><br> <span class="hljs-attribute">rules</span><span class="hljs-punctuation">:</span><br> <span class="hljs-bullet">-</span> <span class="hljs-string">from:</span><br>   <span class="hljs-bullet">-</span> <span class="hljs-string">source:</span><br>       <span class="hljs-attribute">principals</span><span class="hljs-punctuation">:</span> <span class="hljs-string">[&quot;cluster.local/ns/demo/sa/sleep&quot;]</span><br>   <span class="hljs-bullet">-</span> <span class="hljs-string">source:</span><br>       <span class="hljs-attribute">namespaces</span><span class="hljs-punctuation">:</span> <span class="hljs-string">[&quot;demo&quot;]</span><br>   <span class="hljs-attribute">to</span><span class="hljs-punctuation">:</span><br>   <span class="hljs-bullet">-</span> <span class="hljs-string">operation:</span><br>       <span class="hljs-attribute">methods</span><span class="hljs-punctuation">:</span> <span class="hljs-string">[&quot;GET&quot;]</span><br>       <span class="hljs-attribute">paths</span><span class="hljs-punctuation">:</span> <span class="hljs-string">[&quot;/get&quot;]</span><br>EOF<br></code></pre></td></tr></table></figure>
+
+<p>测试可以发现，sleep只能访问到httpbin的get接口，无法访问ip</p>
+<figure class="highlight llvm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs llvm">[root<span class="hljs-title">@VM-0-13-centos</span> istio<span class="hljs-number">-1.5</span>.<span class="hljs-number">1</span>]# kubectl exec -it sleep<span class="hljs-number">-5</span>b<span class="hljs-number">7</span>bf<span class="hljs-number">56</span><span class="hljs-keyword">c</span><span class="hljs-number">54</span>-bhsk<span class="hljs-number">8</span> -n demo -<span class="hljs-keyword">c</span> sleep -- curl http://httpbin.demo:<span class="hljs-number">8000</span>/get<br>&#123;<br>  <span class="hljs-string">&quot;args&quot;</span>: &#123;&#125;<span class="hljs-punctuation">,</span> <br>  <span class="hljs-string">&quot;headers&quot;</span>: &#123;<br>    <span class="hljs-string">&quot;Accept&quot;</span>: <span class="hljs-string">&quot;*/*&quot;</span><span class="hljs-punctuation">,</span> <br>    <span class="hljs-string">&quot;Content-Length&quot;</span>: <span class="hljs-string">&quot;0&quot;</span><span class="hljs-punctuation">,</span> <br>    <span class="hljs-string">&quot;Host&quot;</span>: <span class="hljs-string">&quot;httpbin.demo:8000&quot;</span><span class="hljs-punctuation">,</span> <br>    <span class="hljs-string">&quot;User-Agent&quot;</span>: <span class="hljs-string">&quot;curl/7.69.1&quot;</span><span class="hljs-punctuation">,</span> <br>    <span class="hljs-string">&quot;X-B3-Parentspanid&quot;</span>: <span class="hljs-string">&quot;22a55f5bbea49ab5&quot;</span><span class="hljs-punctuation">,</span> <br>    <span class="hljs-string">&quot;X-B3-Sampled&quot;</span>: <span class="hljs-string">&quot;0&quot;</span><span class="hljs-punctuation">,</span> <br>    <span class="hljs-string">&quot;X-B3-Spanid&quot;</span>: <span class="hljs-string">&quot;33800e033e1cb882&quot;</span><span class="hljs-punctuation">,</span> <br>    <span class="hljs-string">&quot;X-B3-Traceid&quot;</span>: <span class="hljs-string">&quot;cc3a5b206a1a57be22a55f5bbea49ab5&quot;</span><span class="hljs-punctuation">,</span> <br>    <span class="hljs-string">&quot;X-Envoy-Attempt-Count&quot;</span>: <span class="hljs-string">&quot;1&quot;</span><span class="hljs-punctuation">,</span> <br>    <span class="hljs-string">&quot;X-Forwarded-Client-Cert&quot;</span>: <span class="hljs-string">&quot;By=spiffe://cluster.local/ns/demo/sa/httpbin;Hash=8047b0dc92219d97bf966222da87d61ac7c857f8a562f487f7a44e936da499e0;Subject=\&quot;</span>\<span class="hljs-string">&quot;;URI=spiffe://cluster.local/ns/demo/sa/sleep&quot;</span><br>  &#125;<span class="hljs-punctuation">,</span> <br>  <span class="hljs-string">&quot;origin&quot;</span>: <span class="hljs-string">&quot;127.0.0.1&quot;</span><span class="hljs-punctuation">,</span> <br>  <span class="hljs-string">&quot;url&quot;</span>: <span class="hljs-string">&quot;http://httpbin.demo:8000/get&quot;</span><br>&#125;<br>[root<span class="hljs-title">@VM-0-13-centos</span> istio<span class="hljs-number">-1.5</span>.<span class="hljs-number">1</span>]# kubectl exec -it sleep<span class="hljs-number">-5</span>b<span class="hljs-number">7</span>bf<span class="hljs-number">56</span><span class="hljs-keyword">c</span><span class="hljs-number">54</span>-bhsk<span class="hljs-number">8</span> -n demo -<span class="hljs-keyword">c</span> sleep -- curl http://httpbin.demo:<span class="hljs-number">8000</span>/ip<br>RBAC: access denied<br></code></pre></td></tr></table></figure>
+
+<p>下面我们给安全规则的条件再加一个限制，加上请求的header</p>
+<figure class="highlight nestedtext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs nestedtext"><span class="hljs-attribute">kubectl apply -f - &lt;&lt;EOF</span><br><span class="hljs-attribute">apiVersion</span><span class="hljs-punctuation">:</span> <span class="hljs-string">security.istio.io/v1beta1</span><br><span class="hljs-attribute">kind</span><span class="hljs-punctuation">:</span> <span class="hljs-string">AuthorizationPolicy</span><br><span class="hljs-attribute">metadata</span><span class="hljs-punctuation">:</span><br> <span class="hljs-attribute">name</span><span class="hljs-punctuation">:</span> <span class="hljs-string">httpbin</span><br> <span class="hljs-attribute">namespace</span><span class="hljs-punctuation">:</span> <span class="hljs-string">demo</span><br><span class="hljs-attribute">spec</span><span class="hljs-punctuation">:</span><br> <span class="hljs-attribute">action</span><span class="hljs-punctuation">:</span> <span class="hljs-string">ALLOW</span><br> <span class="hljs-attribute">rules</span><span class="hljs-punctuation">:</span><br> <span class="hljs-bullet">-</span> <span class="hljs-string">from:</span><br>   <span class="hljs-bullet">-</span> <span class="hljs-string">source:</span><br>       <span class="hljs-attribute">principals</span><span class="hljs-punctuation">:</span> <span class="hljs-string">[&quot;cluster.local/ns/demo/sa/sleep&quot;]</span><br>   <span class="hljs-bullet">-</span> <span class="hljs-string">source:</span><br>       <span class="hljs-attribute">namespaces</span><span class="hljs-punctuation">:</span> <span class="hljs-string">[&quot;demo&quot;]</span><br>   <span class="hljs-attribute">to</span><span class="hljs-punctuation">:</span><br>   <span class="hljs-bullet">-</span> <span class="hljs-string">operation:</span><br>       <span class="hljs-attribute">methods</span><span class="hljs-punctuation">:</span> <span class="hljs-string">[&quot;GET&quot;]</span><br>       <span class="hljs-attribute">paths</span><span class="hljs-punctuation">:</span> <span class="hljs-string">[&quot;/get&quot;]</span><br>   <span class="hljs-attribute">when</span><span class="hljs-punctuation">:</span><br>   <span class="hljs-bullet">-</span> <span class="hljs-string">key: request.headers[x-rfma-token]</span><br>     <span class="hljs-attribute">values</span><span class="hljs-punctuation">:</span> <span class="hljs-string">[&quot;test*&quot;]</span><br>EOF<br></code></pre></td></tr></table></figure>
+
+<p>从下面的测试访问看，我们只有加上请求头x-rfma-token:test*才能访问到httpbin，否则是访问不通的。</p>
+<figure class="highlight llvm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs llvm">[root<span class="hljs-title">@VM-0-13-centos</span> istio<span class="hljs-number">-1.5</span>.<span class="hljs-number">1</span>]# kubectl exec -it sleep<span class="hljs-number">-5</span>b<span class="hljs-number">7</span>bf<span class="hljs-number">56</span><span class="hljs-keyword">c</span><span class="hljs-number">54</span>-bhsk<span class="hljs-number">8</span> -n demo -<span class="hljs-keyword">c</span> sleep -- curl http://httpbin.demo:<span class="hljs-number">8000</span>/get<br>RBAC: access denied[root<span class="hljs-title">@VM-0-13-centos</span> istio<span class="hljs-number">-1.5</span>.<span class="hljs-number">1</span>]# kubectl exec -it sleep<span class="hljs-number">-5</span>b<span class="hljs-number">7</span>bf<span class="hljs-number">56</span><span class="hljs-keyword">c</span><span class="hljs-number">54</span>-bhsk<span class="hljs-number">8</span> -n demo -<span class="hljs-keyword">c</span> sleep -- curl http://httpbin.demo:<span class="hljs-number">8000</span>/get -H <span class="hljs-keyword">x</span>-rfma-token:test<span class="hljs-number">1</span><br>&#123;<br>  <span class="hljs-string">&quot;args&quot;</span>: &#123;&#125;<span class="hljs-punctuation">,</span> <br>  <span class="hljs-string">&quot;headers&quot;</span>: &#123;<br>    <span class="hljs-string">&quot;Accept&quot;</span>: <span class="hljs-string">&quot;*/*&quot;</span><span class="hljs-punctuation">,</span> <br>    <span class="hljs-string">&quot;Content-Length&quot;</span>: <span class="hljs-string">&quot;0&quot;</span><span class="hljs-punctuation">,</span> <br>    <span class="hljs-string">&quot;Host&quot;</span>: <span class="hljs-string">&quot;httpbin.demo:8000&quot;</span><span class="hljs-punctuation">,</span> <br>    <span class="hljs-string">&quot;User-Agent&quot;</span>: <span class="hljs-string">&quot;curl/7.69.1&quot;</span><span class="hljs-punctuation">,</span> <br>    <span class="hljs-string">&quot;X-B3-Parentspanid&quot;</span>: <span class="hljs-string">&quot;4f565c230a76c4c8&quot;</span><span class="hljs-punctuation">,</span> <br>    <span class="hljs-string">&quot;X-B3-Sampled&quot;</span>: <span class="hljs-string">&quot;0&quot;</span><span class="hljs-punctuation">,</span> <br>    <span class="hljs-string">&quot;X-B3-Spanid&quot;</span>: <span class="hljs-string">&quot;d4d8fed86d2ea3f5&quot;</span><span class="hljs-punctuation">,</span> <br>    <span class="hljs-string">&quot;X-B3-Traceid&quot;</span>: <span class="hljs-string">&quot;c7cd5c2f28b112664f565c230a76c4c8&quot;</span><span class="hljs-punctuation">,</span> <br>    <span class="hljs-string">&quot;X-Envoy-Attempt-Count&quot;</span>: <span class="hljs-string">&quot;1&quot;</span><span class="hljs-punctuation">,</span> <br>    <span class="hljs-string">&quot;X-Forwarded-Client-Cert&quot;</span>: <span class="hljs-string">&quot;By=spiffe://cluster.local/ns/demo/sa/httpbin;Hash=8047b0dc92219d97bf966222da87d61ac7c857f8a562f487f7a44e936da499e0;Subject=\&quot;</span>\<span class="hljs-string">&quot;;URI=spiffe://cluster.local/ns/demo/sa/sleep&quot;</span><span class="hljs-punctuation">,</span> <br>    <span class="hljs-string">&quot;X-Rfma-Token&quot;</span>: <span class="hljs-string">&quot;test1&quot;</span><br>  &#125;<span class="hljs-punctuation">,</span> <br>  <span class="hljs-string">&quot;origin&quot;</span>: <span class="hljs-string">&quot;127.0.0.1&quot;</span><span class="hljs-punctuation">,</span> <br>  <span class="hljs-string">&quot;url&quot;</span>: <span class="hljs-string">&quot;http://httpbin.demo:8000/get&quot;</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>安全策略里面主要存在以下几个字段，我们可以通过下面字段配置更丰富的安全访问策略</p>
+<p>来源（source）：</p>
+<ul>
+<li>principal&#x2F;namespace&#x2F;ipBlock</li>
+</ul>
+<p>操作（to）：</p>
+<ul>
+<li>host&#x2F;method&#x2F;path</li>
+</ul>
+<p>条件（when）：</p>
+<ul>
+<li>request</li>
+<li>source&#x2F;destination</li>
+</ul>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Istio/" class="category-chain-item">Istio</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Kubernetes/">#Kubernetes</a>
+      
+        <a href="/tags/Istio/">#Istio</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>istio入门系列之配置安全策略</div>
+      <div>http://example.com/2020/12/14/2020-12-14-Configure-security-policy-of-istio-entry-series/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>VashonNie</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2020年12月14日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2020/12/20/2020-12-20-Build-an-enterprise-level-mirror-warehouse-Harbor-on-TKE/" title="TKE上搭建企业级镜像仓库Harbor">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">TKE上搭建企业级镜像仓库Harbor</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2020/12/11/2020-12-11-Improve-system-flexibility-of-istio-entry-series/" title="istio入门系列之提升系统弹性能力">
+                        <span class="hidden-mobile">istio入门系列之提升系统弹性能力</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?bfe4709ccd8c5c9e559c89f4fd0866f3";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+  <script defer src="/js/leancloud.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

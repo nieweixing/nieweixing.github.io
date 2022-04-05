@@ -1,0 +1,774 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="VashonNie">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="使用k8s暴露我们的服务给外部访问的方式主要是有2种，一种就是nodeport类型，还有一种就是LoadBalancer，通常这2中都会做一个负载均衡，但是有一个问题就是服务端可能无法获取到客户端的真实ip，service.spec.externalTrafficPolicy这个字段就帮您解决了这个问题。 service.spec.externalTrafficPolicy - 表示此服务是否希望">
+<meta property="og:type" content="article">
+<meta property="og:title" content="k8s之externalTrafficPolicy保留客户端源IP">
+<meta property="og:url" content="http://example.com/2020/11/26/2020-11-26-The-externaltrafficpolicy-of-k8s-retains-the-client-source-ip/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="使用k8s暴露我们的服务给外部访问的方式主要是有2种，一种就是nodeport类型，还有一种就是LoadBalancer，通常这2中都会做一个负载均衡，但是有一个问题就是服务端可能无法获取到客户端的真实ip，service.spec.externalTrafficPolicy这个字段就帮您解决了这个问题。 service.spec.externalTrafficPolicy - 表示此服务是否希望">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-11-26T06:10:00.000Z">
+<meta property="article:modified_time" content="2020-11-26T06:10:00.000Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="Kubernetes">
+<meta property="article:tag" content="externalTrafficPolicy">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  <title>k8s之externalTrafficPolicy保留客户端源IP - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":"www.niewx.cn","path":"/","ignore_local":false}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>聂伟星</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="k8s之externalTrafficPolicy保留客户端源IP"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-author" aria-hidden="true"></i>
+        VashonNie
+      </span>
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2020-11-26 14:10" pubdate>
+          2020年11月26日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          4.5k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          38 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">k8s之externalTrafficPolicy保留客户端源IP</h1>
+            
+            <div class="markdown-body">
+              
+              <p>使用k8s暴露我们的服务给外部访问的方式主要是有2种，一种就是nodeport类型，还有一种就是LoadBalancer，通常这2中都会做一个负载均衡，但是有一个问题就是服务端可能无法获取到客户端的真实ip，service.spec.externalTrafficPolicy这个字段就帮您解决了这个问题。</p>
+<p>service.spec.externalTrafficPolicy - 表示此服务是否希望将外部流量路由到节点本地或集群范围的端点。 有两个可用选项：Cluster（默认）和 Local。 Cluster 隐藏了客户端源 IP，可能导致第二跳到另一个节点，但具有良好的整体负载分布。 Local 保留客户端源 IP 并避免 LoadBalancer 和 NodePort 类型服务的第二跳， 但存在潜在的不均衡流量传播风险。</p>
+<p>externalTrafficPolicy存在2种模式，一种是默认的Cluster类型，一种是Local类型，Cluster类型就是service基本的模式负载均衡，今天我们来讲一下Local这种模式，为什么Local模式会出现负载不均衡。</p>
+<p>首先我们创建一个externalTrafficPolicy为Cluster类型的service，大家都知道k8s中的网络策略都是通过kube-proxy来配置iptables规则来进行转发的，下面我们查看下externalTrafficPolicy为Cluster类型的service对应nodeport的iptables规则</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs pgsql">[root@VM<span class="hljs-number">-0</span><span class="hljs-number">-3</span>-centos ~]# kubectl <span class="hljs-keyword">get</span> svc -n test<br><span class="hljs-type">NAME</span>                          <span class="hljs-keyword">TYPE</span>           <span class="hljs-keyword">CLUSTER</span>-IP      <span class="hljs-keyword">EXTERNAL</span>-IP     PORT(S)        AGE<br>go-test                       ClusterIP      <span class="hljs-number">172.16</span><span class="hljs-number">.46</span><span class="hljs-number">.161</span>   &lt;<span class="hljs-keyword">none</span>&gt;          <span class="hljs-number">80</span>/TCP         <span class="hljs-number">4</span>d16h<br>nginx                         ClusterIP      <span class="hljs-number">172.16</span><span class="hljs-number">.45</span><span class="hljs-number">.116</span>   &lt;<span class="hljs-keyword">none</span>&gt;          <span class="hljs-number">80</span>/TCP         <span class="hljs-number">7</span>d21h<br>nginx-externaltrafficpolicy   NodePort       <span class="hljs-number">172.16</span><span class="hljs-number">.22</span><span class="hljs-number">.159</span>   &lt;<span class="hljs-keyword">none</span>&gt;          <span class="hljs-number">80</span>:<span class="hljs-number">31015</span>/TCP   <span class="hljs-number">15</span>h<br>nginx-<span class="hljs-keyword">log</span>                     LoadBalancer   <span class="hljs-number">172.16</span><span class="hljs-number">.96</span><span class="hljs-number">.7</span>     <span class="hljs-number">106.55</span><span class="hljs-number">.216</span>.XX   <span class="hljs-number">80</span>:<span class="hljs-number">31465</span>/TCP   <span class="hljs-number">3</span>d<br>springboot                    ClusterIP      <span class="hljs-number">172.16</span><span class="hljs-number">.77</span><span class="hljs-number">.157</span>   &lt;<span class="hljs-keyword">none</span>&gt;          <span class="hljs-number">8080</span>/TCP       <span class="hljs-number">4</span>d<br>[root@VM<span class="hljs-number">-0</span><span class="hljs-number">-3</span>-centos ~]# iptables-save | grep <span class="hljs-number">31465</span><br>-A KUBE-NODEPORTS -p tcp -m <span class="hljs-keyword">comment</span> <span class="hljs-comment">--comment &quot;test/nginx-log:80-80-tcp&quot; -m tcp --dport 31465 -j KUBE-MARK-MASQ</span><br>-A KUBE-NODEPORTS -p tcp -m <span class="hljs-keyword">comment</span> <span class="hljs-comment">--comment &quot;test/nginx-log:80-80-tcp&quot; -m tcp --dport 31465 -j KUBE-SVC-4MORCIL57YHWCCJM</span><br></code></pre></td></tr></table></figure>
+
+<p>我们nignx-log这个service就是Cluster类型，我们发现节点上对应31465这个nodeport的iptables规则就是放通所有来源ip来进行访问这个端口。</p>
+<p>下面我们再看看Local类型的service，对应的iptables规则是什么样，这里我们nginx-externaltrafficpolicy这个service就是Local类型，对应service的yaml文件如下。</p>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><code class="hljs dts"><span class="hljs-symbol">apiVersion:</span> v1<br><span class="hljs-symbol">kind:</span> Service<br><span class="hljs-symbol">metadata:</span><br><span class="hljs-symbol">  annotations:</span><br>    service.cloud.tencent.com/local-svc-weighted-balance: <span class="hljs-string">&quot;false&quot;</span><br>    service.kubernetes.io/local-svc-only-bind-node-with-pod: <span class="hljs-string">&quot;false&quot;</span><br><span class="hljs-symbol">  creationTimestamp:</span> <span class="hljs-string">&quot;2020-11-26T10:11:47Z&quot;</span><br><span class="hljs-symbol">  managedFields:</span><br>  - apiVersion: v1<br><span class="hljs-symbol">    manager:</span> tke-apiserver<br><span class="hljs-symbol">    operation:</span> Update<br><span class="hljs-symbol">    time:</span> <span class="hljs-string">&quot;2020-11-26T10:11:47Z&quot;</span><br><span class="hljs-symbol">  name:</span> nginx-externaltrafficpolicy<br><span class="hljs-symbol">  namespace:</span> test<br><span class="hljs-symbol">  resourceVersion:</span> <span class="hljs-string">&quot;2118736256&quot;</span><br><span class="hljs-symbol">  selfLink:</span> <span class="hljs-keyword">/api/</span>v1<span class="hljs-keyword">/namespaces/</span>test<span class="hljs-keyword">/services/</span>nginx-externaltrafficpolicy<br><span class="hljs-symbol">  uid:</span> <span class="hljs-number">7255</span>ae77<span class="hljs-number">-0</span>d6c<span class="hljs-number">-45</span>da<span class="hljs-number">-8171</span><span class="hljs-number">-60521535</span>d020<br><span class="hljs-symbol">spec:</span><br><span class="hljs-symbol">  clusterIP:</span> <span class="hljs-number">172.16</span><span class="hljs-number">.22</span><span class="hljs-number">.159</span><br><span class="hljs-symbol">  externalTrafficPolicy:</span> Local<br><span class="hljs-symbol">  ports:</span><br>  - name: <span class="hljs-number">80</span><span class="hljs-number">-80</span>-tcp<br><span class="hljs-symbol">    nodePort:</span> <span class="hljs-number">31015</span><br><span class="hljs-symbol">    port:</span> <span class="hljs-number">80</span><br><span class="hljs-symbol">    protocol:</span> TCP<br><span class="hljs-symbol">    targetPort:</span> <span class="hljs-number">80</span><br><span class="hljs-symbol">  selector:</span><br>    k8s-app: nginx-externaltrafficpolicy<br>    qcloud-app: nginx-externaltrafficpolicy<br><span class="hljs-symbol">  sessionAffinity:</span> None<br><span class="hljs-symbol">  type:</span> NodePort<br><span class="hljs-symbol">status:</span><br><span class="hljs-symbol">  loadBalancer:</span> <span class="hljs-punctuation">&#123;</span><span class="hljs-punctuation">&#125;</span><br></code></pre></td></tr></table></figure>
+
+<figure class="highlight dsconfig"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs dsconfig">[<span class="hljs-string">root</span>@<span class="hljs-string">VM-0-3-centos</span> ~]<span class="hljs-comment"># kubectl get svc -n test | grep nginx-externaltrafficpolicy</span><br><span class="hljs-string">nginx-externaltrafficpolicy</span>   <span class="hljs-string">NodePort</span>       <span class="hljs-string">172</span>.<span class="hljs-string">16</span>.<span class="hljs-string">22</span>.<span class="hljs-string">159</span>   &lt;<span class="hljs-string">none</span>&gt;          <span class="hljs-string">80:31015/</span><span class="hljs-string">TCP</span>   <span class="hljs-string">16h</span><br>[<span class="hljs-string">root</span>@<span class="hljs-string">VM-0-3-centos</span> ~]<span class="hljs-comment"># iptables-save | grep 31015</span><br>-<span class="hljs-string">A</span> <span class="hljs-string">KUBE-NODEPORTS</span> -<span class="hljs-string">s</span> <span class="hljs-string">127</span>.<span class="hljs-string">0</span>.<span class="hljs-string">0</span>.<span class="hljs-string">0</span>/<span class="hljs-string">8</span> -<span class="hljs-string">p</span> <span class="hljs-string">tcp</span> -<span class="hljs-string">m</span> <span class="hljs-string">comment</span> <span class="hljs-built_in">--comment</span> <span class="hljs-string">&quot;test/nginx-externaltrafficpolicy:80-80-tcp&quot;</span> -<span class="hljs-string">m</span> <span class="hljs-string">tcp</span> <span class="hljs-built_in">--dport</span> <span class="hljs-string">31015</span> -<span class="hljs-string">j</span> <span class="hljs-string">KUBE-MARK-MASQ</span><br>-<span class="hljs-string">A</span> <span class="hljs-string">KUBE-NODEPORTS</span> -<span class="hljs-string">p</span> <span class="hljs-string">tcp</span> -<span class="hljs-string">m</span> <span class="hljs-string">comment</span> <span class="hljs-built_in">--comment</span> <span class="hljs-string">&quot;test/nginx-externaltrafficpolicy:80-80-tcp&quot;</span> -<span class="hljs-string">m</span> <span class="hljs-string">tcp</span> <span class="hljs-built_in">--dport</span> <span class="hljs-string">31015</span> -<span class="hljs-string">j</span> <span class="hljs-string">KUBE-XLB-3LS5F4HE6J2O753K</span><br></code></pre></td></tr></table></figure>
+
+<p>:KUBE-MARK-MASQ - [0:0] &#x2F;<em>对于符合条件的包 set mark 0x4000, 有此标记的数据包会在KUBE-POSTROUTING chain中统一做MASQUERADE</em>&#x2F;</p>
+<p>对于KUBE-MARK-MASQ链中所有规则设置了kubernetes独有MARK标记，在KUBE-POSTROUTING链中对NODE节点上匹配kubernetes独有MARK标记的数据包，进行SNAT处理。</p>
+<p>查看节点上nginx-externaltrafficpolicy的nodeport端口的iptables规则，细心的你肯定发现有个地方和Cluster类型的是不一样的，那就是第一条规则中加了一个源ip网段的访问限制，默认只有127.0.0.0&#x2F;8才能访问这个，那么Local模式的原理这里就清楚了，其实就是这个iptables规则配置的源ip导致的。</p>
+<p>这也就是为啥你访问对应的nodeport的时候，只有pod所在的节点才能访问通，我们在同一个vpc下非集群节点进行访问nginx-externaltrafficpolicy这个pod测试一下</p>
+<figure class="highlight subunit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs subunit">[root@VM<span class="hljs-string">-0</span><span class="hljs-string">-3</span>-centos ~]# kubectl get pod -n test -o wide | grep nginx-externaltrafficpolicy<span class="hljs-string">-6654865</span>c87<span class="hljs-string">-25</span>cnq<br>nginx-externaltrafficpolicy<span class="hljs-string">-6654865</span>c87<span class="hljs-string">-25</span>cnq   2/2     Running   0          16h     10.0.2.37    10.0.0.3    &lt;none&gt;           1/1<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><code class="hljs xml">[root@VM-0-13-centos ~]# curl 10.0.0.3:31015<br><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-keyword">html</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">html</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>Welcome to nginx!<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">style</span>&gt;</span><span class="language-css"></span><br><span class="language-css">    <span class="hljs-selector-tag">body</span> &#123;</span><br><span class="language-css">        <span class="hljs-attribute">width</span>: <span class="hljs-number">35em</span>;</span><br><span class="language-css">        <span class="hljs-attribute">margin</span>: <span class="hljs-number">0</span> auto;</span><br><span class="language-css">        <span class="hljs-attribute">font-family</span>: Tahoma, Verdana, Arial, sans-serif;</span><br><span class="language-css">    &#125;</span><br><span class="language-css"></span><span class="hljs-tag">&lt;/<span class="hljs-name">style</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>Welcome to nginx!<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>If you see this page, the nginx web server is successfully installed and<br>working. Further configuration is required.<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span><br><br><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>For online documentation and support please refer to<br><span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;http://nginx.org/&quot;</span>&gt;</span>nginx.org<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>.<span class="hljs-tag">&lt;<span class="hljs-name">br</span>/&gt;</span><br>Commercial support is available at<br><span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;http://nginx.com/&quot;</span>&gt;</span>nginx.com<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>.<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span><br><br><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">em</span>&gt;</span>Thank you for using nginx.<span class="hljs-tag">&lt;/<span class="hljs-name">em</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span><br>[root@VM-0-13-centos ~]# curl 10.0.0.10:31015<br><br></code></pre></td></tr></table></figure>
+
+<p>我们发现nginx-externaltrafficpolicy这个pod部署在10.0.0.3这个node上，我们在10.0.0.13这个节点访问nodeport，只有10.0.0.3这个节点的31015这个nodeport可以通，这也是符合Local模式的。</p>
+<p>有的时候我们在定位问题也可以注意一下这个配置，可能出现只能访问pod所在节点才能通，这里可以检查下这个配置是否配置成了Local。</p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Kubernetes/" class="category-chain-item">Kubernetes</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Kubernetes/">#Kubernetes</a>
+      
+        <a href="/tags/externalTrafficPolicy/">#externalTrafficPolicy</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>k8s之externalTrafficPolicy保留客户端源IP</div>
+      <div>http://example.com/2020/11/26/2020-11-26-The-externaltrafficpolicy-of-k8s-retains-the-client-source-ip/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>VashonNie</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2020年11月26日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2020/11/28/2020-11-28-Product-introduction-of-istio-entry-series/" title="istio入门系列之产品介绍">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">istio入门系列之产品介绍</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2020/11/26/2020-11-26-fluent_bit-collects-different-business-logs/" title="fluent-bit收集不同业务日志">
+                        <span class="hidden-mobile">fluent-bit收集不同业务日志</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?bfe4709ccd8c5c9e559c89f4fd0866f3";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+  <script defer src="/js/leancloud.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

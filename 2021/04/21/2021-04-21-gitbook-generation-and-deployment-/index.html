@@ -1,0 +1,812 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="VashonNie">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="作为一个运维工程，写文档是日常的工作之一，很多时候我们需要将文档分享给其他人，一般都是用现在的在线文档进行分享，其实这里我们也可以gitbook来发布我们的文档，这里可以更加方便的分享给其他人查阅。今天我们来说说如何生成gitbook并部署到k8s上运行我们的gitbook，并提供对应的域名对外提供访问，让其他人可以直接通过域名来访问文档。 环境准备 虚拟机一台 k8s环境 域名 github账号">
+<meta property="og:type" content="article">
+<meta property="og:title" content="gitbook的生成和部署">
+<meta property="og:url" content="http://example.com/2021/04/21/2021-04-21-gitbook-generation-and-deployment-/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="作为一个运维工程，写文档是日常的工作之一，很多时候我们需要将文档分享给其他人，一般都是用现在的在线文档进行分享，其实这里我们也可以gitbook来发布我们的文档，这里可以更加方便的分享给其他人查阅。今天我们来说说如何生成gitbook并部署到k8s上运行我们的gitbook，并提供对应的域名对外提供访问，让其他人可以直接通过域名来访问文档。 环境准备 虚拟机一台 k8s环境 域名 github账号">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/2021-04-21-gitbook-generation-and-deployment-/1.png">
+<meta property="og:image" content="http://example.com/img/2021-04-21-gitbook-generation-and-deployment-/2.png">
+<meta property="og:image" content="http://example.com/img/2021-04-21-gitbook-generation-and-deployment-/3.png">
+<meta property="og:image" content="http://example.com/img/2021-04-21-gitbook-generation-and-deployment-/4.png">
+<meta property="og:image" content="http://example.com/img/2021-04-21-gitbook-generation-and-deployment-/5.png">
+<meta property="og:image" content="http://example.com/img/2021-04-21-gitbook-generation-and-deployment-/6.png">
+<meta property="og:image" content="http://example.com/img/2021-04-21-gitbook-generation-and-deployment-/7.png">
+<meta property="article:published_time" content="2021-04-21T06:10:00.000Z">
+<meta property="article:modified_time" content="2021-04-21T06:10:00.000Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="Kubernetes">
+<meta property="article:tag" content="gitbook">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://example.com/img/2021-04-21-gitbook-generation-and-deployment-/1.png">
+  
+  
+  <title>gitbook的生成和部署 - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":"www.niewx.cn","path":"/","ignore_local":false}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>聂伟星</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="gitbook的生成和部署"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-author" aria-hidden="true"></i>
+        VashonNie
+      </span>
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2021-04-21 14:10" pubdate>
+          2021年4月21日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          3.6k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          31 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">gitbook的生成和部署</h1>
+            
+            <div class="markdown-body">
+              
+              <p>作为一个运维工程，写文档是日常的工作之一，很多时候我们需要将文档分享给其他人，一般都是用现在的在线文档进行分享，其实这里我们也可以gitbook来发布我们的文档，这里可以更加方便的分享给其他人查阅。今天我们来说说如何生成gitbook并部署到k8s上运行我们的gitbook，并提供对应的域名对外提供访问，让其他人可以直接通过域名来访问文档。</p>
+<h1 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h1><ul>
+<li>虚拟机一台</li>
+<li>k8s环境</li>
+<li>域名</li>
+<li>github账号</li>
+</ul>
+<p>生成部署gitbook需要上面这些环境，虚拟机也可以用k8s集群中的node节点，这里只是用来本地构建gitbook的markdown文档和推送编译后的html文件到远程git仓库上，k8s环境这里用的是腾讯云的tke集群，域名和github都需要自行申请。</p>
+<h1 id="本地安装部署gitbook"><a href="#本地安装部署gitbook" class="headerlink" title="本地安装部署gitbook"></a>本地安装部署gitbook</h1><p>gitbook是一个基于Node.js的命令行工具，所以要先安装Node.js，安装nodejs默认会安装npm，所以这里不需要安装npm，安装好之后下载下gitbook-cli命令，然后创建一个目录作为gitbook的工作目录</p>
+<figure class="highlight coffeescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs coffeescript">[root@VM<span class="hljs-number">-0</span><span class="hljs-number">-13</span>-centos ~]<span class="hljs-comment"># node -v</span><br>v6<span class="hljs-number">.17</span><span class="hljs-number">.1</span><br>[root@VM<span class="hljs-number">-0</span><span class="hljs-number">-13</span>-centos ~]<span class="hljs-comment"># npm -v</span><br><span class="hljs-number">3.10</span><span class="hljs-number">.10</span><br>[root@VM<span class="hljs-number">-0</span><span class="hljs-number">-13</span>-centos ~]<span class="hljs-comment"># npm install -g gitbook-cli</span><br>[root@VM<span class="hljs-number">-0</span><span class="hljs-number">-13</span>-centos ~]<span class="hljs-comment"># mkdir gitbook</span><br>[root@VM<span class="hljs-number">-0</span><span class="hljs-number">-13</span>-centos ~]<span class="hljs-comment"># cd gitbook</span><br>[root@VM<span class="hljs-number">-0</span><span class="hljs-number">-13</span>-centos ~]<span class="hljs-comment"># gitbook init</span><br>warn: <span class="hljs-literal">no</span> summary file <span class="hljs-keyword">in</span> this book<br>info: create README.md<br>info: create SUMMARY.md<br>info: initialization <span class="hljs-keyword">is</span> finished<br>[root@VM<span class="hljs-number">-0</span><span class="hljs-number">-13</span>-centos gitbook]<span class="hljs-comment"># ll</span><br>total <span class="hljs-number">8</span><br>-rw-r--r-- <span class="hljs-number">1</span> root root <span class="hljs-number">16</span> Apr <span class="hljs-number">22</span> <span class="hljs-number">12</span>:<span class="hljs-number">39</span> README.md<br>-rw-r--r-- <span class="hljs-number">1</span> root root <span class="hljs-number">40</span> Apr <span class="hljs-number">22</span> <span class="hljs-number">12</span>:<span class="hljs-number">39</span> SUMMARY.md<br></code></pre></td></tr></table></figure>
+
+<p>执行init后会生成2个md文件</p>
+<ul>
+<li>README.md（书籍的介绍在这个文件里）</li>
+<li>SUMMARY.md（书籍的目录结构在这里配置）</li>
+</ul>
+<p>下面我们在SUMMRAY.md编写一下目录结构</p>
+<figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs scss"><span class="hljs-selector-attr">[root@VM-0-13-centos gitbook]</span># cat <span class="hljs-selector-tag">SUMMARY</span><span class="hljs-selector-class">.md</span><br># <span class="hljs-selector-tag">Summary</span><br><br>* <span class="hljs-selector-attr">[Introduction]</span>(README.md)<br>* <span class="hljs-selector-attr">[前言]</span>(readme.md)<br>* <span class="hljs-selector-attr">[第一章]</span>(part1/README.md)<br>    * <span class="hljs-selector-attr">[第一节]</span>(part1/<span class="hljs-number">1</span>.md)<br>    * <span class="hljs-selector-attr">[第二节]</span>(part1/<span class="hljs-number">2</span>.md)<br>    * <span class="hljs-selector-attr">[第三节]</span>(part1/<span class="hljs-number">3</span>.md)<br>    * <span class="hljs-selector-attr">[第四节]</span>(part1/<span class="hljs-number">4</span>.md)<br>* <span class="hljs-selector-attr">[第二章]</span>(part2/README.md)<br>* <span class="hljs-selector-attr">[第三章]</span>(part3/README.md)<br>* <span class="hljs-selector-attr">[第四章]</span>(part4/README.md)<br></code></pre></td></tr></table></figure>
+
+<p>创建一个part1目录，创建一个README.md来作为第一章的简介</p>
+<figure class="highlight autoit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs autoit">[root<span class="hljs-symbol">@VM</span><span class="hljs-number">-0</span><span class="hljs-number">-13</span>-centos gitbook]<span class="hljs-meta"># mkdir part1</span><br>[root<span class="hljs-symbol">@VM</span><span class="hljs-number">-0</span><span class="hljs-number">-13</span>-centos part1]<span class="hljs-meta"># cat README.md</span><br><span class="hljs-meta"># 第一章</span><br></code></pre></td></tr></table></figure>
+
+<p>然后我们本地运行下gitbook</p>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs dts">[root@VM<span class="hljs-number">-0</span><span class="hljs-number">-13</span>-centos gitbook]<span class="hljs-meta"># gitbook serve &amp;</span><br>Live reload server started on port: <span class="hljs-number">35729</span><br>Press CTRL+C to quit ...<br><span class="hljs-symbol"></span><br><span class="hljs-symbol">info:</span> <span class="hljs-number">7</span> plugins are installed<br><span class="hljs-symbol">info:</span> loading plugin <span class="hljs-string">&quot;livereload&quot;</span>... OK<br><span class="hljs-symbol">info:</span> loading plugin <span class="hljs-string">&quot;highlight&quot;</span>... OK<br><span class="hljs-symbol">info:</span> loading plugin <span class="hljs-string">&quot;search&quot;</span>... OK<br><span class="hljs-symbol">info:</span> loading plugin <span class="hljs-string">&quot;lunr&quot;</span>... OK<br><span class="hljs-symbol">info:</span> loading plugin <span class="hljs-string">&quot;sharing&quot;</span>... OK<br><span class="hljs-symbol">info:</span> loading plugin <span class="hljs-string">&quot;fontsettings&quot;</span>... OK<br><span class="hljs-symbol">info:</span> loading plugin <span class="hljs-string">&quot;theme-default&quot;</span>... OK<br><span class="hljs-symbol">info:</span> found <span class="hljs-number">1</span> pages<br><span class="hljs-symbol">info:</span> found <span class="hljs-number">0</span> asset files<br><span class="hljs-symbol">info:</span> &gt;&gt; generation finished with success in <span class="hljs-number">1.4</span>s !<br><br>Starting server ...<br>Serving book on http:<span class="hljs-comment">//localhost:4000</span><br></code></pre></td></tr></table></figure>
+
+<p><img src="/img/2021-04-21-gitbook-generation-and-deployment-/1.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>运行gitbook后，可以通过服务器ip和4000端口访问，如果后面我们有更新gitbook目录下的markdown文档，gitbook会自动同步并生成静态文件在_book目录下。</p>
+<h1 id="代码上传到github"><a href="#代码上传到github" class="headerlink" title="代码上传到github"></a>代码上传到github</h1><p>这里我们如果要自动化部署可以将gitbook生成的静态文件上传到github，然后构建成docker镜像，最终部署到k8s集群中。</p>
+<figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs tap">[root@VM-0-13-centos gitbook-docker]<span class="hljs-comment"># ll</span><br>total 12<br>-rw-r--r--<span class="hljs-number"> 1 </span>root root  <span class="hljs-number"> 87 </span>Apr<span class="hljs-number"> 22 </span>13:12 Dockerfile<br>drwxr-xr-x<span class="hljs-number"> 4 </span>root root<span class="hljs-number"> 4096 </span>Apr<span class="hljs-number"> 22 </span>13:11 gitbook<br>-rw-r--r--<span class="hljs-number"> 1 </span>root root  <span class="hljs-number"> 17 </span>Apr<span class="hljs-number"> 22 </span>13:07 README.md<br></code></pre></td></tr></table></figure>
+
+<p>这里的github代码仓库目录结构如下，gitbook存放生成的静态文件，Dokcerfile用来构建docker镜像，具体代码如下，README.md文件说明代码仓库的作用。</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs awk">[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">13</span>-centos gitbook-docker]<span class="hljs-comment"># cat Dockerfile</span><br>FROM nginx<br>WORKDIR <span class="hljs-regexp">/usr/</span>share<span class="hljs-regexp">/nginx/</span>html<br>ADD .<span class="hljs-regexp">/gitbook /u</span>sr<span class="hljs-regexp">/share/</span>nginx/html<br>EXPOSE <span class="hljs-number">80</span><br></code></pre></td></tr></table></figure>
+
+<p>我们直接用一个nginx将gitbook生成的静态文件展示，我们将gitbook-docker的代码push到远程仓库即可，后续更新代码只需要更新gitbook目录下的静态文件。</p>
+<h1 id="自动化构建发布到k8s集群"><a href="#自动化构建发布到k8s集群" class="headerlink" title="自动化构建发布到k8s集群"></a>自动化构建发布到k8s集群</h1><p>这里自动化构建发布用的是腾讯云的TCR镜像仓库和流水线，首先你需要在TCR上购买一个实例，然后新建一个镜像仓库用来存gitbook镜像，这里已经新建了一个gitbook的镜像仓库。</p>
+<p><img src="/img/2021-04-21-gitbook-generation-and-deployment-/2.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>然后我们新建一条流水线，这样我们更新代码后，就可以自动构建发布到我们的tke集群中，流水线信息如下</p>
+<p><img src="/img/2021-04-21-gitbook-generation-and-deployment-/3.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>这里我们提交下代码，触发下自动构建看看，</p>
+<p><img src="/img/2021-04-21-gitbook-generation-and-deployment-/4.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2021-04-21-gitbook-generation-and-deployment-/5.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2021-04-21-gitbook-generation-and-deployment-/6.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>这里我们看到提交了代码后，流水线将github上的代码构建成docker镜像并发布到tke集群了，pod正常运行。</p>
+<h1 id="ingress域名暴露gitbook服务"><a href="#ingress域名暴露gitbook服务" class="headerlink" title="ingress域名暴露gitbook服务"></a>ingress域名暴露gitbook服务</h1><p>下面我们用ingress来配置域名来访问我们的gitbook服务，这里我们已经在集群部署了nginx-ingress了，首先创建一个service</p>
+<figure class="highlight nestedtext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs nestedtext"><span class="hljs-attribute">apiVersion</span><span class="hljs-punctuation">:</span> <span class="hljs-string">v1</span><br><span class="hljs-attribute">kind</span><span class="hljs-punctuation">:</span> <span class="hljs-string">Service</span><br><span class="hljs-attribute">metadata</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-attribute">name</span><span class="hljs-punctuation">:</span> <span class="hljs-string">gitbook</span><br>  <span class="hljs-attribute">namespace</span><span class="hljs-punctuation">:</span> <span class="hljs-string">gitbook</span><br><span class="hljs-attribute">spec</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-attribute">clusterIP</span><span class="hljs-punctuation">:</span> <span class="hljs-string">172.16.8.27</span><br>  <span class="hljs-attribute">ports</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-string">name: 80-80-tcp</span><br>    <span class="hljs-attribute">port</span><span class="hljs-punctuation">:</span> <span class="hljs-string">80</span><br>    <span class="hljs-attribute">protocol</span><span class="hljs-punctuation">:</span> <span class="hljs-string">TCP</span><br>    <span class="hljs-attribute">targetPort</span><span class="hljs-punctuation">:</span> <span class="hljs-string">80</span><br>  <span class="hljs-attribute">selector</span><span class="hljs-punctuation">:</span><br>    <span class="hljs-attribute">k8s-app</span><span class="hljs-punctuation">:</span> <span class="hljs-string">gitbook</span><br>    <span class="hljs-attribute">qcloud-app</span><span class="hljs-punctuation">:</span> <span class="hljs-string">gitbook</span><br>  <span class="hljs-attribute">sessionAffinity</span><span class="hljs-punctuation">:</span> <span class="hljs-string">None</span><br>  <span class="hljs-attribute">type</span><span class="hljs-punctuation">:</span> <span class="hljs-string">ClusterIP</span><br></code></pre></td></tr></table></figure>
+
+<p>然后创建ingress转发到后端的service</p>
+<figure class="highlight nestedtext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs nestedtext"><span class="hljs-attribute">apiVersion</span><span class="hljs-punctuation">:</span> <span class="hljs-string">networking.k8s.io/v1beta1</span><br><span class="hljs-attribute">kind</span><span class="hljs-punctuation">:</span> <span class="hljs-string">Ingress</span><br><span class="hljs-attribute">metadata</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-attribute">annotations</span><span class="hljs-punctuation">:</span><br>    <span class="hljs-attribute">kubernetes.io/ingress.class</span><span class="hljs-punctuation">:</span> <span class="hljs-string">ingress</span><br>  <span class="hljs-attribute">name</span><span class="hljs-punctuation">:</span> <span class="hljs-string">gitbook-ingress</span><br>  <span class="hljs-attribute">namespace</span><span class="hljs-punctuation">:</span> <span class="hljs-string">gitbook</span><br><span class="hljs-attribute">spec</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-attribute">rules</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-string">host: gitbook.tke.niewx.cn</span><br>    <span class="hljs-attribute">http</span><span class="hljs-punctuation">:</span><br>      <span class="hljs-attribute">paths</span><span class="hljs-punctuation">:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">backend:</span><br>          <span class="hljs-attribute">serviceName</span><span class="hljs-punctuation">:</span> <span class="hljs-string">gitbook</span><br>          <span class="hljs-attribute">servicePort</span><span class="hljs-punctuation">:</span> <span class="hljs-string">80</span><br>        <span class="hljs-attribute">path</span><span class="hljs-punctuation">:</span> <span class="hljs-string">/</span><br></code></pre></td></tr></table></figure>
+
+<p>ingress创建好之后，我们通过域名来访问下我们的gitbook服务看看，浏览器输入gitbook.tke.niewx.cn就可以访问到我们的gitbook文档了。</p>
+<p><img src="/img/2021-04-21-gitbook-generation-and-deployment-/7.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>如果我们后面需要更新文档，只需要编写md文档，然后将生成的静态文件更新到远程仓库即可，流水线执行完成后，直接通过域名就可以访问到最新的文档了。</p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Gitbook/" class="category-chain-item">Gitbook</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Kubernetes/">#Kubernetes</a>
+      
+        <a href="/tags/gitbook/">#gitbook</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>gitbook的生成和部署</div>
+      <div>http://example.com/2021/04/21/2021-04-21-gitbook-generation-and-deployment-/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>VashonNie</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2021年4月21日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2021/05/21/2021-05-21-Nginx-learning-and-configuration/" title="Nginx的学习和配置">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Nginx的学习和配置</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2021/04/16/2021-04-16-k8s-deploy-rancher/" title="k8s上部署rancher">
+                        <span class="hidden-mobile">k8s上部署rancher</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?bfe4709ccd8c5c9e559c89f4fd0866f3";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+  <script defer src="/js/leancloud.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

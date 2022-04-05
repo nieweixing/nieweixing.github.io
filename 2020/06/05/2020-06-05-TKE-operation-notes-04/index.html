@@ -1,0 +1,900 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="VashonNie">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="本周讲述了在TKE上如何监控集群并发送告警，简单部署wordpress到集群中 TKE监控使用和查看良好的监控环境为腾讯云容器服务高可靠性、高可用性和高性能提供重要保证。您可以方便为不同资源收集不同维度的监控数据，能方便掌握资源的使用状况，轻松定位故障。 腾讯云容器服务提供集群、节点、工作负载、Pod、Container 5个层面的监控数据收集和展示功能。 收集监控数据有助于您建立容器集群性能的正">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TKE操作笔记04">
+<meta property="og:url" content="http://example.com/2020/06/05/2020-06-05-TKE-operation-notes-04/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="本周讲述了在TKE上如何监控集群并发送告警，简单部署wordpress到集群中 TKE监控使用和查看良好的监控环境为腾讯云容器服务高可靠性、高可用性和高性能提供重要保证。您可以方便为不同资源收集不同维度的监控数据，能方便掌握资源的使用状况，轻松定位故障。 腾讯云容器服务提供集群、节点、工作负载、Pod、Container 5个层面的监控数据收集和展示功能。 收集监控数据有助于您建立容器集群性能的正">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/1.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/2.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/3.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/4.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/5.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/6.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/7.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/8.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/9.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/10.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/11.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/12.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/13.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/14.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/15.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/16.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/17.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/18.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/19.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/20.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/21.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/22.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/23.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/24.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/25.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/26.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/27.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/28.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/29.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/30.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/31.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/32.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/33.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/34.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/35.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/36.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/37.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/38.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/39.png">
+<meta property="og:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/40.png">
+<meta property="article:published_time" content="2020-06-05T06:10:00.000Z">
+<meta property="article:modified_time" content="2020-06-05T06:10:00.000Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="Kubernetes">
+<meta property="article:tag" content="Docker">
+<meta property="article:tag" content="TKE">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://example.com/img/2020-06-05-TKE-operation-notes-04/1.png">
+  
+  
+  <title>TKE操作笔记04 - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":"www.niewx.cn","path":"/","ignore_local":false}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>聂伟星</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="TKE操作笔记04"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-author" aria-hidden="true"></i>
+        VashonNie
+      </span>
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2020-06-05 14:10" pubdate>
+          2020年6月5日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          3k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          25 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">TKE操作笔记04</h1>
+            
+            <div class="markdown-body">
+              
+              <p>本周讲述了在TKE上如何监控集群并发送告警，简单部署wordpress到集群中</p>
+<h1 id="TKE监控使用和查看"><a href="#TKE监控使用和查看" class="headerlink" title="TKE监控使用和查看"></a>TKE监控使用和查看</h1><p>良好的监控环境为腾讯云容器服务高可靠性、高可用性和高性能提供重要保证。您可以方便为不同资源收集不同维度的监控数据，能方便掌握资源的使用状况，轻松定位故障。 腾讯云容器服务提供集群、节点、工作负载、Pod、Container 5个层面的监控数据收集和展示功能。 收集监控数据有助于您建立容器集群性能的正常标准。通过在不同时间、不同负载条件下测量容集群的性能并收集历史监控数据，您可以较为清楚的了解容器集群和服务运行时的正常性能，并能快速根据当前监控数据判断服务运行时是否处于异常状态，及时找出解决问题的方法。例如，您可以监控服务的 CPU 利用率、内存使用率和磁盘 I&#x2F;O</p>
+<h2 id="集群整体监控"><a href="#集群整体监控" class="headerlink" title="集群整体监控"></a>集群整体监控</h2><p><img src="/img/2020-06-05-TKE-operation-notes-04/1.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2020-06-05-TKE-operation-notes-04/2.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>可以选择不同的时间段，时间间隔等选项来查看对应的指标数据</p>
+<h2 id="节点监控"><a href="#节点监控" class="headerlink" title="节点监控"></a>节点监控</h2><p><img src="/img/2020-06-05-TKE-operation-notes-04/3.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2020-06-05-TKE-operation-notes-04/4.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>我们可以查看某一个节点或者所有节点的监控指标，根据其他选项来选择数据的时间段和类型</p>
+<h2 id="pod监控"><a href="#pod监控" class="headerlink" title="pod监控"></a>pod监控</h2><p><img src="/img/2020-06-05-TKE-operation-notes-04/5.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2020-06-05-TKE-operation-notes-04/6.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>我们要选择pod所在的节点，然后再进行其他选择来查看某个pod或者所有pod的监控指标数据</p>
+<h2 id="deployment监控"><a href="#deployment监控" class="headerlink" title="deployment监控"></a>deployment监控</h2><p><img src="/img/2020-06-05-TKE-operation-notes-04/7.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2020-06-05-TKE-operation-notes-04/8.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>可以选择所有负载或者某一个负载不同时间段的监控数据</p>
+<h2 id="查看某个deployment中具体pod的监控"><a href="#查看某个deployment中具体pod的监控" class="headerlink" title="查看某个deployment中具体pod的监控"></a>查看某个deployment中具体pod的监控</h2><p><img src="/img/2020-06-05-TKE-operation-notes-04/9.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2020-06-05-TKE-operation-notes-04/10.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2020-06-05-TKE-operation-notes-04/11.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<h2 id="查看pod内某个容器的指标"><a href="#查看pod内某个容器的指标" class="headerlink" title="查看pod内某个容器的指标"></a>查看pod内某个容器的指标</h2><p><img src="/img/2020-06-05-TKE-operation-notes-04/12.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>单击【Container】，将【所属 Pod】选择为您想查看的 Pod，即可查看该 Pod 内 Container 的监控指标对比图</p>
+<h1 id="helm的安装和使用"><a href="#helm的安装和使用" class="headerlink" title="helm的安装和使用"></a>helm的安装和使用</h1><h2 id="helm的安装"><a href="#helm的安装" class="headerlink" title="helm的安装"></a>helm的安装</h2><h3 id="helm服务端的安装"><a href="#helm服务端的安装" class="headerlink" title="helm服务端的安装"></a>helm服务端的安装</h3><p><img src="/img/2020-06-05-TKE-operation-notes-04/13.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>找到扩展插件，选择你的集群，选择helm，点击安装到你的集群中即可</p>
+<h3 id="helm客户端的安装"><a href="#helm客户端的安装" class="headerlink" title="helm客户端的安装"></a>helm客户端的安装</h3><p>在你配置了集群的访问凭证下执行如下操作</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs awk">curl -O https:<span class="hljs-regexp">//</span>storage.googleapis.com<span class="hljs-regexp">/kubernetes-helm/</span>helm-v2.<span class="hljs-number">10.0</span>-linux-amd64.tar.gz<br>tar xzvf helm-v2.<span class="hljs-number">10.0</span>-linux-amd64.tar.gz<br>sudo cp linux-amd64<span class="hljs-regexp">/helm /u</span>sr<span class="hljs-regexp">/local/</span>bin/helm<br></code></pre></td></tr></table></figure>
+<p>能够正确查询到版本则成功</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs pgsql">[root@VM_0_13_centos ~]# helm <span class="hljs-keyword">version</span><br>Client: &amp;<span class="hljs-keyword">version</span>.<span class="hljs-keyword">Version</span>&#123;SemVer:&quot;v2.10.0&quot;, GitCommit:&quot;9ad53aac42165a5fadc6c87be0dea6b115f93090&quot;, GitTreeState:&quot;clean&quot;&#125;<br><span class="hljs-keyword">Server</span>: &amp;<span class="hljs-keyword">version</span>.<span class="hljs-keyword">Version</span>&#123;SemVer:&quot;v2.10.0&quot;, GitCommit:&quot;9ad53aac42165a5fadc6c87be0dea6b115f93090&quot;, GitTreeState:&quot;clean&quot;&#125;<br></code></pre></td></tr></table></figure>
+<p>配置 Helm 为 Client-only</p>
+<p>执行以下命令，将 Helm 配置为 Client-only。</p>
+<figure class="highlight ada"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ada">helm init <span class="hljs-comment">--client-only</span><br></code></pre></td></tr></table></figure>
+<h2 id="helm的使用"><a href="#helm的使用" class="headerlink" title="helm的使用"></a>helm的使用</h2><h3 id="helm仓库"><a href="#helm仓库" class="headerlink" title="helm仓库"></a>helm仓库</h3><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs awk">[root@VM_0_13_centos ~]<span class="hljs-comment"># helm repo list</span><br>NAME    URL<br>stable  https:<span class="hljs-regexp">//</span>kubernetes-charts.storage.googleapis.com<br>local   http:<span class="hljs-regexp">//</span><span class="hljs-number">127.0</span>.<span class="hljs-number">0.1</span>:<span class="hljs-number">8879</span>/charts<br></code></pre></td></tr></table></figure>
+<p>一般默认的远程仓库为google的，下载应用比较慢，我们可以设置为阿里的。<br>客户端命令设置如下</p>
+<figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs perl">[root@VM_0_13_centos ~]<span class="hljs-comment"># helm repo remove stable</span><br>[root@VM_0_13_centos ~]<span class="hljs-comment"># helm repo add stable https://kubernetes.oss-cn-hangzhou.aliyuncs.com/charts</span><br><span class="hljs-string">&quot;stable&quot;</span> has been added to your repositories<br>[root@VM_0_13_centos ~]<span class="hljs-comment"># helm repo list</span><br>NAME    URL<br><span class="hljs-keyword">local</span>   http:<span class="hljs-regexp">//</span><span class="hljs-number">127.0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">1</span>:<span class="hljs-number">8879</span>/charts<br>stable  https:<span class="hljs-regexp">//</span>kubernetes.oss-cn-hangzhou.aliyuncs.com/charts<br></code></pre></td></tr></table></figure>
+
+<p>我们也可以在控制台安装应用的时候指定chart包地址进行下载</p>
+<p><img src="/img/2020-06-05-TKE-operation-notes-04/14.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2020-06-05-TKE-operation-notes-04/15.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>新建应用中填写指定的chart包地址进行安装即可</p>
+<h1 id="日志的采集"><a href="#日志的采集" class="headerlink" title="日志的采集"></a>日志的采集</h1><h2 id="创建日志采集"><a href="#创建日志采集" class="headerlink" title="创建日志采集"></a>创建日志采集</h2><p><img src="/img/2020-06-05-TKE-operation-notes-04/16.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>首先要在集群中安装扩展插件才能进行日志采集</p>
+<p><img src="/img/2020-06-05-TKE-operation-notes-04/17.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2020-06-05-TKE-operation-notes-04/18.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>参数说明</p>
+<ul>
+<li>名称：填写你日志采集器的名称</li>
+<li>类型：收集说明类型的日志</li>
+<li>日志源：可以指定某个容器，也可以选择全部容器（我们这里选择全部）</li>
+<li>消费端：消费端也就是日志存储的地方，我们选择CLS（没有创建CLS，要先创建）</li>
+</ul>
+<h2 id="创建CLS日志采集服务"><a href="#创建CLS日志采集服务" class="headerlink" title="创建CLS日志采集服务"></a>创建CLS日志采集服务</h2><p><img src="/img/2020-06-05-TKE-operation-notes-04/19.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2020-06-05-TKE-operation-notes-04/20.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2020-06-05-TKE-operation-notes-04/21.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p>
+<p>可以根据需要选择你日志保存的天数</p>
+<p><img src="/img/2020-06-05-TKE-operation-notes-04/22.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>参数说明：</p>
+<p>日志主题名称：采集日志名称</p>
+<p>主题分区数量：通过合并或分裂操作可以自由划分区间，从而控制服务的整体吞吐性能，最多为50个</p>
+<h2 id="收集日志"><a href="#收集日志" class="headerlink" title="收集日志"></a>收集日志</h2><p><img src="/img/2020-06-05-TKE-operation-notes-04/23.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>引用创建的日志主题，点击完成</p>
+<p><img src="/img/2020-06-05-TKE-operation-notes-04/24.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>日志采集创建完成</p>
+<h2 id="检索日志"><a href="#检索日志" class="headerlink" title="检索日志"></a>检索日志</h2><p><img src="/img/2020-06-05-TKE-operation-notes-04/25.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>日志服务中找到【检索分析】，然后选择你的主题，设置你的日志时间，可以搜索你想要查看的日志内容</p>
+<h1 id="告警设置"><a href="#告警设置" class="headerlink" title="告警设置"></a>告警设置</h1><p><img src="/img/2020-06-05-TKE-operation-notes-04/26.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2020-06-05-TKE-operation-notes-04/27.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>可以设置不同的告警指标条件，然后将告警通过不同的方式来给不同的用户组</p>
+<h1 id="事件持久化"><a href="#事件持久化" class="headerlink" title="事件持久化"></a>事件持久化</h1><p>Kubernetes Events 包括了 Kuberntes 集群的运行和各类资源的调度情况，对维护人员日常观察资源的变更以及定位问题均有帮助。TKE 支持为您的所有集群配置事件持久化功能，开启本功能后，会将您的集群事件实时导出到配置的存储端。TKE 还支持使用腾讯云提供的 PAAS 服务或开源软件对事件流水进行检索</p>
+<p><img src="/img/2020-06-05-TKE-operation-notes-04/28.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2020-06-05-TKE-operation-notes-04/29.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>可以将持久化日志存储到ES或者CLS中</p>
+<h1 id="健康检查"><a href="#健康检查" class="headerlink" title="健康检查"></a>健康检查</h1><p><img src="/img/2020-06-05-TKE-operation-notes-04/30.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>点击健康检查，选择你的集群，可以选择立即手动检查，也可以设置某个时间定时检查。</p>
+<p><img src="/img/2020-06-05-TKE-operation-notes-04/31.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>点击健康检查，选择你的集群，可以选择立即手动检查，也可以设置某个时间定时检查。</p>
+<p><img src="/img/2020-06-05-TKE-operation-notes-04/32.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>根据报告可以适当的调整集群，修复告警项</p>
+<h1 id="TecentDB部署WordPress"><a href="#TecentDB部署WordPress" class="headerlink" title="TecentDB部署WordPress"></a>TecentDB部署WordPress</h1><h2 id="创建mysql数据库"><a href="#创建mysql数据库" class="headerlink" title="创建mysql数据库"></a>创建mysql数据库</h2><p><img src="/img/2020-06-05-TKE-operation-notes-04/33.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2020-06-05-TKE-operation-notes-04/34.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2020-06-05-TKE-operation-notes-04/35.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2020-06-05-TKE-operation-notes-04/36.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p>
+<p>初始化完成后mysql数据库即创建完成</p>
+<h2 id="部署WordPress服务"><a href="#部署WordPress服务" class="headerlink" title="部署WordPress服务"></a>部署WordPress服务</h2><p><img src="/img/2020-06-05-TKE-operation-notes-04/37.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p>
+<p><img src="/img/2020-06-05-TKE-operation-notes-04/38.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2020-06-05-TKE-operation-notes-04/39.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>主要参数信息如下，其余选项保持默认设置：</p>
+<ul>
+<li>名称：输入自定义容器名称，本文以 my-wordpress为例。</li>
+<li>镜像：输入 wordpress。</li>
+<li>镜像版本（Tag）：输入 latest。</li>
+<li>镜像拉取策略：提供以下3种策略，请按需选择，本文以不进行设置使用默认策略为例。若不设置镜像拉取策略，当镜像版本为空或 latest 时，使用 Always 策略，否则使用 IfNotPresent 策略。<ul>
+<li>Always：总是从远程拉取该镜像。</li>
+<li>IfNotPresent：默认使用本地镜像，若本地无该镜像则远程拉取该镜像。</li>
+<li>Never：只使用本地镜像，若本地没有该镜像将报异常。</li>
+</ul>
+</li>
+<li>环境变量：依次输入以下配置信息：<ul>
+<li>WORDPRESS_DB_HOST &#x3D; 云数据库 MySQL 的内网 IP</li>
+<li>WORDPRESS_DB_PASSWORD &#x3D; 初始化时填写的密码</li>
+</ul>
+</li>
+<li>Service：勾选“启用”。</li>
+<li>服务访问方式：选择“提供公网访问”。</li>
+<li>负载均衡器：根据实际需求进行选择。</li>
+<li>端口映射：选择 TCP 协议，将容器端口和服务端口都设置为80 。</li>
+</ul>
+<h2 id="访问wordpress服务"><a href="#访问wordpress服务" class="headerlink" title="访问wordpress服务"></a>访问wordpress服务</h2><p><img src="/img/2020-06-05-TKE-operation-notes-04/40.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/TKE/" class="category-chain-item">TKE</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Kubernetes/">#Kubernetes</a>
+      
+        <a href="/tags/Docker/">#Docker</a>
+      
+        <a href="/tags/TKE/">#TKE</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>TKE操作笔记04</div>
+      <div>http://example.com/2020/06/05/2020-06-05-TKE-operation-notes-04/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>VashonNie</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2020年6月5日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2020/06/08/2020-06-08-TKE-study-notes/" title="TKE学习笔记">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">TKE学习笔记</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2020/06/03/2020-06-03-TKE-operation-notes-03/" title="TKE操作笔记03">
+                        <span class="hidden-mobile">TKE操作笔记03</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?bfe4709ccd8c5c9e559c89f4fd0866f3";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+  <script defer src="/js/leancloud.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

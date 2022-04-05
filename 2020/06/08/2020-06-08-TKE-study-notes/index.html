@@ -1,0 +1,801 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="VashonNie">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="该文章介绍了在TKE学习使用过程中的一些记录，tke集群中的各类组件如何选择。 TKE集群网络模式GlobalRouter 模式  GlobalRouter模式是在每个节点下起一个agent从整个VPC中指定一个子网进行通信和数据的传输。该模式其实就是在VPC下为每个节点分配一个子网进行网络通讯和传输 VPC-CNI 模式  VPC-CNI模式是在某个VPC下提前规划好多个子网，pod服务通过每个">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TKE学习笔记">
+<meta property="og:url" content="http://example.com/2020/06/08/2020-06-08-TKE-study-notes/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="该文章介绍了在TKE学习使用过程中的一些记录，tke集群中的各类组件如何选择。 TKE集群网络模式GlobalRouter 模式  GlobalRouter模式是在每个节点下起一个agent从整个VPC中指定一个子网进行通信和数据的传输。该模式其实就是在VPC下为每个节点分配一个子网进行网络通讯和传输 VPC-CNI 模式  VPC-CNI模式是在某个VPC下提前规划好多个子网，pod服务通过每个">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/2020-06-08-TKE-study-notes/1.png">
+<meta property="og:image" content="http://example.com/img/2020-06-08-TKE-study-notes/2.png">
+<meta property="og:image" content="http://example.com/img/2020-06-08-TKE-study-notes/3.png">
+<meta property="og:image" content="http://example.com/img/2020-06-08-TKE-study-notes/4.png">
+<meta property="og:image" content="http://example.com/img/2020-06-08-TKE-study-notes/5.png">
+<meta property="og:image" content="http://example.com/img/2020-06-08-TKE-study-notes/6.png">
+<meta property="og:image" content="http://example.com/img/2020-06-08-TKE-study-notes/7.png">
+<meta property="article:published_time" content="2020-06-08T06:10:00.000Z">
+<meta property="article:modified_time" content="2020-06-08T06:10:00.000Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="Kubernetes">
+<meta property="article:tag" content="Docker">
+<meta property="article:tag" content="TKE">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://example.com/img/2020-06-08-TKE-study-notes/1.png">
+  
+  
+  <title>TKE学习笔记 - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":"www.niewx.cn","path":"/","ignore_local":false}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>聂伟星</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="TKE学习笔记"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-author" aria-hidden="true"></i>
+        VashonNie
+      </span>
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2020-06-08 14:10" pubdate>
+          2020年6月8日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          3.5k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          30 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">TKE学习笔记</h1>
+            
+            <div class="markdown-body">
+              
+              <p>该文章介绍了在TKE学习使用过程中的一些记录，tke集群中的各类组件如何选择。</p>
+<h1 id="TKE集群网络模式"><a href="#TKE集群网络模式" class="headerlink" title="TKE集群网络模式"></a>TKE集群网络模式</h1><h2 id="GlobalRouter-模式"><a href="#GlobalRouter-模式" class="headerlink" title="GlobalRouter 模式"></a>GlobalRouter 模式</h2><p><img src="/img/2020-06-08-TKE-study-notes/1.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>GlobalRouter模式是在每个节点下起一个agent从整个VPC中指定一个子网进行通信和数据的传输。该模式其实就是在VPC下为每个节点分配一个子网进行网络通讯和传输</p>
+<h2 id="VPC-CNI-模式"><a href="#VPC-CNI-模式" class="headerlink" title="VPC-CNI 模式"></a>VPC-CNI 模式</h2><p><img src="/img/2020-06-08-TKE-study-notes/2.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>VPC-CNI模式是在某个VPC下提前规划好多个子网，pod服务通过每个节点上的弹性网卡从子网中随机分配ip来进行pod之间的通讯和数据传输。固定IP模式其实就是单独固定某个子网作为pod的ip和service分配使用。</p>
+<h2 id="VPC-CNI和GlobalRouter对比"><a href="#VPC-CNI和GlobalRouter对比" class="headerlink" title="VPC-CNI和GlobalRouter对比"></a>VPC-CNI和GlobalRouter对比</h2><p><img src="/img/2020-06-08-TKE-study-notes/3.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<ul>
+<li>绝大多数情况下应该选择 GlobalRouter，容器网段地址充裕，扩展性强，能适应规模较大的业务</li>
+<li>如果后期部分业务需要用到 VPC-CNI 模式，可以在 GlobalRouter 集群再开启 VPC-CNI 支持，也就是 GlobalRouter 与 VPC-CNI 混用，仅对 部分业务使用 VPC-CNI 模式  </li>
+<li>如果完全了解并接受 VPC-CNI 的各种限制，并且需要集群内所有 Pod 都用 VPC-CNI 模式，可以创建集群时选择 VPC-CNI 网络插件</li>
+</ul>
+<h1 id="TKE集群容器运行组件"><a href="#TKE集群容器运行组件" class="headerlink" title="TKE集群容器运行组件"></a>TKE集群容器运行组件</h1><h2 id="Docker"><a href="#Docker" class="headerlink" title="Docker"></a>Docker</h2><p><img src="/img/2020-06-08-TKE-study-notes/4.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>docker运行容器，主要是通过kubelet调用dockerd的进程，调用docker-containerd接口去启动对应的容器</p>
+<h2 id="Containerd"><a href="#Containerd" class="headerlink" title="Containerd"></a>Containerd</h2><p><img src="/img/2020-06-08-TKE-study-notes/5.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>containerd则主要是kubelet通过CRI插件去调用containerd的api接口来启动容器</p>
+<h2 id="docker和containerd对比"><a href="#docker和containerd对比" class="headerlink" title="docker和containerd对比"></a>docker和containerd对比</h2><ul>
+<li>containerd 方案由于绕过了 dockerd，调用链更短，组件更少，占用节点资源更少，绕过了 dockerd 本身的一些 bug，但 containerd 自身也还存在一些 bug (已修复一些，灰度中) </li>
+<li>docker 方案历史比较悠久，相对更成熟，支持 docker api，功能丰富，符合大多数人的使用习惯</li>
+</ul>
+<p>推荐使用docker方式，这样可以调用docker api以及命令，如果想对docker做优化也可以执行</p>
+<h1 id="servie的转发"><a href="#servie的转发" class="headerlink" title="servie的转发"></a>servie的转发</h1><h2 id="iptables"><a href="#iptables" class="headerlink" title="iptables"></a>iptables</h2><p><img src="/img/2020-06-08-TKE-study-notes/6.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>iptables支持的小场景下应用，更加稳定</p>
+<h2 id="ipvs"><a href="#ipvs" class="headerlink" title="ipvs"></a>ipvs</h2><p><img src="/img/2020-06-08-TKE-study-notes/7.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<ul>
+<li>IPVS为大型集群提供了更好的可扩展性和性能。（规则的存储方式使用的数据结构更高效）</li>
+<li>IPVS支持比iptables更复杂的负载平衡算法（最小负载，最少连接，位置，加权等）。</li>
+<li>IPVS支持服务器健康检查和连接重试等。</li>
+</ul>
+<h1 id="集群故障定位"><a href="#集群故障定位" class="headerlink" title="集群故障定位"></a>集群故障定位</h1><h2 id="pod退出错误码分析"><a href="#pod退出错误码分析" class="headerlink" title="pod退出错误码分析"></a>pod退出错误码分析</h2><ul>
+<li>129-255 表示进程因外界中断信号退出，最常见的是 137，表示被 SIGKILL 杀死，可能是 Cgroup OOM，系统 OOM，存 活检查失败或者被其它进程杀死导致 </li>
+<li>1-128 表示进程主动退出 (只是约定)，具体状态码含义取决于应用程序逻辑；有时主动退出也会是 255 状态码: 代码里使 用类似 exit(-1) 时，-1 被自动转成 255，通常状态码为 1 和 255 是一般性错误，看不错具体含义，需要结合日志分析</li>
+</ul>
+<h2 id="容器内抓包"><a href="#容器内抓包" class="headerlink" title="容器内抓包"></a>容器内抓包</h2><p>nsenter命令仅进入该容器的网络命名空间，使用宿主机的命令调试容器网络</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs bash">[root@VM_0_13_centos kubernetes-elasticsearch]<span class="hljs-comment"># docker ps</span><br>CONTAINER ID        IMAGE                                COMMAND                  CREATED             STATUS                PORTS                                         NAMES<br>1421f7bbc523        goharbor/nginx-photon:v2.0.0         <span class="hljs-string">&quot;nginx -g &#x27;daemon of…&quot;</span>   6 days ago          Up 6 days (healthy)   0.0.0.0:80-&gt;8080/tcp, 0.0.0.0:443-&gt;8443/tcp   nginx<br>e9ab5bf15849        goharbor/harbor-jobservice:v2.0.0    <span class="hljs-string">&quot;/harbor/entrypoint.…&quot;</span>   6 days ago          Up 6 days (healthy)                                                 harbor-jobservice<br>d04f14741f3d        goharbor/harbor-core:v2.0.0          <span class="hljs-string">&quot;/harbor/entrypoint.…&quot;</span>   6 days ago          Up 6 days (healthy)                                                 harbor-core<br>c31d291b2425        goharbor/redis-photon:v2.0.0         <span class="hljs-string">&quot;redis-server /etc/r…&quot;</span>   6 days ago          Up 6 days (healthy)   6379/tcp                                      redis<br>13f1de98a114        goharbor/registry-photon:v2.0.0      <span class="hljs-string">&quot;/home/harbor/entryp…&quot;</span>   6 days ago          Up 6 days (healthy)   5000/tcp                                      registry<br>9e154ff22c54        goharbor/harbor-registryctl:v2.0.0   <span class="hljs-string">&quot;/home/harbor/start.…&quot;</span>   6 days ago          Up 6 days (healthy)                                                 registryctl<br>051736f00111        goharbor/harbor-db:v2.0.0            <span class="hljs-string">&quot;/docker-entrypoint.…&quot;</span>   6 days ago          Up 6 days (healthy)   5432/tcp                                      harbor-db<br>b10b982a225a        goharbor/harbor-portal:v2.0.0        <span class="hljs-string">&quot;nginx -g &#x27;daemon of…&quot;</span>   6 days ago          Up 6 days (healthy)   8080/tcp                                      harbor-portal<br>3a0d7ec954c5        goharbor/harbor-log:v2.0.0           <span class="hljs-string">&quot;/bin/sh -c /usr/loc…&quot;</span>   6 days ago          Up 6 days (healthy)   127.0.0.1:1514-&gt;10514/tcp                     harbor-log<br>[root@VM_0_13_centos kubernetes-elasticsearch]<span class="hljs-comment"># nsenter --target 6128</span><br>[root@VM_0_13_centos kubernetes-elasticsearch]<span class="hljs-comment"># docker inspect -f &#123;&#123;.State.Pid&#125;&#125; 1421f7bbc523</span><br>6128<br>[root@VM_0_13_centos kubernetes-elasticsearch]<span class="hljs-comment"># nsenter -n --target 6128</span><br></code></pre></td></tr></table></figure>
+
+<p>进入之后可以执行对应的ip address，ping，telnet，ss，tcpdump命令等</p>
+<figure class="highlight pf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs pf">[root@VM_0_13_centos kubernetes-elasticsearch]<span class="hljs-comment"># ip addr</span><br><span class="hljs-number">1</span>: lo: <span class="hljs-variable">&lt;LOOPBACK,UP,LOWER_UP&gt;</span> mtu <span class="hljs-number">65536</span> qdisc noqueue <span class="hljs-keyword">state</span> UNKNOWN <span class="hljs-keyword">group</span> <span class="hljs-keyword">default</span> qlen <span class="hljs-number">1000</span><br>    link/loopback <span class="hljs-number">00</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00</span> brd <span class="hljs-number">00</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00</span><br>    <span class="hljs-keyword">inet</span> <span class="hljs-number">127.0</span>.<span class="hljs-number">0.1</span>/<span class="hljs-number">8</span> scope host lo<br>       valid_lft forever preferred_lft forever<br><span class="hljs-number">31887</span>: eth0@if31888: <span class="hljs-variable">&lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt;</span> mtu <span class="hljs-number">1500</span> qdisc noqueue <span class="hljs-keyword">state</span> UP <span class="hljs-keyword">group</span> <span class="hljs-keyword">default</span><br>    link/ether <span class="hljs-number">02</span>:<span class="hljs-number">42</span>:ac:<span class="hljs-number">1</span>f:<span class="hljs-number">00</span>:<span class="hljs-number">0</span>a brd ff:ff:ff:ff:ff:ff link-netnsid <span class="hljs-number">0</span><br>    <span class="hljs-keyword">inet</span> <span class="hljs-number">172.31</span>.<span class="hljs-number">0.10</span>/<span class="hljs-number">16</span> brd <span class="hljs-number">172.31</span>.<span class="hljs-number">255.255</span> scope <span class="hljs-keyword">global</span> eth0<br>       valid_lft forever preferred_lft forever<br>[root@VM_0_13_centos kubernetes-elasticsearch]<span class="hljs-comment"># tcpdump -i eth0 tcp</span><br>tcpdump: verbose output suppressed, use -v or -vv <span class="hljs-keyword">for</span> full protocol decode<br>listening <span class="hljs-keyword">on</span> eth0, link-type EN10MB (Ethernet), capture size <span class="hljs-number">262144</span> bytes<br></code></pre></td></tr></table></figure>
+<h2 id="在pod中通过busybox容器来修改系统参数失败"><a href="#在pod中通过busybox容器来修改系统参数失败" class="headerlink" title="在pod中通过busybox容器来修改系统参数失败"></a>在pod中通过busybox容器来修改系统参数失败</h2><p>现在的版本中集群中如果节点使用TKE订制镜像，无法修改pod的内核参数，如果需要支持内核参数的修改，可以采用官方的centos和ubuntu镜像。</p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/TKE/" class="category-chain-item">TKE</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Kubernetes/">#Kubernetes</a>
+      
+        <a href="/tags/Docker/">#Docker</a>
+      
+        <a href="/tags/TKE/">#TKE</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>TKE学习笔记</div>
+      <div>http://example.com/2020/06/08/2020-06-08-TKE-study-notes/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>VashonNie</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2020年6月8日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2020/06/10/2020-06-10-Build-prometheus-on-TKE/" title="TKE集群上搭建prometheus">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">TKE集群上搭建prometheus</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2020/06/05/2020-06-05-TKE-operation-notes-04/" title="TKE操作笔记04">
+                        <span class="hidden-mobile">TKE操作笔记04</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?bfe4709ccd8c5c9e559c89f4fd0866f3";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+  <script defer src="/js/leancloud.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

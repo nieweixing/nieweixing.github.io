@@ -1,0 +1,802 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="VashonNie">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="在Kubernetes环境中，使用Kubernetes Ingress资源来指定需要暴露到集群外的服务。 在 Istio 服务网格中，更好的选择（同样适用于 Kubernetes 及其他环境）是使用一种新的配置模型，名为 Istio Gateway。 Gateway 允许应用一些诸如监控和路由规则的 Istio 特性来管理进入集群的流量。   ingress网关ingress是一个入口网关，给服务">
+<meta property="og:type" content="article">
+<meta property="og:title" content="istio入门系列之Gateway网关">
+<meta property="og:url" content="http://example.com/2020/11/30/2020-11-30-Gateway-gateway-of-istio-entry-series/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="在Kubernetes环境中，使用Kubernetes Ingress资源来指定需要暴露到集群外的服务。 在 Istio 服务网格中，更好的选择（同样适用于 Kubernetes 及其他环境）是使用一种新的配置模型，名为 Istio Gateway。 Gateway 允许应用一些诸如监控和路由规则的 Istio 特性来管理进入集群的流量。   ingress网关ingress是一个入口网关，给服务">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/2020-11-30-Gateway-gateway-of-istio-entry-series/1.png">
+<meta property="og:image" content="http://example.com/img/2020-11-30-Gateway-gateway-of-istio-entry-series/2.png">
+<meta property="og:image" content="http://example.com/img/2020-11-30-Gateway-gateway-of-istio-entry-series/3.png">
+<meta property="article:published_time" content="2020-11-30T06:10:00.000Z">
+<meta property="article:modified_time" content="2020-11-30T06:10:00.000Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="Kubernetes">
+<meta property="article:tag" content="Istio">
+<meta property="article:tag" content="Gateway">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://example.com/img/2020-11-30-Gateway-gateway-of-istio-entry-series/1.png">
+  
+  
+  <title>istio入门系列之Gateway网关 - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":"www.niewx.cn","path":"/","ignore_local":false}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>聂伟星</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="istio入门系列之Gateway网关"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-author" aria-hidden="true"></i>
+        VashonNie
+      </span>
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2020-11-30 14:10" pubdate>
+          2020年11月30日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          5.4k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          45 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">istio入门系列之Gateway网关</h1>
+            
+            <div class="markdown-body">
+              
+              <p>在Kubernetes环境中，使用Kubernetes Ingress资源来指定需要暴露到集群外的服务。 在 Istio 服务网格中，更好的选择（同样适用于 Kubernetes 及其他环境）是使用一种新的配置模型，名为 Istio Gateway。 Gateway 允许应用一些诸如监控和路由规则的 Istio 特性来管理进入集群的流量。</p>
+<p><img src="/img/2020-11-30-Gateway-gateway-of-istio-entry-series/1.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<h1 id="ingress网关"><a href="#ingress网关" class="headerlink" title="ingress网关"></a>ingress网关</h1><p>ingress是一个入口网关，给服务提供一个访问入口，下面我们来给bookinfo配置一个访问的入口来访问details。</p>
+<p><img src="/img/2020-11-30-Gateway-gateway-of-istio-entry-series/2.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><code class="hljs yaml">[<span class="hljs-string">root@VM-0-13-centos</span> <span class="hljs-string">bookinfo</span>]<span class="hljs-comment"># kubectl create -f - &lt;&lt;EOF</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">networking.istio.io/v1alpha3</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Gateway</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">test-gateway</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">istio:</span> <span class="hljs-string">ingressgateway</span><br>  <span class="hljs-attr">servers:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">port:</span><br>      <span class="hljs-attr">number:</span> <span class="hljs-number">80</span><br>      <span class="hljs-attr">name:</span> <span class="hljs-string">http</span><br>      <span class="hljs-attr">protocol:</span> <span class="hljs-string">HTTP</span><br>    <span class="hljs-attr">hosts:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-string">&quot;*&quot;</span><br><span class="hljs-meta">---</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">networking.istio.io/v1alpha3</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">VirtualService</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">test-gateway</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">hosts:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-string">&quot;*&quot;</span><br>  <span class="hljs-attr">gateways:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-string">test-gateway</span><br>  <span class="hljs-attr">http:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">match:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-attr">uri:</span><br>        <span class="hljs-attr">prefix:</span> <span class="hljs-string">/details</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-attr">uri:</span><br>        <span class="hljs-attr">exact:</span> <span class="hljs-string">/health</span><br>    <span class="hljs-attr">route:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-attr">destination:</span><br>        <span class="hljs-attr">host:</span> <span class="hljs-string">details</span><br>        <span class="hljs-attr">port:</span><br>          <span class="hljs-attr">number:</span> <span class="hljs-number">9080</span><br><span class="hljs-string">EOF</span><br></code></pre></td></tr></table></figure>
+
+<p>我们在网关只配置访问入口，具体的路由规则在VirtualService进行配置。</p>
+<p>下面我们再来做一个测试，通过配置ingress网关来访问我们部署的httpbin服务</p>
+<p>首先部署一个httpbin的服务</p>
+<figure class="highlight subunit"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs subunit">[root@VM<span class="hljs-string">-0</span><span class="hljs-string">-13</span>-centos istio<span class="hljs-string">-1</span>.5.1]# kubectl apply -f samples/httpbin/httpbin.yaml<br></code></pre></td></tr></table></figure>
+
+<p>查看一下ingressgateway的svc对应的公网ip，假如你没有负载均衡也可以用nodeport来进行配置</p>
+<figure class="highlight dns"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs dns">[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">13</span>-centos istio-<span class="hljs-number">1</span>.<span class="hljs-number">5</span>.<span class="hljs-number">1</span>]# kubectl get svc -n istio-system | grep gateway<br>istio-ingressgateway        LoadBalancer   <span class="hljs-number">172.16.99.203</span>    <span class="hljs-number">42.194.246.130</span>   <span class="hljs-number">15020:32289</span>/TCP,<span class="hljs-number">80:30066</span>/TCP,<span class="hljs-number">443:32311</span>/TCP,<span class="hljs-number">15029:31532</span>/TCP,<span class="hljs-number">15030:31660</span>/TCP,<span class="hljs-number">15031:30183</span>/TCP,<span class="hljs-number">15032:30388</span>/TCP,<span class="hljs-number">31400:30952</span>/TCP,<span class="hljs-number">15443:31259</span>/TCP   <span class="hljs-number">3d</span>19h<br></code></pre></td></tr></table></figure>
+
+<p>部署ingressgateway来访问httpbin</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-string">$</span> <span class="hljs-string">kubectl</span> <span class="hljs-string">apply</span> <span class="hljs-string">-f</span> <span class="hljs-bullet">-</span> <span class="hljs-string">&lt;&lt;EOF</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">networking.istio.io/v1alpha3</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Gateway</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">httpbin-gateway</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">istio:</span> <span class="hljs-string">ingressgateway</span> <span class="hljs-comment"># use Istio default gateway implementation</span><br>  <span class="hljs-attr">servers:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">port:</span><br>      <span class="hljs-attr">number:</span> <span class="hljs-number">80</span><br>      <span class="hljs-attr">name:</span> <span class="hljs-string">http</span><br>      <span class="hljs-attr">protocol:</span> <span class="hljs-string">HTTP</span><br>    <span class="hljs-attr">hosts:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-string">&quot;httpbin.example.com&quot;</span><br><span class="hljs-string">EOF</span><br></code></pre></td></tr></table></figure>
+
+<p>为通过 Gateway 的入口流量配置路由</p>
+<figure class="highlight nestedtext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs nestedtext"><span class="hljs-attribute">$ kubectl apply -f - &lt;&lt;EOF</span><br><span class="hljs-attribute">apiVersion</span><span class="hljs-punctuation">:</span> <span class="hljs-string">networking.istio.io/v1alpha3</span><br><span class="hljs-attribute">kind</span><span class="hljs-punctuation">:</span> <span class="hljs-string">VirtualService</span><br><span class="hljs-attribute">metadata</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-attribute">name</span><span class="hljs-punctuation">:</span> <span class="hljs-string">httpbin</span><br><span class="hljs-attribute">spec</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-attribute">hosts</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-string">&quot;httpbin.example.com&quot;</span><br>  <span class="hljs-attribute">gateways</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-string">httpbin-gateway</span><br>  <span class="hljs-attribute">http</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-string">match:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-string">uri:</span><br>        <span class="hljs-attribute">prefix</span><span class="hljs-punctuation">:</span> <span class="hljs-string">/status</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-string">uri:</span><br>        <span class="hljs-attribute">prefix</span><span class="hljs-punctuation">:</span> <span class="hljs-string">/delay</span><br>    <span class="hljs-attribute">route</span><span class="hljs-punctuation">:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-string">destination:</span><br>        <span class="hljs-attribute">port</span><span class="hljs-punctuation">:</span><br>          <span class="hljs-attribute">number</span><span class="hljs-punctuation">:</span> <span class="hljs-string">8000</span><br>        <span class="hljs-attribute">host</span><span class="hljs-punctuation">:</span> <span class="hljs-string">httpbin</span><br>EOF<br></code></pre></td></tr></table></figure>
+
+<p>已为 httpbin 服务创建了虚拟服务配置，包含两个路由规则，允许流量流向路径 &#x2F;status 和 &#x2F;delay。</p>
+<p>gateways 列表规约了哪些请求允许通过 httpbin-gateway 网关。 所有其他外部请求均被拒绝并返回 404 响应。</p>
+<p>我们来通过网关svc的公网ip来进行测试一下</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs yaml">[<span class="hljs-string">root@VM-0-13-centos</span> <span class="hljs-string">istio-1.5.1</span>]<span class="hljs-comment"># curl -I -HHost:httpbin.example.com http://42.194.246.130/status/200</span><br><span class="hljs-string">HTTP/1.1</span> <span class="hljs-number">200</span> <span class="hljs-string">OK</span><br><span class="hljs-attr">server:</span> <span class="hljs-string">istio-envoy</span><br><span class="hljs-attr">date:</span> <span class="hljs-string">Thu,</span> <span class="hljs-number">03</span> <span class="hljs-string">Dec</span> <span class="hljs-number">2020 04:04:34 </span><span class="hljs-string">GMT</span><br><span class="hljs-attr">content-type:</span> <span class="hljs-string">text/html;</span> <span class="hljs-string">charset=utf-8</span><br><span class="hljs-attr">access-control-allow-origin:</span> <span class="hljs-string">*</span><br><span class="hljs-attr">access-control-allow-credentials:</span> <span class="hljs-literal">true</span><br><span class="hljs-attr">content-length:</span> <span class="hljs-number">0</span><br><span class="hljs-attr">x-envoy-upstream-service-time:</span> <span class="hljs-number">6</span><br><br>[<span class="hljs-string">root@VM-0-13-centos</span> <span class="hljs-string">istio-1.5.1</span>]<span class="hljs-comment"># curl -I -HHost:httpbin.example.com http://42.194.246.130/headers</span><br><span class="hljs-string">HTTP/1.1</span> <span class="hljs-number">404</span> <span class="hljs-string">Not</span> <span class="hljs-string">Found</span><br><span class="hljs-attr">date:</span> <span class="hljs-string">Thu,</span> <span class="hljs-number">03</span> <span class="hljs-string">Dec</span> <span class="hljs-number">2020 04:04:48 </span><span class="hljs-string">GMT</span><br><span class="hljs-attr">server:</span> <span class="hljs-string">istio-envoy</span><br><span class="hljs-attr">transfer-encoding:</span> <span class="hljs-string">chunked</span><br></code></pre></td></tr></table></figure>
+
+<p>使用 -H 标识将 HTTP 头部参数 Host 设置为 “httpbin.example.com”。 该操作为必须操作，因为 ingress Gateway 已被配置用来处理 “httpbin.example.com” 的服务请求，而在测试环境中并没有为该主机绑定 DNS 而是简单直接地向 ingress IP 发送请求</p>
+<h1 id="egress网关"><a href="#egress网关" class="headerlink" title="egress网关"></a>egress网关</h1><p>由于默认情况下，来自 Istio-enable Pod 的所有出站流量都会重定向到其 Sidecar 代理，群集外部 URL 的可访问性取决于代理的配置。默认情况下，Istio 将 Envoy 代理配置为允许传递未知服务的请求。尽管这为入门 Istio 带来了方便，但是，通常情况下，配置更严格的控制是更可取的。</p>
+<p><img src="/img/2020-11-30-Gateway-gateway-of-istio-entry-series/3.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>三种访问外部服务的方法：</p>
+<ul>
+<li>允许 Envoy 代理将请求传递到未在网格内配置过的服务。</li>
+<li>配置 service entries 以提供对外部服务的受控访问。</li>
+<li>对于特定范围的 IP，完全绕过 Envoy 代理。</li>
+</ul>
+<p>下面我们将httpbin注册为网格内部的服务，并配置流控策略。</p>
+<h2 id="创建一个sleep服务访问httpbin接口"><a href="#创建一个sleep服务访问httpbin接口" class="headerlink" title="创建一个sleep服务访问httpbin接口"></a>创建一个sleep服务访问httpbin接口</h2><figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs dts">[root@VM<span class="hljs-number">-0</span><span class="hljs-number">-13</span>-centos istio<span class="hljs-number">-1.5</span><span class="hljs-number">.1</span>]<span class="hljs-meta"># kubectl apply -f samples/sleep/sleep.yaml</span><br>serviceaccount/sleep created<br>service/sleep created<br>deployment.apps/sleep created<br>[root@VM<span class="hljs-number">-0</span><span class="hljs-number">-13</span>-centos istio<span class="hljs-number">-1.5</span><span class="hljs-number">.1</span>]<span class="hljs-meta"># kubectl apply -f - &lt;&lt; EOF </span><br><span class="hljs-symbol">apiVersion:</span> networking.istio.io/v1alpha3<br><span class="hljs-symbol">kind:</span> ServiceEntry<br><span class="hljs-symbol">metadata:</span><br><span class="hljs-symbol">  name:</span> httpbin-ext<br><span class="hljs-symbol">spec:</span><br><span class="hljs-symbol">  hosts:</span><br>  - httpbin.org<br><span class="hljs-symbol">  ports:</span><br>  - number: <span class="hljs-number">80</span><br><span class="hljs-symbol">    name:</span> http<br><span class="hljs-symbol">    protocol:</span> HTTP<br><span class="hljs-symbol">  resolution:</span> DNS<br><span class="hljs-symbol">  location:</span> MESH_EXTERNAL<br>EOF<br>serviceentry.networking.istio.io/httpbin-ext created<br>[root@VM<span class="hljs-number">-0</span><span class="hljs-number">-13</span>-centos istio<span class="hljs-number">-1.5</span><span class="hljs-number">.1</span>]<span class="hljs-meta"># kubectl get se</span><br>NAME          HOSTS           LOCATION        RESOLUTION   AGE<br>httpbin-ext   [httpbin.org]   MESH_EXTERNAL   DNS          <span class="hljs-number">11</span>s<br><br>[root@VM<span class="hljs-number">-0</span><span class="hljs-number">-13</span>-centos istio<span class="hljs-number">-1.5</span><span class="hljs-number">.1</span>]<span class="hljs-meta"># kubectl exec -it sleep-5b7bf56c54-krj9n -c sleep -- curl http:<span class="hljs-comment">//httpbin.org/ip</span></span><br><span class="hljs-punctuation">&#123;</span><br>  <span class="hljs-string">&quot;origin&quot;</span>: <span class="hljs-string">&quot;106.53.155.140&quot;</span><br><span class="hljs-punctuation">&#125;</span><br><br></code></pre></td></tr></table></figure>
+<h2 id="配置egress网关"><a href="#配置egress网关" class="headerlink" title="配置egress网关"></a>配置egress网关</h2><figure class="highlight nestedtext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs nestedtext"><span class="hljs-attribute">[root@VM-0-13-centos istio-1.5.1]# kubectl apply -f - &lt;&lt; EOF</span><br><span class="hljs-attribute">apiVersion</span><span class="hljs-punctuation">:</span> <span class="hljs-string">networking.istio.io/v1alpha3</span><br><span class="hljs-attribute">kind</span><span class="hljs-punctuation">:</span> <span class="hljs-string">Gateway</span><br><span class="hljs-attribute">metadata</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-attribute">name</span><span class="hljs-punctuation">:</span> <span class="hljs-string">istio-egressgateway</span><br><span class="hljs-attribute">spec</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-attribute">selector</span><span class="hljs-punctuation">:</span><br>    <span class="hljs-attribute">istio</span><span class="hljs-punctuation">:</span> <span class="hljs-string">egressgateway</span><br>  <span class="hljs-attribute">servers</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-string">port:</span><br>      <span class="hljs-attribute">number</span><span class="hljs-punctuation">:</span> <span class="hljs-string">80</span><br>      <span class="hljs-attribute">name</span><span class="hljs-punctuation">:</span> <span class="hljs-string">http</span><br>      <span class="hljs-attribute">protocol</span><span class="hljs-punctuation">:</span> <span class="hljs-string">HTTP</span><br>    <span class="hljs-attribute">hosts</span><span class="hljs-punctuation">:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-string">httpbin.org</span><br>EOF<br></code></pre></td></tr></table></figure>
+
+<h2 id="配置VirtualService和DestinationRule"><a href="#配置VirtualService和DestinationRule" class="headerlink" title="配置VirtualService和DestinationRule"></a>配置VirtualService和DestinationRule</h2><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><code class="hljs yaml">[<span class="hljs-string">root@VM-0-13-centos</span> <span class="hljs-string">istio-1.5.1</span>]<span class="hljs-comment"># kubectl apply -f - &lt;&lt; EOF</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">networking.istio.io/v1alpha3</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">VirtualService</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">vs-for-egressgateway</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">hosts:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-string">httpbin.org</span><br>  <span class="hljs-attr">gateways:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-string">istio-egressgateway</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-string">mesh</span><br>  <span class="hljs-attr">http:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">match:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-attr">gateways:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">mesh</span><br>      <span class="hljs-attr">port:</span> <span class="hljs-number">80</span><br>    <span class="hljs-attr">route:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-attr">destination:</span><br>        <span class="hljs-attr">host:</span> <span class="hljs-string">istio-egressgateway.istio-system.svc.cluster.local</span><br>        <span class="hljs-attr">subset:</span> <span class="hljs-string">httpbin</span><br>        <span class="hljs-attr">port:</span><br>          <span class="hljs-attr">number:</span> <span class="hljs-number">80</span><br>      <span class="hljs-attr">weight:</span> <span class="hljs-number">100</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">match:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-attr">gateways:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">istio-egressgateway</span><br>      <span class="hljs-attr">port:</span> <span class="hljs-number">80</span><br>    <span class="hljs-attr">route:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-attr">destination:</span><br>        <span class="hljs-attr">host:</span> <span class="hljs-string">httpbin.org</span><br>        <span class="hljs-attr">port:</span><br>          <span class="hljs-attr">number:</span> <span class="hljs-number">80</span><br>      <span class="hljs-attr">weight:</span> <span class="hljs-number">100</span><br><span class="hljs-meta">---</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">networking.istio.io/v1alpha3</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">DestinationRule</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">dr-for-egressgateway</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">host:</span> <span class="hljs-string">istio-egressgateway.istio-system.svc.cluster.local</span><br>  <span class="hljs-attr">subsets:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">httpbin</span><br><span class="hljs-string">EOF</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="进行测试"><a href="#进行测试" class="headerlink" title="进行测试"></a>进行测试</h2><figure class="highlight gherkin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs gherkin">[root<span class="hljs-meta">@VM-0-13-centos</span> istio-1.5.1]<span class="hljs-comment"># kubectl exec -it sleep-5b7bf56c54-krj9n -c sleep -- curl http://httpbin.org/ip</span><br>&#123;<br>  <span class="hljs-string">&quot;origin&quot;</span>: <span class="hljs-string">&quot;10.0.1.38, 106.53.152.241&quot;</span><br>&#125;<br><br>[root<span class="hljs-meta">@VM-0-13-centos</span> tke]<span class="hljs-comment"># kubectl logs -f istio-egressgateway-666956b747-zp4vh -n istio-system</span><br><br>[2020-12-02T12:51:35.467Z] <span class="hljs-string">&quot;GET /ip HTTP/2&quot;</span> 200 - <span class="hljs-string">&quot;-&quot;</span> <span class="hljs-string">&quot;-&quot;</span> 0 44 462 461 <span class="hljs-string">&quot;10.0.1.38&quot;</span> <span class="hljs-string">&quot;curl/7.69.1&quot;</span> <span class="hljs-string">&quot;fdfc6cbd-a888-96b1-a45e-e6edfe68caec&quot;</span> <span class="hljs-string">&quot;httpbin.org&quot;</span> <span class="hljs-string">&quot;3.230.36.204:80&quot;</span> outbound|<span class="hljs-string">80</span>||<span class="hljs-string">httpbin.org 10.0.2.116:38220 10.0.2.116:80 10.0.1.38:37650 - -</span><br></code></pre></td></tr></table></figure>
+
+<p>从上面发现，我们发现到httpbind的请求都是通过egress去访问的。</p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Istio/" class="category-chain-item">Istio</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Kubernetes/">#Kubernetes</a>
+      
+        <a href="/tags/Istio/">#Istio</a>
+      
+        <a href="/tags/Gateway/">#Gateway</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>istio入门系列之Gateway网关</div>
+      <div>http://example.com/2020/11/30/2020-11-30-Gateway-gateway-of-istio-entry-series/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>VashonNie</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2020年11月30日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2020/12/01/2020-12-01-Traffic-shift-of-istio-entry-series/" title="istio入门系列之流量转移">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">istio入门系列之流量转移</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2020/11/30/2020-11-30-ServiceEntry-of-istio-entry-series/" title="istio入门系列之ServiceEntry">
+                        <span class="hidden-mobile">istio入门系列之ServiceEntry</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?bfe4709ccd8c5c9e559c89f4fd0866f3";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+  <script defer src="/js/leancloud.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

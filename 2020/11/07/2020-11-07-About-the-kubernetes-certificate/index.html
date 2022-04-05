@@ -1,0 +1,869 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="VashonNie">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="本篇文章主要介绍了k8s中用的证书和组件之间是如何进行认证访问的。 k8s证书介绍众所周知。Kubernetes 需要 PKI 证书才能进行基于 TLS 的身份验证。如果你是使用kubeadm安装的 Kubernetes， 则会自动生成集群所需的证书。但是如果是通过二进制搭建，所有的证书是需要自己生成的，这里我们说说集群必需的证书。  服务器单向认证：只需要服务器端提供证书，客户端通过服务器端证书">
+<meta property="og:type" content="article">
+<meta property="og:title" content="关于Kubernetes证书的那点事">
+<meta property="og:url" content="http://example.com/2020/11/07/2020-11-07-About-the-kubernetes-certificate/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="本篇文章主要介绍了k8s中用的证书和组件之间是如何进行认证访问的。 k8s证书介绍众所周知。Kubernetes 需要 PKI 证书才能进行基于 TLS 的身份验证。如果你是使用kubeadm安装的 Kubernetes， 则会自动生成集群所需的证书。但是如果是通过二进制搭建，所有的证书是需要自己生成的，这里我们说说集群必需的证书。  服务器单向认证：只需要服务器端提供证书，客户端通过服务器端证书">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/2020-11-07-About-the-kubernetes-certificate/1.png">
+<meta property="og:image" content="http://example.com/img/2020-11-07-About-the-kubernetes-certificate/2.png">
+<meta property="article:published_time" content="2020-11-07T06:10:00.000Z">
+<meta property="article:modified_time" content="2020-11-07T06:10:00.000Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="Kubernetes">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://example.com/img/2020-11-07-About-the-kubernetes-certificate/1.png">
+  
+  
+  <title>关于Kubernetes证书的那点事 - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":"www.niewx.cn","path":"/","ignore_local":false}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>聂伟星</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="关于Kubernetes证书的那点事"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-author" aria-hidden="true"></i>
+        VashonNie
+      </span>
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2020-11-07 14:10" pubdate>
+          2020年11月7日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          39k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          322 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">关于Kubernetes证书的那点事</h1>
+            
+            <div class="markdown-body">
+              
+              <p>本篇文章主要介绍了k8s中用的证书和组件之间是如何进行认证访问的。</p>
+<h1 id="k8s证书介绍"><a href="#k8s证书介绍" class="headerlink" title="k8s证书介绍"></a>k8s证书介绍</h1><p>众所周知。Kubernetes 需要 PKI 证书才能进行基于 TLS 的身份验证。如果你是使用kubeadm安装的 Kubernetes， 则会自动生成集群所需的证书。但是如果是通过二进制搭建，所有的证书是需要自己生成的，这里我们说说集群必需的证书。</p>
+<ul>
+<li>服务器单向认证：只需要服务器端提供证书，客户端通过服务器端证书验证服务的身份，但服务器并不验证客户端的身份。这种情况一般适用于对 Internet 开放的服务，例如搜索引擎网站，任何客户端都可以连接到服务器上进行访问，但客户端需要验证服务器的身份，以避免连接到伪造的恶意服务器。</li>
+<li>双向 TLS 认证：除了客户端需要验证服务器的证书，服务器也要通过客户端证书验证客户端的身份。这种情况下服务器提供的是敏感信息，只允许特定身份的客户端访问</li>
+</ul>
+<p>Kubernetes为了安全性，都是采用双向认证。通常我们在部署k8s时候，kubeadm会自动生成集群所需要的证书，下面我们就这些证书一一给大家进行讲解。<br>这是我们用kubeadm搭建完一个集群后再&#x2F;etc&#x2F;kubernetes目录下所生成的文件</p>
+<figure class="highlight gherkin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><code class="hljs gherkin">[root<span class="hljs-meta">@VM-4-3-centos</span> etc]<span class="hljs-comment"># tree kubernetes/</span><br>kubernetes/<br>|<span class="hljs-string">-- admin.conf</span><br><span class="hljs-string"></span>|<span class="hljs-string">-- controller-manager.conf</span><br><span class="hljs-string"></span>|<span class="hljs-string">-- kubelet.conf</span><br><span class="hljs-string"></span>|<span class="hljs-string">-- scheduler.conf</span><br><span class="hljs-string"></span>|<span class="hljs-string">-- manifests</span><br><span class="hljs-string"></span>|<span class="hljs-string">   </span>|<span class="hljs-string">-- etcd.yaml</span><br><span class="hljs-string"></span>|<span class="hljs-string">   </span>|<span class="hljs-string">-- kube-apiserver.yaml</span><br><span class="hljs-string"></span>|<span class="hljs-string">   </span>|<span class="hljs-string">-- kube-controller-manager.yaml</span><br><span class="hljs-string"></span>|<span class="hljs-string">   `-- kube-scheduler.yaml</span><br><span class="hljs-string"></span>|<span class="hljs-string">-- pki</span><br><span class="hljs-string"></span>|<span class="hljs-string">   </span>|<span class="hljs-string">-- apiserver.crt</span><br><span class="hljs-string"></span>|<span class="hljs-string">   </span>|<span class="hljs-string">-- apiserver-etcd-client.crt</span><br><span class="hljs-string"></span>|<span class="hljs-string">   </span>|<span class="hljs-string">-- apiserver-etcd-client.key</span><br><span class="hljs-string"></span>|<span class="hljs-string">   </span>|<span class="hljs-string">-- apiserver.key</span><br><span class="hljs-string"></span>|<span class="hljs-string">   </span>|<span class="hljs-string">-- apiserver-kubelet-client.crt</span><br><span class="hljs-string"></span>|<span class="hljs-string">   </span>|<span class="hljs-string">-- apiserver-kubelet-client.key</span><br><span class="hljs-string"></span>|<span class="hljs-string">   </span>|<span class="hljs-string">-- ca.crt</span><br><span class="hljs-string"></span>|<span class="hljs-string">   </span>|<span class="hljs-string">-- ca.key</span><br><span class="hljs-string"></span>|<span class="hljs-string">   </span>|<span class="hljs-string">-- etcd</span><br><span class="hljs-string"></span>|<span class="hljs-string">   </span>|<span class="hljs-string">   </span>|<span class="hljs-string">-- ca.crt</span><br><span class="hljs-string"></span>|<span class="hljs-string">   </span>|<span class="hljs-string">   </span>|<span class="hljs-string">-- ca.key</span><br><span class="hljs-string"></span>|<span class="hljs-string">   </span>|<span class="hljs-string">   </span>|<span class="hljs-string">-- healthcheck-client.crt</span><br><span class="hljs-string"></span>|<span class="hljs-string">   </span>|<span class="hljs-string">   </span>|<span class="hljs-string">-- healthcheck-client.key</span><br><span class="hljs-string"></span>|<span class="hljs-string">   </span>|<span class="hljs-string">   </span>|<span class="hljs-string">-- peer.crt</span><br><span class="hljs-string"></span>|<span class="hljs-string">   </span>|<span class="hljs-string">   </span>|<span class="hljs-string">-- peer.key</span><br><span class="hljs-string"></span>|<span class="hljs-string">   </span>|<span class="hljs-string">   </span>|<span class="hljs-string">-- server.crt</span><br><span class="hljs-string"></span>|<span class="hljs-string">   </span>|<span class="hljs-string">   `-- server.key</span><br><span class="hljs-string"></span>|<span class="hljs-string">   </span>|<span class="hljs-string">-- front-proxy-ca.crt</span><br><span class="hljs-string"></span>|<span class="hljs-string">   </span>|<span class="hljs-string">-- front-proxy-ca.key</span><br><span class="hljs-string"></span>|<span class="hljs-string">   </span>|<span class="hljs-string">-- front-proxy-client.crt</span><br><span class="hljs-string"></span>|<span class="hljs-string">   </span>|<span class="hljs-string">-- front-proxy-client.key</span><br><span class="hljs-string"></span>|<span class="hljs-string">   </span>|<span class="hljs-string">-- sa.key</span><br><span class="hljs-string"></span>|<span class="hljs-string">   `-- sa.pub</span><br></code></pre></td></tr></table></figure>
+<p><img src="/img/2020-11-07-About-the-kubernetes-certificate/1.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>下面我们根据这个k8s的组件之间通讯图来一一讲解每个证书的作用。</p>
+<h1 id="CA证书"><a href="#CA证书" class="headerlink" title="CA证书"></a>CA证书</h1><p>kubeadm安装的集群中我们都是用3套CA证书来管理和签发其他证书，一套CA给ETCD使用，一套是给kubernetes内部组件使用，还有一套是给配置聚合层使用的，当然如果你觉得管理3套CA比较麻烦，您也可以用一套来管理。</p>
+<h1 id="etcd证书"><a href="#etcd证书" class="headerlink" title="etcd证书"></a>etcd证书</h1><figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs stylus">ca<span class="hljs-selector-class">.crt</span>  ca<span class="hljs-selector-class">.key</span>  healthcheck-client<span class="hljs-selector-class">.crt</span>  healthcheck-client<span class="hljs-selector-class">.key</span>  peer<span class="hljs-selector-class">.crt</span>  peer<span class="hljs-selector-class">.key</span>  server<span class="hljs-selector-class">.crt</span>  server.key<br></code></pre></td></tr></table></figure>
+<p>etcd证书位于&#x2F;etc&#x2F;kubernetes&#x2F;pki&#x2F;etcd目录下，我们根据etcd的yaml配置解释下证书的作用</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><code class="hljs awk">spec:<br>  containers:<br>  - command:<br>    - etcd<br>    - --advertise-client-urls=https:<span class="hljs-regexp">//</span><span class="hljs-number">10.0</span>.<span class="hljs-number">4.3</span>:<span class="hljs-number">2379</span><br>    - --cert-file=<span class="hljs-regexp">/etc/</span>kubernetes<span class="hljs-regexp">/pki/</span>etcd/server.crt<br>    - --client-cert-auth=true<br>    - --data-dir=<span class="hljs-regexp">/var/</span>lib/etcd<br>    - --initial-advertise-peer-urls=https:<span class="hljs-regexp">//</span><span class="hljs-number">10.0</span>.<span class="hljs-number">4.3</span>:<span class="hljs-number">2380</span><br>    - --initial-cluster=vm-<span class="hljs-number">4</span>-<span class="hljs-number">3</span>-centos=https:<span class="hljs-regexp">//</span><span class="hljs-number">10.0</span>.<span class="hljs-number">4.3</span>:<span class="hljs-number">2380</span><br>    - --key-file=<span class="hljs-regexp">/etc/</span>kubernetes<span class="hljs-regexp">/pki/</span>etcd/server.key<br>    - --listen-client-urls=https:<span class="hljs-regexp">//</span><span class="hljs-number">127.0</span>.<span class="hljs-number">0.1</span>:<span class="hljs-number">2379</span>,https:<span class="hljs-regexp">//</span><span class="hljs-number">10.0</span>.<span class="hljs-number">4.3</span>:<span class="hljs-number">2379</span><br>    - --listen-peer-urls=https:<span class="hljs-regexp">//</span><span class="hljs-number">10.0</span>.<span class="hljs-number">4.3</span>:<span class="hljs-number">2380</span><br>    - --name=vm-<span class="hljs-number">4</span>-<span class="hljs-number">3</span>-centos<br>    - --peer-cert-file=<span class="hljs-regexp">/etc/</span>kubernetes<span class="hljs-regexp">/pki/</span>etcd/peer.crt<br>    - --peer-client-cert-auth=true<br>    - --peer-key-file=<span class="hljs-regexp">/etc/</span>kubernetes<span class="hljs-regexp">/pki/</span>etcd/peer.key<br>    - --peer-trusted-ca-file=<span class="hljs-regexp">/etc/</span>kubernetes<span class="hljs-regexp">/pki/</span>etcd/ca.crt<br>    - --snapshot-count=<span class="hljs-number">10000</span><br>    - --trusted-ca-file=<span class="hljs-regexp">/etc/</span>kubernetes<span class="hljs-regexp">/pki/</span>etcd/ca.crt<br>    image: k8s.gcr.io/etcd:<span class="hljs-number">3.3</span>.<span class="hljs-number">10</span><br>    imagePullPolicy: IfNotPresent<br>    livenessProbe:<br>      exec:<br>        command:<br>        - <span class="hljs-regexp">/bin/</span>sh<br>        - -ec<br>        - ETCDCTL_API=<span class="hljs-number">3</span> etcdctl --endpoints=https:<span class="hljs-regexp">//</span>[<span class="hljs-number">127.0</span>.<span class="hljs-number">0.1</span>]:<span class="hljs-number">2379</span> --cacert=<span class="hljs-regexp">/etc/</span>kubernetes<span class="hljs-regexp">/pki/</span>etcd/ca.crt<br>          --cert=<span class="hljs-regexp">/etc/</span>kubernetes<span class="hljs-regexp">/pki/</span>etcd<span class="hljs-regexp">/healthcheck-client.crt --key=/</span>etc<span class="hljs-regexp">/kubernetes/</span>pki<span class="hljs-regexp">/etcd/</span>healthcheck-client.key<br>          get foo<br>      failureThreshold: <span class="hljs-number">8</span><br></code></pre></td></tr></table></figure>
+
+<ul>
+<li>etcd 对外提供服务的服务器证书及私钥<figure class="highlight axapta"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs axapta"><span class="hljs-keyword">server</span>.crt  <span class="hljs-keyword">server</span>.key<br></code></pre></td></tr></table></figure></li>
+<li>etcd 节点之间相互进行认证的 peer 证书、私钥以及验证 peer 的 CA<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs stylus">ca<span class="hljs-selector-class">.crt</span>  ca<span class="hljs-selector-class">.key</span> peer<span class="hljs-selector-class">.crt</span>  peer.key<br></code></pre></td></tr></table></figure></li>
+<li>etcd 验证访问其服务的客户端的 CA<figure class="highlight axapta"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs axapta">healthcheck-<span class="hljs-keyword">client</span>.crt  healthcheck-<span class="hljs-keyword">client</span>.key <br></code></pre></td></tr></table></figure></li>
+</ul>
+<h1 id="kube-apiserver证书"><a href="#kube-apiserver证书" class="headerlink" title="kube-apiserver证书"></a>kube-apiserver证书</h1><figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><code class="hljs gradle"> name: kube-apiserver<br>  namespace: kube-system<br>spec:<br>  containers:<br>  - command:<br>    - kube-apiserver<br>    - --advertise-address=<span class="hljs-number">10.0</span>.<span class="hljs-number">4.3</span><br>    - --allow-privileged=<span class="hljs-keyword">true</span><br>    - --authorization-mode=Node,RBAC<br>    - --client-ca-<span class="hljs-keyword">file</span>=<span class="hljs-regexp">/etc/</span>kubernetes<span class="hljs-regexp">/pki/</span>ca.crt<br>    - --enable-admission-plugins=NodeRestriction<br>    - --enable-bootstrap-token-auth=<span class="hljs-keyword">true</span><br>    - --etcd-cafile=<span class="hljs-regexp">/etc/</span>kubernetes<span class="hljs-regexp">/pki/</span>etcd/ca.crt<br>    - --etcd-certfile=<span class="hljs-regexp">/etc/</span>kubernetes<span class="hljs-regexp">/pki/</span>apiserver-etcd-client.crt<br>    - --etcd-keyfile=<span class="hljs-regexp">/etc/</span>kubernetes<span class="hljs-regexp">/pki/</span>apiserver-etcd-client.key<br>    - --etcd-servers=https:<span class="hljs-comment">//127.0.0.1:2379</span><br>    - --insecure-port=<span class="hljs-number">0</span><br>    - --kubelet-client-certificate=<span class="hljs-regexp">/etc/</span>kubernetes<span class="hljs-regexp">/pki/</span>apiserver-kubelet-client.crt<br>    - --kubelet-client-key=<span class="hljs-regexp">/etc/</span>kubernetes<span class="hljs-regexp">/pki/</span>apiserver-kubelet-client.key<br>    - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname<br>    - --proxy-client-cert-<span class="hljs-keyword">file</span>=<span class="hljs-regexp">/etc/</span>kubernetes<span class="hljs-regexp">/pki/</span>front-proxy-client.crt<br>    - --proxy-client-key-<span class="hljs-keyword">file</span>=<span class="hljs-regexp">/etc/</span>kubernetes<span class="hljs-regexp">/pki/</span>front-proxy-client.key<br>    - --requestheader-allowed-names=front-proxy-client<br>    - --requestheader-client-ca-<span class="hljs-keyword">file</span>=<span class="hljs-regexp">/etc/</span>kubernetes<span class="hljs-regexp">/pki/</span>front-proxy-ca.crt<br>    - --requestheader-extra-headers-prefix=X-Remote-Extra-<br>    - --requestheader-<span class="hljs-keyword">group</span>-headers=X-Remote-<span class="hljs-keyword">Group</span><br>    - --requestheader-username-headers=X-Remote-User<br>    - --secure-port=<span class="hljs-number">6443</span><br>    - --service-account-key-<span class="hljs-keyword">file</span>=<span class="hljs-regexp">/etc/</span>kubernetes<span class="hljs-regexp">/pki/</span>sa.pub<br>    - --service-cluster-ip-range=<span class="hljs-number">10.96</span>.<span class="hljs-number">0.0</span>/<span class="hljs-number">12</span><br>    - --tls-cert-<span class="hljs-keyword">file</span>=<span class="hljs-regexp">/etc/</span>kubernetes<span class="hljs-regexp">/pki/</span>apiserver.crt<br>    - --tls-<span class="hljs-keyword">private</span>-key-<span class="hljs-keyword">file</span>=<span class="hljs-regexp">/etc/</span>kubernetes<span class="hljs-regexp">/pki/</span>apiserver.key<br>    image: k8s.gcr.io/kube-apiserver:v1.<span class="hljs-number">15.2</span><br></code></pre></td></tr></table></figure>
+
+<p>apiserver证书位于&#x2F;etc&#x2F;kubernetes&#x2F;pki，同样我们通过apiserver的yaml文件来一一解释下每个证书的作用。</p>
+<ul>
+<li>访问etcd的客户端证书及私钥，这个证书是由etcd的CA证书签发，因此也需要在apiserver中配置etcd的CA证书<figure class="highlight axapta"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs axapta">apiserver-etcd-<span class="hljs-keyword">client</span>.key   apiserver-etcd-<span class="hljs-keyword">client</span>.crt   <br></code></pre></td></tr></table></figure></li>
+<li>用来签发k8s中其他证书的CA证书及私钥<figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs stata"><span class="hljs-keyword">ca</span>.crt  <span class="hljs-keyword">ca</span>.key<br></code></pre></td></tr></table></figure></li>
+<li>apiServer的对外提供服务的服务端证书及私钥<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs stylus">apiserver<span class="hljs-selector-class">.crt</span>   apiserver<span class="hljs-selector-class">.key</span>  <br></code></pre></td></tr></table></figure></li>
+<li>apiserver 访问 kubelet 所需的客户端证书及私钥<figure class="highlight axapta"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs axapta">apiserver-kubelet-<span class="hljs-keyword">client</span>.crt  apiserver-kubelet-<span class="hljs-keyword">client</span>.key<br></code></pre></td></tr></table></figure>
+配置聚合层（apiserver扩展）的CA和客户端证书及私钥<br>说明：要使聚合层在您的环境中正常工作以支持代理服务器和扩展 apiserver 之间的相互 TLS 身份验证， 需要满足一些设置要求。Kubernetes 和 kube-apiserver 具有多个 CA， 因此请确保代理是由聚合层 CA 签名的，而不是由主 CA 签名的。扩展apiserver为了能够和apiserver通讯，所以需要在apiserver中配置，假如你不需要这个功能可以不配置该证书。<figure class="highlight plaintext"><figcaption><span>front-proxy-client.crt  front-proxy-ca.key      front-proxy-client.key</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs front-proxy-ca.crt">```<br>* 验证 service account token 的公钥<br></code></pre></td></tr></table></figure>
+sa.pub  <figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs mipsasm">到这里，集群生成的所有证书介绍完了，那么像kube-controller-mananger、kube-<span class="hljs-keyword">scheduler、kube-proxy、kubele这些组件也是需要访问apiserver的，那么他们是怎么通讯的呢？下面我们可以看看这些组件是如何和apiserver进行通讯的。</span><br><span class="hljs-keyword"></span><br><span class="hljs-comment"># kube-controller-mananger</span><br>还是和之前一样，我们通过kube-controller-mananger的yaml文件配置来看看是如何访问apiserver。<br></code></pre></td></tr></table></figure>
+spec:<br>containers:<ul>
+<li>command:<ul>
+<li>kube-controller-manager</li>
+<li>–allocate-node-cidrs&#x3D;true</li>
+<li>–authentication-kubeconfig&#x3D;&#x2F;etc&#x2F;kubernetes&#x2F;controller-manager.conf</li>
+<li>–authorization-kubeconfig&#x3D;&#x2F;etc&#x2F;kubernetes&#x2F;controller-manager.conf</li>
+<li>–bind-address&#x3D;127.0.0.1</li>
+<li>–client-ca-file&#x3D;&#x2F;etc&#x2F;kubernetes&#x2F;pki&#x2F;ca.crt</li>
+<li>–cluster-cidr&#x3D;10.244.0.0&#x2F;16</li>
+<li>–cluster-signing-cert-file&#x3D;&#x2F;etc&#x2F;kubernetes&#x2F;pki&#x2F;ca.crt</li>
+<li>–cluster-signing-key-file&#x3D;&#x2F;etc&#x2F;kubernetes&#x2F;pki&#x2F;ca.key</li>
+<li>–controllers&#x3D;*,bootstrapsigner,tokencleaner</li>
+<li>–kubeconfig&#x3D;&#x2F;etc&#x2F;kubernetes&#x2F;controller-manager.conf</li>
+<li>–leader-elect&#x3D;true</li>
+<li>–node-cidr-mask-size&#x3D;24</li>
+<li>–requestheader-client-ca-file&#x3D;&#x2F;etc&#x2F;kubernetes&#x2F;pki&#x2F;front-proxy-ca.crt</li>
+<li>–root-ca-file&#x3D;&#x2F;etc&#x2F;kubernetes&#x2F;pki&#x2F;ca.crt</li>
+<li>–service-account-private-key-file&#x3D;&#x2F;etc&#x2F;kubernetes&#x2F;pki&#x2F;sa.key</li>
+<li>–use-service-account-credentials&#x3D;true<br>image: k8s.gcr.io&#x2F;kube-controller-manager:v1.15.2<figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs stata">你会发现在yaml中配置了/etc/kubernetes/controller-manager.<span class="hljs-keyword">conf</span>这个配置文件，而不是配置controller-manager的客户端证书之类的。Kubernetes 这里的设计是这样的，kube-controller-mananger、kube-scheduler、kube-proxy、kubelet等组件，采用一个kubeconfig 文件中配置的信息来访问 kube-apiserver。该文件中包含了 kube-apiserver 的地址，验证 kube-apiserver 服务器证书的 <span class="hljs-keyword">CA</span> 证书，自己的客户端证书和私钥等访问信息，这样组件只需要配置这个kubeconfig就行。<br><br>由于创建工作负载的时候，我们有时候会用到service accout，那么这里需要和apiserver认证，所以我们需要在controller-manager<br><br>配置上<span class="hljs-keyword">sa</span>私钥，当然需要和apiserver通讯，自然需要配置上kubernates的<span class="hljs-keyword">CA</span>证书<br><br>下面我们看看controller-manager.<span class="hljs-keyword">conf</span>这个文件配置的证书和秘钥是什么。<br></code></pre></td></tr></table></figure>
+[root@VM-4-3-centos kubernetes]# cat controller-manager.conf<br>apiVersion: v1<br>clusters:</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>cluster:<br>  certificate-authority-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUN5RENDQWJDZ0F3SUJBZ0lCQURBTkJna3Foa2lHOXcwQkFRc0ZBREFWTVJNd0VRWURWUVFERXdwcmRXSmwKY201bGRHVnpNQjRYRFRJd01EZ3lNREF5TXpBd05Wb1hEVE13TURneE9EQXlNekF3TlZvd0ZURVRNQkVHQTFVRQpBeE1LYTNWaVpYSnVaWFJsY3pDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDQVFvQ2dnRUJBSndoCmw4ZVd5SlBsSWpwajlTN09VSWRSTWVxV0Mwb2crN3hQemJQZDhzS2NTemZqWjdHc0ttUXlvQjhoQnNlaVVDdUwKai9teVl5Tk02MkxIa0ZKbDI3MXNFWVdmOEtiWS81Y210UmFjRnlMOEpyaTNLQi91eHZnZlEvMXhMK2c3UmRBcQpGQllWRzNtaSs1T1orTExyZlVMUU5qemtoTVllaEhDdHNDRmZJMGF5amJpYk1UUGJLT3lobjV3cHVMZzgvOVdlClNTSnI1TmtnK2R0WHJSZ05YelNpc1JMQVF5MmdEczdOaTN0SklaNjRuRGdIakpyS21HR2dqbEljN1RFdGFUdWcKcnltKy92akVZZ2NxTlhHakY2ekJlT1FXNW5NdUh0K1plYXphZ1QyQTNkUDhGY3lEWVZrSFJVd0RESDBZOVZlcwpOUFAyZnhURzVVZlhWOUV0WVJNQ0F3RUFBYU1qTUNFd0RnWURWUjBQQVFIL0JBUURBZ0trTUE4R0ExVWRFd0VCCi93UUZNQU1CQWY4d0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dFQkFEajZLYXVQR2dvVnlGQmdNUzFZYlVFRXFHQmoKN3IwaG5vclNuOVp4dlUxZkM1UkZ0UEd0OEI0YU40T3RMa1REUno5ZmdFc1ZidFdoMXRXWURIWUF6N2FDYkVZawpMRTArRzZQMkpxR043SHlrd05BZFp1QS96emhOdVFKZnhjZG5qVHlIRWZXZyt5OEd1S2JqSU1QdFJVOU45bFpoCkZTeUxsYjNvektYbURDK2RuSHhHMXhNbnpCM05TQStYeGk3ZDVHakExemUzYXFxZXM2bWVONTNYWnFkeDE2N0gKLzNBNld6NjZ4UE9nOHlsUFNVa3R5bU1HNTFkOTFsdTFiZWJYUExtdmc0K3BBeFdhZGJGZ21MR0Z0UE1URXcrWgpIRHZzK3E2NDBIOWJpeitPV2Rld0hjUXE0TW9oQ1dubDhhVzVJYWVSYW1mWS9zZy8xd1NXMkZteGViQT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo&#x3D;<br>  server: <a target="_blank" rel="noopener" href="https://10.0.4.3:6443/">https://10.0.4.3:6443</a><br>name: kubernetes<br>contexts:</li>
+<li>context:<br>  cluster: kubernetes<br>  user: system:kube-controller-manager<br>name: system:kube-controller-manager@kubernetes<br>current-context: system:kube-controller-manager@kubernetes<br>kind: Config<br>preferences: {}<br>users:</li>
+<li>name: system:kube-controller-manager<br>user:<br>  client-certificate-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUM1ekNDQWMrZ0F3SUJBZ0lJSWN4Ynk4VWEvV1F3RFFZSktvWklodmNOQVFFTEJRQXdGVEVUTUJFR0ExVUUKQXhNS2EzVmlaWEp1WlhSbGN6QWVGdzB5TURBNE1qQXdNak13TURWYUZ3MHlNVEE0TWpBd01qTXdNRGRhTUNreApKekFsQmdOVkJBTVRIbk41YzNSbGJUcHJkV0psTFdOdmJuUnliMnhzWlhJdGJXRnVZV2RsY2pDQ0FTSXdEUVlKCktvWklodmNOQVFFQkJRQURnZ0VQQURDQ0FRb0NnZ0VCQU5YK0Vqa3c0NDNTNzh5d05LL0dIQTV2eFZCS0Rhbi8KZ21yaUlFTW1hYWhlbDllREJXR0s0dVVtY1VXMXU1TCszeUR0amJlKy83MHZ2M3hvSWY1VkNZQXZqYUorN2twUQpyYW5RUE93cFJnbUlqNTEzV1FsZzMxWDlqREpuNlAybVpYTmZ6YWVOalBwOXdrZGkzZGVqSUZaSm1zYjQ0R3VwCkNrdlpodE5iYUlrVVU1U3dCT3h1dE92Um1uemdHQ3BQa0c4ME9pNWdYcDVzTHJ2dmVYSWxpem5wbHNsa3pxbjQKdWNJMHZMekhQY0JsSWhncEVJOXdCVTFOK3VWLzIxTmRaT3p1UlpFVFRMQ0xmNjhVR0FlM0ZCVXJHblJCUTJJZgpKLzhpNnJVQ2l1T25PQWUvOFNLbzlVM0ExOHN3RDJYandTZVo1NzRRclRGdkFjUjBYQ1BibW4wQ0F3RUFBYU1uCk1DVXdEZ1lEVlIwUEFRSC9CQVFEQWdXZ01CTUdBMVVkSlFRTU1Bb0dDQ3NHQVFVRkJ3TUNNQTBHQ1NxR1NJYjMKRFFFQkN3VUFBNElCQVFBcTY0cVBnVllzRzFGb05QQTRTNlJ0bGwrbUdTVUE2QlVNakQrWkt0eVM1NExCVFZnWQp5K1IrL0Zpd3o2RW1xWUpnZ0EyNWZGdkszSWlGNCt5d3JxeDZETlVZa3BBQkZFWXQ5VjU4a2gxV0pha3BvMEZQCnRZRkFaNmlEMlg4UlBZeUUwSXBMYlFqTGRncS9LYTRiSlhZRFhsS3RTV2UwbmJoY2FUWjRpRm5BcldndmpRQ0sKU05kV0tmSUpGNjJiWGE5a1BGc3ROYWVrWjdoQVZEZzhBbEd1c0tlYVFLdFNLZ2dMREFreElRWjlnNTZSVUprYwp6UUhRVHlibmVTcXJEN3cxT0xIR2RpYmZEYXhzMWdtbi9oL20xNk5ib3NMUlgxNkkxK3VKOWV1d29TWlp3Z29zCmpVRExuWVg1Zm1ZcEdhK2ZDbjdiMTJ4Mzg3SFpmbkE4eTFDTQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg&#x3D;&#x3D;<br>  client-key-data: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFb3dJQkFBS0NBUUVBMWY0U09URGpqZEx2ekxBMHI4WWNEbS9GVUVvTnFmK0NhdUlnUXlacHFGNlgxNE1GCllZcmk1U1p4UmJXN2t2N2ZJTzJOdDc3L3ZTKy9mR2doL2xVSmdDK05vbjd1U2xDdHFkQTg3Q2xHQ1lpUG5YZFoKQ1dEZlZmMk1NbWZvL2FabGMxL05wNDJNK24zQ1IyTGQxNk1nVmttYXh2amdhNmtLUzltRzAxdG9pUlJUbExBRQo3RzYwNjlHYWZPQVlLaytRYnpRNkxtQmVubXd1dSs5NWNpV0xPZW1XeVdUT3FmaTV3alM4dk1jOXdHVWlHQ2tRCmozQUZUVTM2NVgvYlUxMWs3TzVGa1JOTXNJdC9yeFFZQjdjVUZTc2FkRUZEWWg4bi95THF0UUtLNDZjNEI3L3gKSXFqMVRjRFh5ekFQWmVQQko1bm52aEN0TVc4QnhIUmNJOXVhZlFJREFRQUJBb0lCQURCTHVrTXNGSDlpdHZwRQpYbSs1VDRXMmxocXJ5Kyt0R2ZzVGMrS1QzYzdCSXBYaUhTbkpsYkhQL2txVVhIUXRqNkEzM1A4MlhUT09maklPCnNuVmJMZHkvWHNEbzB0RDA2bXpqOFl2L09LNVlJc21RTVFrYjB1dnVZR0RUOE5LbVpra211eHh3cHZ1MXZFNHUKTXhGQzRMNTR1RFRsNElpTHl5WVpQd09lb3JZazlYVi9LSkN4a2g1RnVmZzBublI5MjNXQ1lDZVNyaUVWRm9LbQovbzBKYmlVNE1MU3FxallRWnljRnFSbGM0Vy9sMVJuMldLbU1KZ29EVUE4eEZiOEtJYjk4bGpOR0F0Z2QyNFQwCmcxS1VnbDRNazlPOTEvUzdrbHc3L3dsaHBkY3g0eFJ2dEtBTWZiM0RBa1V4MmpFZDB2ckZvU3NseHM0NXJOc2QKM296ZDhFRUNnWUVBM1p2OGJZTDE0ZlU3c0ZnVXlXekl4ejA3WlJ5czFzZitESmVXRmNCOEZoa2Jpb3Q1T0dqZwp0RHZmQlcvOXliMmtPM3RRNlJxNkFMOFpKcGE1QjcyOVF2YUJ1bDlpRHladVZndC8xUnY1d290Smo1SGZQS25vCnFVNzh6NVdtQUR2VitmQTVXaW9ad0hBVzQ3RHFLUU5OdzYyNWZaZFV3NTFXblZOWHpBZWR2VkVDZ1lFQTl6TjgKU3JrOXlsUlBaZnQ4emgrK05OZndoOFgzRWlZR2JwUHNpWG4zTitxYnQ4eXJORFhNYXRId1NrS2dxWDdxU0twQQpDc3ZGeXRreDhBc2VMaDZhQzBMbXh1aVVtQW8yMnBBU21veDY3VFo1ditqeXdtNGt3TFFXdjh6R0ptMjhyUlRVClZkejMvZC9pTkJHZDlKaHB0dzY3REUvcENPTm9vVWhOOHFwbVQyMENnWUJSYm9vNWE1QVNzZHgzRmthOUpWNDUKNkVRMUNXNXhsaGZDWk1sZndOVllBVzNmWVJUd0o0bTZjTzJvdjloUUU0R1A0ZVovWWJUTHBXMEdnd2dHMGpBRAp0VFZDV041ZGxzK2dpcVUwbUEwVThiM2NKY3dVTEpNejg3UnVTeDB1cE00aUE2WHZmZHpzbThPdGMwcjRPeUNPCk1QNGlLa09aaGUxWDdsSXF4UG12b1FLQmdFdk45UUp4RmJxeTZmb3JDWlduOUVyK0lSdHhvSmRuSTdmTEV0RUIKbnNiOTRheVdUYlhmL1lTUVJuQnZTQmRSL1FRMWVSZ1didHdLaUo3RXVnZUlpTktGUElHb2x0Q2M2VDlTeVBHdAp2SkI3a1JCQm5oZnpjTC9MT2VLdEorSm02bUhsTGt2NlMrNEZOcmVpNDE0N1VzZTQ4N0VOM0RkR2pUSlFHdDhjClUrMXRBb0dCQU1JVzFrcHhGZ1NOUjJORGczdHlJWGNhVDJiQStPTWZrc25nNVdrQUdqb0xveS9laE5waWtJTHAKbHFVVG5oZENaMHBvV3d2MUkxdkZ5VVRJTTREUHd1WVNicnZQNjV2UkJua1M5RGlldVE5Q0FEbXRkT0h1WWR2VgpzSy90cmQ5RTNTdUNVNWNSdXJqVkFacGJoOVNIQzU3bk9rVTRJY2EzT0EvbGZsSmRvbUl0Ci0tLS0tRU5EIFJTQSBQUklWQVRFIEtFWS0tLS0tCg&#x3D;&#x3D;<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs haskell">我们解析下certificate-authority-<span class="hljs-class"><span class="hljs-keyword">data</span>这个内容看看是不是<span class="hljs-type">CA</span>的证书</span><br></code></pre></td></tr></table></figure>
+[root@VM-4-3-centos kubernetes]# echo “LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUN5RENDQWJDZ0F3SUJBZ0lCQURBTkJna3Foa2lHOXcwQkFRc0ZBREFWTVJNd0VRWURWUVFERXdwcmRXSmwKY201bGRHVnpNQjRYRFRJd01EZ3lNREF5TXpBd05Wb1hEVE13TURneE9EQXlNekF3TlZvd0ZURVRNQkVHQTFVRQpBeE1LYTNWaVpYSnVaWFJsY3pDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDQVFvQ2dnRUJBSndoCmw4ZVd5SlBsSWpwajlTN09VSWRSTWVxV0Mwb2crN3hQemJQZDhzS2NTemZqWjdHc0ttUXlvQjhoQnNlaVVDdUwKai9teVl5Tk02MkxIa0ZKbDI3MXNFWVdmOEtiWS81Y210UmFjRnlMOEpyaTNLQi91eHZnZlEvMXhMK2c3UmRBcQpGQllWRzNtaSs1T1orTExyZlVMUU5qemtoTVllaEhDdHNDRmZJMGF5amJpYk1UUGJLT3lobjV3cHVMZzgvOVdlClNTSnI1TmtnK2R0WHJSZ05YelNpc1JMQVF5MmdEczdOaTN0SklaNjRuRGdIakpyS21HR2dqbEljN1RFdGFUdWcKcnltKy92akVZZ2NxTlhHakY2ekJlT1FXNW5NdUh0K1plYXphZ1QyQTNkUDhGY3lEWVZrSFJVd0RESDBZOVZlcwpOUFAyZnhURzVVZlhWOUV0WVJNQ0F3RUFBYU1qTUNFd0RnWURWUjBQQVFIL0JBUURBZ0trTUE4R0ExVWRFd0VCCi93UUZNQU1CQWY4d0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dFQkFEajZLYXVQR2dvVnlGQmdNUzFZYlVFRXFHQmoKN3IwaG5vclNuOVp4dlUxZkM1UkZ0UEd0OEI0YU40T3RMa1REUno5ZmdFc1ZidFdoMXRXWURIWUF6N2FDYkVZawpMRTArRzZQMkpxR043SHlrd05BZFp1QS96emhOdVFKZnhjZG5qVHlIRWZXZyt5OEd1S2JqSU1QdFJVOU45bFpoCkZTeUxsYjNvektYbURDK2RuSHhHMXhNbnpCM05TQStYeGk3ZDVHakExemUzYXFxZXM2bWVONTNYWnFkeDE2N0gKLzNBNld6NjZ4UE9nOHlsUFNVa3R5bU1HNTFkOTFsdTFiZWJYUExtdmc0K3BBeFdhZGJGZ21MR0Z0UE1URXcrWgpIRHZzK3E2NDBIOWJpeitPV2Rld0hjUXE0TW9oQ1dubDhhVzVJYWVSYW1mWS9zZy8xd1NXMkZteGViQT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo&#x3D;”|base64 -d</li>
+</ul>
+<p>—–BEGIN CERTIFICATE—–<br>MIICyDCCAbCgAwIBAgIBADANBgkqhkiG9w0BAQsFADAVMRMwEQYDVQQDEwprdWJl<br>cm5ldGVzMB4XDTIwMDgyMDAyMzAwNVoXDTMwMDgxODAyMzAwNVowFTETMBEGA1UE<br>AxMKa3ViZXJuZXRlczCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJwh<br>l8eWyJPlIjpj9S7OUIdRMeqWC0og+7xPzbPd8sKcSzfjZ7GsKmQyoB8hBseiUCuL<br>j&#x2F;myYyNM62LHkFJl271sEYWf8KbY&#x2F;5cmtRacFyL8Jri3KB&#x2F;uxvgfQ&#x2F;1xL+g7RdAq<br>FBYVG3mi+5OZ+LLrfULQNjzkhMYehHCtsCFfI0ayjbibMTPbKOyhn5wpuLg8&#x2F;9We<br>SSJr5Nkg+dtXrRgNXzSisRLAQy2gDs7Ni3tJIZ64nDgHjJrKmGGgjlIc7TEtaTug<br>rym+&#x2F;vjEYgcqNXGjF6zBeOQW5nMuHt+ZeazagT2A3dP8FcyDYVkHRUwDDH0Y9Ves<br>NPP2fxTG5UfXV9EtYRMCAwEAAaMjMCEwDgYDVR0PAQH&#x2F;BAQDAgKkMA8GA1UdEwEB<br>&#x2F;wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBADj6KauPGgoVyFBgMS1YbUEEqGBj<br>7r0hnorSn9ZxvU1fC5RFtPGt8B4aN4OtLkTDRz9fgEsVbtWh1tWYDHYAz7aCbEYk<br>LE0+G6P2JqGN7HykwNAdZuA&#x2F;zzhNuQJfxcdnjTyHEfWg+y8GuKbjIMPtRU9N9lZh<br>FSyLlb3ozKXmDC+dnHxG1xMnzB3NSA+Xxi7d5GjA1ze3aqqes6meN53XZqdx167H<br>&#x2F;3A6Wz66xPOg8ylPSUktymMG51d91lu1bebXPLmvg4+pAxWadbFgmLGFtPMTEw+Z<br>HDvs+q640H9biz+OWdewHcQq4MohCWnl8aW5IaeRamfY&#x2F;sg&#x2F;1wSW2FmxebA&#x3D;<br>—–END CERTIFICATE—–<br>[root@VM-4-3-centos kubernetes]# cat pki&#x2F;ca.crt<br>—–BEGIN CERTIFICATE—–<br>MIICyDCCAbCgAwIBAgIBADANBgkqhkiG9w0BAQsFADAVMRMwEQYDVQQDEwprdWJl<br>cm5ldGVzMB4XDTIwMDgyMDAyMzAwNVoXDTMwMDgxODAyMzAwNVowFTETMBEGA1UE<br>AxMKa3ViZXJuZXRlczCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJwh<br>l8eWyJPlIjpj9S7OUIdRMeqWC0og+7xPzbPd8sKcSzfjZ7GsKmQyoB8hBseiUCuL<br>j&#x2F;myYyNM62LHkFJl271sEYWf8KbY&#x2F;5cmtRacFyL8Jri3KB&#x2F;uxvgfQ&#x2F;1xL+g7RdAq<br>FBYVG3mi+5OZ+LLrfULQNjzkhMYehHCtsCFfI0ayjbibMTPbKOyhn5wpuLg8&#x2F;9We<br>SSJr5Nkg+dtXrRgNXzSisRLAQy2gDs7Ni3tJIZ64nDgHjJrKmGGgjlIc7TEtaTug<br>rym+&#x2F;vjEYgcqNXGjF6zBeOQW5nMuHt+ZeazagT2A3dP8FcyDYVkHRUwDDH0Y9Ves<br>NPP2fxTG5UfXV9EtYRMCAwEAAaMjMCEwDgYDVR0PAQH&#x2F;BAQDAgKkMA8GA1UdEwEB<br>&#x2F;wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBADj6KauPGgoVyFBgMS1YbUEEqGBj<br>7r0hnorSn9ZxvU1fC5RFtPGt8B4aN4OtLkTDRz9fgEsVbtWh1tWYDHYAz7aCbEYk<br>LE0+G6P2JqGN7HykwNAdZuA&#x2F;zzhNuQJfxcdnjTyHEfWg+y8GuKbjIMPtRU9N9lZh<br>FSyLlb3ozKXmDC+dnHxG1xMnzB3NSA+Xxi7d5GjA1ze3aqqes6meN53XZqdx167H<br>&#x2F;3A6Wz66xPOg8ylPSUktymMG51d91lu1bebXPLmvg4+pAxWadbFgmLGFtPMTEw+Z<br>HDvs+q640H9biz+OWdewHcQq4MohCWnl8aW5IaeRamfY&#x2F;sg&#x2F;1wSW2FmxebA&#x3D;<br>—–END CERTIFICATE—–</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs haskell"><br>从解码可以发现，kubeconfig配置的就是kubernates的<span class="hljs-type">CA</span>证书，client-certificate-<span class="hljs-class"><span class="hljs-keyword">data</span>和client-key-<span class="hljs-keyword">data</span>就是controller-manager用来访问apiserver的客户端证书和秘钥，只不过kubeconfig对内容进行了base64编码。这个就是整个controller-manager和apiserver证书认证的方式。</span><br><br><span class="hljs-meta"># kube-scheduler</span><br><span class="hljs-title">kube</span>-scheduler也是同样的原理，也是在yaml中配置一个kubeconfig来进行访问apiserver<br></code></pre></td></tr></table></figure>
+<p>[root@VM-4-3-centos kubernetes]# cat scheduler.conf<br>apiVersion: v1<br>clusters:</p>
+<ul>
+<li>cluster:<br>  certificate-authority-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUN5RENDQWJDZ0F3SUJBZ0lCQURBTkJna3Foa2lHOXcwQkFRc0ZBREFWTVJNd0VRWURWUVFERXdwcmRXSmwKY201bGRHVnpNQjRYRFRJd01EZ3lNREF5TXpBd05Wb1hEVE13TURneE9EQXlNekF3TlZvd0ZURVRNQkVHQTFVRQpBeE1LYTNWaVpYSnVaWFJsY3pDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDQVFvQ2dnRUJBSndoCmw4ZVd5SlBsSWpwajlTN09VSWRSTWVxV0Mwb2crN3hQemJQZDhzS2NTemZqWjdHc0ttUXlvQjhoQnNlaVVDdUwKai9teVl5Tk02MkxIa0ZKbDI3MXNFWVdmOEtiWS81Y210UmFjRnlMOEpyaTNLQi91eHZnZlEvMXhMK2c3UmRBcQpGQllWRzNtaSs1T1orTExyZlVMUU5qemtoTVllaEhDdHNDRmZJMGF5amJpYk1UUGJLT3lobjV3cHVMZzgvOVdlClNTSnI1TmtnK2R0WHJSZ05YelNpc1JMQVF5MmdEczdOaTN0SklaNjRuRGdIakpyS21HR2dqbEljN1RFdGFUdWcKcnltKy92akVZZ2NxTlhHakY2ekJlT1FXNW5NdUh0K1plYXphZ1QyQTNkUDhGY3lEWVZrSFJVd0RESDBZOVZlcwpOUFAyZnhURzVVZlhWOUV0WVJNQ0F3RUFBYU1qTUNFd0RnWURWUjBQQVFIL0JBUURBZ0trTUE4R0ExVWRFd0VCCi93UUZNQU1CQWY4d0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dFQkFEajZLYXVQR2dvVnlGQmdNUzFZYlVFRXFHQmoKN3IwaG5vclNuOVp4dlUxZkM1UkZ0UEd0OEI0YU40T3RMa1REUno5ZmdFc1ZidFdoMXRXWURIWUF6N2FDYkVZawpMRTArRzZQMkpxR043SHlrd05BZFp1QS96emhOdVFKZnhjZG5qVHlIRWZXZyt5OEd1S2JqSU1QdFJVOU45bFpoCkZTeUxsYjNvektYbURDK2RuSHhHMXhNbnpCM05TQStYeGk3ZDVHakExemUzYXFxZXM2bWVONTNYWnFkeDE2N0gKLzNBNld6NjZ4UE9nOHlsUFNVa3R5bU1HNTFkOTFsdTFiZWJYUExtdmc0K3BBeFdhZGJGZ21MR0Z0UE1URXcrWgpIRHZzK3E2NDBIOWJpeitPV2Rld0hjUXE0TW9oQ1dubDhhVzVJYWVSYW1mWS9zZy8xd1NXMkZteGViQT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo&#x3D;<br>  server: <a target="_blank" rel="noopener" href="https://10.0.4.3:6443/">https://10.0.4.3:6443</a><br>name: kubernetes<br>contexts:</li>
+<li>context:<br>  cluster: kubernetes<br>  user: system:kube-scheduler<br>name: system:kube-scheduler@kubernetes<br>current-context: system:kube-scheduler@kubernetes<br>kind: Config<br>preferences: {}<br>users:</li>
+<li>name: system:kube-scheduler<br>user:<br>  client-certificate-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUMzakNDQWNhZ0F3SUJBZ0lJVlUybER1V2Y1OHd3RFFZSktvWklodmNOQVFFTEJRQXdGVEVUTUJFR0ExVUUKQXhNS2EzVmlaWEp1WlhSbGN6QWVGdzB5TURBNE1qQXdNak13TURWYUZ3MHlNVEE0TWpBd01qTXdNRGhhTUNBeApIakFjQmdOVkJBTVRGWE41YzNSbGJUcHJkV0psTFhOamFHVmtkV3hsY2pDQ0FTSXdEUVlKS29aSWh2Y05BUUVCCkJRQURnZ0VQQURDQ0FRb0NnZ0VCQU14SzJrNmZnWG50cHVNM2JPZ2ZUS0V4aVhsdzdMQVc2VHpUK2thcndVS2UKK2hKSExWSjF4OUphazlDajZ2VWRZdEdkRzMyd0V1R0VFa3ltN0dFZXlyeHJneGRsU3NyVmRqQkFTYnhwNndpZApvZ3dmL2xVa2kza2FPVUozVXd6bmFnWCt6ZUh1d2hVN0R3NkNuaUpkMy9SZW9hU0FjZitvbDl0TTRiazRldVRrCnRXaUE5SDk0VnlQam42SUpkUDdNb1h4TWpZN1c1UysxNy9aczBwbXJabHhuWFdqZjZESXdyNnplbStSNlF1YnAKeE5adEk1WWdsNDk2a09BaTZMVW5xemhCNHIzaDdDOUd0SjFnVDk1YmxiQ0VZNzRtNmVLREZpNXFwZ3JRZnA0YwoxMlhRYzNtcGQzY2IrZXlGUFNsYUVDUmRwS1BKazRpZXgxNnN4TmwzRmk4Q0F3RUFBYU1uTUNVd0RnWURWUjBQCkFRSC9CQVFEQWdXZ01CTUdBMVVkSlFRTU1Bb0dDQ3NHQVFVRkJ3TUNNQTBHQ1NxR1NJYjNEUUVCQ3dVQUE0SUIKQVFBWFovVTcxSnRqQXQ3MjJLeVl6Q1RDZlF1bHdMM2EySGN6NGw5NXVaMFNWVG5ncTNhWUJxeVdwQ2puM3VNaApTaGN5OUZ4ZC92am52YXVTWUdXY05abm84dEVNUFhTaitNNzI5bW1vTUNUa0xCUGJSVGZwRGt3aDNnRS9IRWtuCnN0emRoZTZ3dWp4OWduMXl5WTJSOTFTZ3U3cjdwZjlLM1hOeFh2SFo3Z0tDQnJIVisyMVlQTkNCaC8rYlVuZkcKY2pvNlNNZHphT0Y5SlJod2pUS0l5VTlkeXJkbFBLUlR0Q3NGVEttdy9HM1d4Z1gvbGRCZnNsZmNaVXR4TlpsYQpablBVNlYvK3gwelBTVG56RzRmYTQ3UkhlZmc3YzczQkZjL0ZiYW9obmhrZHNPMVBNWGdhSjQ1bGo1NVNPL1phCmlIbUphZUF3bnh5d0hMazFtclE1b0ttVAotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg&#x3D;&#x3D;<br>  client-key-data: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcEFJQkFBS0NBUUVBekVyYVRwK0JlZTJtNHpkczZCOU1vVEdKZVhEc3NCYnBQTlA2UnF2QlFwNzZFa2N0ClVuWEgwbHFUMEtQcTlSMWkwWjBiZmJBUzRZUVNUS2JzWVI3S3ZHdURGMlZLeXRWMk1FQkp2R25yQ0oyaURCLysKVlNTTGVSbzVRbmRURE9kcUJmN040ZTdDRlRzUERvS2VJbDNmOUY2aHBJQngvNmlYMjB6aHVUaDY1T1MxYUlEMApmM2hYSStPZm9nbDAvc3loZkV5Tmp0YmxMN1h2OW16U21hdG1YR2RkYU4vb01qQ3ZyTjZiNUhwQzV1bkUxbTBqCmxpQ1hqM3FRNENMb3RTZXJPRUhpdmVIc0wwYTBuV0JQM2x1VnNJUmp2aWJwNG9NV0xtcW1DdEIrbmh6WFpkQnoKZWFsM2R4djU3SVU5S1ZvUUpGMmtvOG1UaUo3SFhxekUyWGNXTHdJREFRQUJBb0lCQVFDbmJhVlRFSGlkdy82bApjMVJIUFBlaG1DYXlKN0ZqYzdOOWpjRXRVREJZZUZBODBLYTlVUmdPTnZ1ejM5TjlSYk1xVlpjbFFEdUpKYU9WCnZLdzN3SE9wVG5lbW9mWlZHL0w4QW9RcjdhYVpiZzlUM3BpamtRclptbnRaRk5BMDRDZk5lQkdsMi9hbVRidSsKU2FCdVMvOXltR2ZqbVAxVTZRaGp5N09uQ0RuNEFsMmw1SXJpUCtlSTgxS3ZjVjRWUWNhcmtQL0F5SityQm56SgpSZjNRSFBRL2pFaUVRMm9kKzQ4N1FzSWNZVlcwZ0FmQ3pKN05NMUJMeTE0Yy8zUFJRS3JLZTdXT3AwM2Z3QmkxCk5TRlc1dmxSUkpnTDduSHQ4TkdsSUhHRE5VT29KR0UvVnppekJUVFpQRS9nOEkxZ1FLYko5b3ZSdXJQa0J6VGsKRHNGQ281bEJBb0dCQU5qalNTVXIybFo0Z1B6MEZ6bnBMTEFBaVhBSDkwZFlBb1BQSUhoWDR2WmtRUjE4Ykx2NgoraXVSR2dMTkQyckV4dHk3dE1tcTQrZkt2S1VXRWorOVR0KzNqWTVmTFdCeWhNTk1uaXN2eDFsdkxlZnFybkRvCnlkODdPb0p3TnZZdit2YitQR3NGaU51SHdXUTR4Wit3WTFaYitCUnB5UVJNUEs1TnVEbDRFMXZQQW9HQkFQRWkKRitwS1VJSmE0NGZuWDk3L1lHalh6Z1lWTEQ4RkRRMTh4dmY3TG43UEhUNzJoK1VCaXJFV29uK2RmcDFBZS95UwpTMER6Q2ZLUDdiM0R3YkxPbmRKcHdLWnUrUjdBaEs5RGFlVEJ3Y2FkRDFpTzNoME5RSVFoVFJPaVJRclN4RWpmCllXVnRmUXFuSUJhS3pMSnRCakVtakRDcXJ2QjJ3QTRza1Z5d09WZWhBb0dBTWZWb3k5OG1FL1QrQVVaWWMwWjYKdksvaStLTmRHbG56ZWxranFaVFUrdHh0QTFXOTFpOGhvUmR6WG1ITncxSkFYR2dBWk5Pd1c1d2ZpQWRsZkxrbQppZkhGOFoySzNrU0N3Rm5OdFRUMFBtMlZyVzRwY0dpdTEzVFZMV2Fid21tYTdYbnlnTlJ0aWVQamNDcURteDBPClJMNDZqcmt2VElZakZDTmk1Qm44bTVFQ2dZQmNHdUs1cW1Nd041bGJpd1J5d0dkS0JNeDhSRkFmVGtXYkZrTkYKNjVycDh5Qy9zUmxkWHdaaitEcGZ0bi9yZnZzZEVhQlBFY2FGOFhZbEd3WDh6N0UyOHhBVVFxVkRtdFBUd2xOTApmcnNPcTJWMk5UUWdNclNuQTdWV1A1QlJ2d29jcjc2YktJUXZzb0N1TzV4T3R4ZzdZL2IraStQQWxBdHVIcFh6CnFwaHNvUUtCZ1FERkxITzFwTTNPNlRWN3cybThKWVI0WGxBUWtLZkRPMlFGaDB0bGM1bk1rZUdZbHZFUUlZdVMKS2liV3NJNHVwMHFRcFZjdHF2VU9wc2V1Rk5ZdGVRQzF6YncxNWp4a0xEMm9Gb2c1Yk9WRXk3ekZERU1kVmdpRwpEbjhkbHN3SWp0bUF1SDFGOWdBbGR1V1M0cXkyV0I0SlRPZjBlTDVOM1dTWkRzcm91anA5NlE9PQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQo&#x3D;<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs haskell"><br>同理，解析certificate-authority-<span class="hljs-class"><span class="hljs-keyword">data</span>也是kubernates的<span class="hljs-type">CA</span>证书，client-certificate-<span class="hljs-keyword">data</span>和client-key-<span class="hljs-keyword">data</span>就是kube-scheduler用来访问apiserver的客户端证书和秘钥</span><br><br><span class="hljs-meta"># kube-proxy</span><br>在这里我们并未发现kube-proxy的kubeconfig，kube-proxy也是需要访问apiserver的，那么是如何进行认证的。还是从yaml文件进行分析一下，如果需要认证，肯定会在yaml中配置对应的证书或者包含证书的文件或token<br></code></pre></td></tr></table></figure>
+[root@VM-4-3-centos run]# kubectl get  pod kube-proxy-6bf2t -n kube-system -o yaml<br>…..<br>containers:<ul>
+<li>command:<ul>
+<li>&#x2F;usr&#x2F;local&#x2F;bin&#x2F;kube-proxy</li>
+<li>–config&#x3D;&#x2F;var&#x2F;lib&#x2F;kube-proxy&#x2F;config.conf</li>
+<li>–hostname-override&#x3D;$(NODE_NAME)<br>env:</li>
+<li>name: NODE_NAME<br>valueFrom:<br>  fieldRef:<br>apiVersion: v1<br>fieldPath: spec.nodeName<br>image: k8s.gcr.io&#x2F;kube-proxy:v1.15.2<br>imagePullPolicy: IfNotPresent<br>name: kube-proxy<br>resources: {}<br>securityContext:<br>privileged: true<br>terminationMessagePath: &#x2F;dev&#x2F;termination-log<br>terminationMessagePolicy: File<br>volumeMounts:</li>
+<li>mountPath: &#x2F;var&#x2F;lib&#x2F;kube-proxy<br>name: kube-proxy</li>
+<li>mountPath: &#x2F;run&#x2F;xtables.lock<br>name: xtables-lock</li>
+<li>mountPath: &#x2F;lib&#x2F;modules<br>name: lib-modules<br>readOnly: true</li>
+<li>mountPath: &#x2F;var&#x2F;run&#x2F;secrets&#x2F;kubernetes.io&#x2F;serviceaccount<br>name: kube-proxy-token-rd92l<br>readOnly: true<br>dnsPolicy: ClusterFirst<br>…..<br>volumes:</li>
+</ul>
+</li>
+<li>configMap:<br>  defaultMode: 420<br>  name: kube-proxy<br>name: kube-proxy</li>
+<li>hostPath:<br>  path: &#x2F;run&#x2F;xtables.lock<br>  type: FileOrCreate<br>name: xtables-lock</li>
+<li>hostPath:<br>  path: &#x2F;lib&#x2F;modules<br>  type: “”<br>name: lib-modules</li>
+<li>name: kube-proxy-token-rd92l<br>secret:<br>  defaultMode: 420<br>  secretName: kube-proxy-token-rd92l<br>kube-proxy挂载一个secret，这边猜测这个就是用来进行认证的。我们查看下这个token<br>[root@VM-4-3-centos run]# kubectl get secret -n kube-system kube-proxy-token-rd92l -o yaml<br>apiVersion: v1<br>data:<br>ca.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUN5RENDQWJDZ0F3SUJBZ0lCQURBTkJna3Foa2lHOXcwQkFRc0ZBREFWTVJNd0VRWURWUVFERXdwcmRXSmwKY201bGRHVnpNQjRYRFRJd01EZ3lNREF5TXpBd05Wb1hEVE13TURneE9EQXlNekF3TlZvd0ZURVRNQkVHQTFVRQpBeE1LYTNWaVpYSnVaWFJsY3pDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDQVFvQ2dnRUJBSndoCmw4ZVd5SlBsSWpwajlTN09VSWRSTWVxV0Mwb2crN3hQemJQZDhzS2NTemZqWjdHc0ttUXlvQjhoQnNlaVVDdUwKai9teVl5Tk02MkxIa0ZKbDI3MXNFWVdmOEtiWS81Y210UmFjRnlMOEpyaTNLQi91eHZnZlEvMXhMK2c3UmRBcQpGQllWRzNtaSs1T1orTExyZlVMUU5qemtoTVllaEhDdHNDRmZJMGF5amJpYk1UUGJLT3lobjV3cHVMZzgvOVdlClNTSnI1TmtnK2R0WHJSZ05YelNpc1JMQVF5MmdEczdOaTN0SklaNjRuRGdIakpyS21HR2dqbEljN1RFdGFUdWcKcnltKy92akVZZ2NxTlhHakY2ekJlT1FXNW5NdUh0K1plYXphZ1QyQTNkUDhGY3lEWVZrSFJVd0RESDBZOVZlcwpOUFAyZnhURzVVZlhWOUV0WVJNQ0F3RUFBYU1qTUNFd0RnWURWUjBQQVFIL0JBUURBZ0trTUE4R0ExVWRFd0VCCi93UUZNQU1CQWY4d0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dFQkFEajZLYXVQR2dvVnlGQmdNUzFZYlVFRXFHQmoKN3IwaG5vclNuOVp4dlUxZkM1UkZ0UEd0OEI0YU40T3RMa1REUno5ZmdFc1ZidFdoMXRXWURIWUF6N2FDYkVZawpMRTArRzZQMkpxR043SHlrd05BZFp1QS96emhOdVFKZnhjZG5qVHlIRWZXZyt5OEd1S2JqSU1QdFJVOU45bFpoCkZTeUxsYjNvektYbURDK2RuSHhHMXhNbnpCM05TQStYeGk3ZDVHakExemUzYXFxZXM2bWVONTNYWnFkeDE2N0gKLzNBNld6NjZ4UE9nOHlsUFNVa3R5bU1HNTFkOTFsdTFiZWJYUExtdmc0K3BBeFdhZGJGZ21MR0Z0UE1URXcrWgpIRHZzK3E2NDBIOWJpeitPV2Rld0hjUXE0TW9oQ1dubDhhVzVJYWVSYW1mWS9zZy8xd1NXMkZteGViQT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo&#x3D;<br>namespace: a3ViZS1zeXN0ZW0&#x3D;<br>token: ZXlKaGJHY2lPaUpTVXpJMU5pSXNJbXRwWkNJNklpSjkuZXlKcGMzTWlPaUpyZFdKbGNtNWxkR1Z6TDNObGNuWnBZMlZoWTJOdmRXNTBJaXdpYTNWaVpYSnVaWFJsY3k1cGJ5OXpaWEoyYVdObFlXTmpiM1Z1ZEM5dVlXMWxjM0JoWTJVaU9pSnJkV0psTFhONWMzUmxiU0lzSW10MVltVnlibVYwWlhNdWFXOHZjMlZ5ZG1salpXRmpZMjkxYm5RdmMyVmpjbVYwTG01aGJXVWlPaUpyZFdKbExYQnliM2g1TFhSdmEyVnVMWEprT1RKc0lpd2lhM1ZpWlhKdVpYUmxjeTVwYnk5elpYSjJhV05sWVdOamIzVnVkQzl6WlhKMmFXTmxMV0ZqWTI5MWJuUXVibUZ0WlNJNkltdDFZbVV0Y0hKdmVIa2lMQ0pyZFdKbGNtNWxkR1Z6TG1sdkwzTmxjblpwWTJWaFkyTnZkVzUwTDNObGNuWnBZMlV0WVdOamIzVnVkQzUxYVdRaU9pSmhOemRrTjJKaE1TMW1Zek5pTFRRM1lUTXRZV00wWkMweVpXRmtPVEV6WkRVd09ESWlMQ0p6ZFdJaU9pSnplWE4wWlcwNmMyVnlkbWxqWldGalkyOTFiblE2YTNWaVpTMXplWE4wWlcwNmEzVmlaUzF3Y205NGVTSjkuSTRuR0UxOVhJakFPU0lKcWZyb3A2azhHcXBickxBeVFzQ3NoeFhxMEc3RklTZmJudS1TTW9xV1pHUjU0S2hwREdlaGd6WkQwMGVGZG14bEM1ZzBIc2ZzZE40V0tmVFI1ZjY1b3kzTnVvWUxxcUIzUzgySUxLelJHREVBNHpwWmFXeG1lRmtzdU1mdl9UWDRjSGdtYUI3V0ZQZzJ5RWtxV0VPa3kwT0hOWnIxNmd4Mzl3S1owWDRhQ29FOVd0cGlZU1BKYU5SdmtVbENfNTlPZHJTYnBCYnlkd2JOaWVaRjdhcWRBbFdWQ3JXQkRfWmlCaHNnZklVYUpEcVg5TWtRbUpjVS1Yb2pzWUpXNFpNejZ3OEZFTHY4THpCazRLTUc5V185aG5Jc3FfVlFUM2xDek5iSHlNSktWeXZ1VlVrblo5X3AwaTJGQlpDeGVVdlpVazdrd01R<br>kind: Secret<br>metadata:<br>annotations:<br>kubernetes.io&#x2F;service-account.name: kube-proxy<br>kubernetes.io&#x2F;service-account.uid: a77d7ba1-fc3b-47a3-ac4d-2ead913d5082<br>creationTimestamp: “2020-08-20T02:30:48Z”<br>name: kube-proxy-token-rd92l<br>namespace: kube-system<br>resourceVersion: “196”<br>selfLink: &#x2F;api&#x2F;v1&#x2F;namespaces&#x2F;kube-system&#x2F;secrets&#x2F;kube-proxy-token-rd92l<br>uid: c9ff07a0-4176-4053-a93c-11c7d0aff285<br>type: kubernetes.io&#x2F;service-account-token<figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs stata">从上面<span class="hljs-keyword">token</span>的内容，这个里面包含一个<span class="hljs-keyword">CA</span>证书是kubernates查到<span class="hljs-keyword">ca</span>证书，<span class="hljs-keyword">token</span>就是用来和apiserver通讯的客户端证书和秘钥<br><br># kubelet<br>kubelet和其他组件类似，用的kubeconfig来进行认证的，都是用kubernates的<span class="hljs-keyword">CA</span>生成。<br></code></pre></td></tr></table></figure>
+[root@VM-4-3-centos kubernetes]# cat kubelet.conf<br>apiVersion: v1<br>clusters:</li>
+</ul>
+</li>
+<li>cluster:<br>  certificate-authority-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUN5RENDQWJDZ0F3SUJBZ0lCQURBTkJna3Foa2lHOXcwQkFRc0ZBREFWTVJNd0VRWURWUVFERXdwcmRXSmwKY201bGRHVnpNQjRYRFRJd01EZ3lNREF5TXpBd05Wb1hEVE13TURneE9EQXlNekF3TlZvd0ZURVRNQkVHQTFVRQpBeE1LYTNWaVpYSnVaWFJsY3pDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDQVFvQ2dnRUJBSndoCmw4ZVd5SlBsSWpwajlTN09VSWRSTWVxV0Mwb2crN3hQemJQZDhzS2NTemZqWjdHc0ttUXlvQjhoQnNlaVVDdUwKai9teVl5Tk02MkxIa0ZKbDI3MXNFWVdmOEtiWS81Y210UmFjRnlMOEpyaTNLQi91eHZnZlEvMXhMK2c3UmRBcQpGQllWRzNtaSs1T1orTExyZlVMUU5qemtoTVllaEhDdHNDRmZJMGF5amJpYk1UUGJLT3lobjV3cHVMZzgvOVdlClNTSnI1TmtnK2R0WHJSZ05YelNpc1JMQVF5MmdEczdOaTN0SklaNjRuRGdIakpyS21HR2dqbEljN1RFdGFUdWcKcnltKy92akVZZ2NxTlhHakY2ekJlT1FXNW5NdUh0K1plYXphZ1QyQTNkUDhGY3lEWVZrSFJVd0RESDBZOVZlcwpOUFAyZnhURzVVZlhWOUV0WVJNQ0F3RUFBYU1qTUNFd0RnWURWUjBQQVFIL0JBUURBZ0trTUE4R0ExVWRFd0VCCi93UUZNQU1CQWY4d0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dFQkFEajZLYXVQR2dvVnlGQmdNUzFZYlVFRXFHQmoKN3IwaG5vclNuOVp4dlUxZkM1UkZ0UEd0OEI0YU40T3RMa1REUno5ZmdFc1ZidFdoMXRXWURIWUF6N2FDYkVZawpMRTArRzZQMkpxR043SHlrd05BZFp1QS96emhOdVFKZnhjZG5qVHlIRWZXZyt5OEd1S2JqSU1QdFJVOU45bFpoCkZTeUxsYjNvektYbURDK2RuSHhHMXhNbnpCM05TQStYeGk3ZDVHakExemUzYXFxZXM2bWVONTNYWnFkeDE2N0gKLzNBNld6NjZ4UE9nOHlsUFNVa3R5bU1HNTFkOTFsdTFiZWJYUExtdmc0K3BBeFdhZGJGZ21MR0Z0UE1URXcrWgpIRHZzK3E2NDBIOWJpeitPV2Rld0hjUXE0TW9oQ1dubDhhVzVJYWVSYW1mWS9zZy8xd1NXMkZteGViQT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo&#x3D;<br>  server: <a target="_blank" rel="noopener" href="https://10.0.4.3:6443/">https://10.0.4.3:6443</a><br>name: kubernetes<br>contexts:</li>
+<li>context:<br>  cluster: kubernetes<br>  user: system:node:vm-4-3-centos<br>name: system:node:vm-4-3-centos@kubernetes<br>current-context: system:node:vm-4-3-centos@kubernetes<br>kind: Config<br>preferences: {}<br>users:</li>
+<li>name: system:node:vm-4-3-centos<br>user:<br>  client-certificate-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUMrVENDQWVHZ0F3SUJBZ0lJUW92eFg0d2RyTmd3RFFZSktvWklodmNOQVFFTEJRQXdGVEVUTUJFR0ExVUUKQXhNS2EzVmlaWEp1WlhSbGN6QWVGdzB5TURBNE1qQXdNak13TURWYUZ3MHlNVEE0TWpBd01qTXdNRGRhTURzeApGVEFUQmdOVkJBb1RESE41YzNSbGJUcHViMlJsY3pFaU1DQUdBMVVFQXhNWmMzbHpkR1Z0T201dlpHVTZkbTB0Ck5DMHpMV05sYm5SdmN6Q0NBU0l3RFFZSktvWklodmNOQVFFQkJRQURnZ0VQQURDQ0FRb0NnZ0VCQU1scld4Y3kKOEhyT0FPeXNGcjJxUXhOdGZ4QllBMWJYZ1BkRy95eW9rWjVLdm1nc0NjbGh2MWkyaWF2bzF6T1d4QkNZSHlJZQpyK0hSdDQ5TFFzcjZIU2k3QlZveEtuWm8rekpjSFBIVHk0VUtESVYrOUxUU29INDA3akhXeGFOWXc0RWw2QVB0Ck92UzcvcXVBb3BBOFNPVVU2YTdWcFc2OHRvNVJtRGNwcGVMZnlmL3dXdXRpZFZ0dTRmTE5RK3gwRnBGRWZXMisKY3ZHNWd2ZlZnaldaUnhzbXoyWlFESEo0NStSWldmVnF6bHdjYVlkMytROTFiK1BmUHhlVU81bmdRMGtpbTVTbAp6K1c4Q1p6Q01UOUF6QVU2USt1L1oyKzlsaU9xbzdxWnEySHZMMms5R05GNjVHcVVnWWpDT3hVRFpoanZ5RkxQCjNvdHR0ZTJQeHZkMXJRa0NBd0VBQWFNbk1DVXdEZ1lEVlIwUEFRSC9CQVFEQWdXZ01CTUdBMVVkSlFRTU1Bb0cKQ0NzR0FRVUZCd01DTUEwR0NTcUdTSWIzRFFFQkN3VUFBNElCQVFBcHpFNkxJU25jZFE1di9yZ2ZJbHRQV2l3Lwp4WjFQdHk2WWZTYmw2UXlNY2g1Qk1RNDhyL3o1ZXV5V21kVXhVUmFHaUlldUVaODAxQ2xteitoRjQ2RFRyZGlaCmZmTUNLcXE5Z3lKbkRBT1VYMkpkY3RZb2IvNWp0T0t0ejVYYmRrMzI5ZG01cUVEQ1gzRm44M3NWcWJPZnRXUnQKM2NvdFdUYjM4cmljQm5sRTRwZjBUdXk5RVZIZFBFazgyOUh0UVdDc3JDVFNQZXZ0S29oM01mdUZ0ek9leXJsMQpDSXFjNXVDM0k1dU1xS0tBeFNvSk1Pd1pVUklrRkpTQ09lRlRRVnd1ZE9vVi92STcrR0NBcVBObS9IUVRlNUROCkdPUXVWNTRMYWFkRzVRSHdDOEJhWDZTc0JQb09KOG5vWlM4cllSSERjMnFBcUYzMkhReHlXVHc1aE53dgotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg&#x3D;&#x3D;<br>  client-key-data: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcFFJQkFBS0NBUUVBeVd0YkZ6THdlczRBN0t3V3ZhcERFMjEvRUZnRFZ0ZUE5MGIvTEtpUm5rcSthQ3dKCnlXRy9XTGFKcStqWE01YkVFSmdmSWg2djRkRzNqMHRDeXZvZEtMc0ZXakVxZG1qN01sd2M4ZFBMaFFvTWhYNzAKdE5LZ2ZqVHVNZGJGbzFqRGdTWG9BKzA2OUx2K3E0Q2lrRHhJNVJUcHJ0V2xicnkyamxHWU55bWw0dC9KLy9CYQo2MkoxVzI3aDhzMUQ3SFFXa1VSOWJiNXk4Ym1DOTlXQ05abEhHeWJQWmxBTWNuam41RmxaOVdyT1hCeHBoM2Y1CkQzVnY0OTgvRjVRN21lQkRTU0tibEtYUDVid0puTUl4UDBETUJUcEQ2NzluYjcyV0k2cWp1cG1yWWU4dmFUMFkKMFhya2FwU0JpTUk3RlFObUdPL0lVcy9laTIyMTdZL0c5M1d0Q1FJREFRQUJBb0lCQUIwTXFycVIwalVqK09ZcAplNjRuSEQxMUVWcGVGejB6SDVxS1Zzc3VGTEpydlVKdzk0aGYzS1VDenFCSW1LRU1JWUx6TGFwU0dyUEs5MXBuClZGN0o2K0t2OW5tbmxhUTJSK1JmZkowMEdxbzVaTXpzSG9ibHlkZnA4bUNseFNObDdleDJkeHY1M3dMbENqbloKOTVndDJhV1FlcE9JcEs5djhEUmVlRUdjZEJ4Z1FMRm5nTU5SR3NzQ0lOSUt6Wkc5aDlwd2htZTRGUW9sRUlNMwp1ZkxkbzVZM0UyeFk3bkV4TTYvTnEvNUVQL1k2S1NGQlJwaXBxeWF2MERIaEVoaU9HNGtCS1l2ajZwdWdXcDgrCkNvcFZ0NWtNWjlwSWx3UElnT1UwQzB3L3Y5K0M2S0hIbzZUZExlTE9GeDlKMER4bXluMWJRMENvTGFTUXRiUUkKOG12UHFuRUNnWUVBOG92a0l1YjBUSHZlQVlSUG1hT1RMVFg4QkZiWWMwUEdhNDljMlNsaU95QmV1M0dxSEwzQgpWT3JKRXUwbVdQQU5pMDIrR0lpZG9MejFUTC82dlRmTkR6ajZRTWFRNUJsZVVKdUZlOGxuMEliUG5jbjZzN0MzCkp5eGZRMzA1emFONFJjWXQyQWZrZkg1bnZpK3d1YUpXbzAySUQzOXczdU1BMkNFZFdGbVdBMzhDZ1lFQTFKZDMKOUk0dktLZFFhNytKZkFLWG9mYWd2cUtWNnRHSkVPWjE2NXJNS1FTUmJvcDM3UXhmQ2dLRXpKMEI0U1p5eGFZYgpLdWJTZ1hjQXVrbER6TVpqc2ZsL0VEMmhDcFFQSGhnVUNNTGVQUkl3SDJWM2gvZk9nMlU3SEtFdHMvSXNsdlVRCk1JWDJpTnQ5MnUyU3AvUzBsMWowTitndjZ3M0R6S2xHS2dUWWMzY0NnWUVBcTJ3aGxtVmkvbmVCUmRNc3F5ckkKQjJrak1ESHRFekl3bDY2Z2NiOWs5T01BOFR2NWZnekRDbkJTSXJWSHFBNHBsRzRpejVZbXlnY2kyOWJIc1ZveAo3UE5aTTlUamJNTmRQRjFlcjBsK3ZRdTZ5d3VJeTkwMjVWSGdGb1A0Q1pYaW1IWGp5czV4TjJmampMQ0tGL2xiCmdGbDRzM05mNDdmT3pmSkJta0xlMnFNQ2dZRUFsdEtMRU41YXlLM0RHVjQrek5NTi9xTDVNYVlwVS9tcUUycGQKR0hTdkNSNnJpdEFEK3hIK3p4d3dXUFcrNHB3amF1UElmR3hieGV2R2dXTC9EZVZsejFzaGNVVTMza2hpWFVoWgoxa2xoMzlQcWZpdS9YS0JMUzk3aXpCSHhXYXVqUk1uQjNacjg1K1ZJYWF5SWtrM0NYV21IZ2E1aGFKSlFhZjloCnZ1ZkhKRXNDZ1lFQW9wSnQzSGdzS3R6VSs2YkMzdEJwQkEweXFZQ09yTkFQRjV5SWJzZnZXRmM1WENpc25xZE4KUG9hNzBJTVJwWFhCREo1V01lVWhiVVQzbHRtNWppV3dkVGp1WTJSYWorNVhZeHplN1NpWW9Dak9xckdua0NoLwppUG1pb21wNGViUU9DS3A3WTN5cG0rdy9RcENSN2ZBUEI1NkZVWnRZbktEbEs3RHlsWjFIQ0s0PQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQo&#x3D;<figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs stata">这边我们会给每个节点生成一份客户端的证书和私钥，master上用的是kubelet.<span class="hljs-keyword">conf</span> ，节点上的kubelet.<span class="hljs-keyword">conf</span>如下，直接指向一个kubelet-client-current.pem文件，这里包含了证书和私钥，每一个节点都不一样。因此每个节点都会有一个自己的客户端证书和私钥。<br></code></pre></td></tr></table></figure>
+[root@VM-4-9-centos ~]# cat &#x2F;etc&#x2F;kubernetes&#x2F;kubelet.conf<br>apiVersion: v1<br>clusters:</li>
+<li>cluster:<br>  certificate-authority-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUN5RENDQWJDZ0F3SUJBZ0lCQURBTkJna3Foa2lHOXcwQkFRc0ZBREFWTVJNd0VRWURWUVFERXdwcmRXSmwKY201bGRHVnpNQjRYRFRJd01EZ3lNREF5TXpBd05Wb1hEVE13TURneE9EQXlNekF3TlZvd0ZURVRNQkVHQTFVRQpBeE1LYTNWaVpYSnVaWFJsY3pDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDQVFvQ2dnRUJBSndoCmw4ZVd5SlBsSWpwajlTN09VSWRSTWVxV0Mwb2crN3hQemJQZDhzS2NTemZqWjdHc0ttUXlvQjhoQnNlaVVDdUwKai9teVl5Tk02MkxIa0ZKbDI3MXNFWVdmOEtiWS81Y210UmFjRnlMOEpyaTNLQi91eHZnZlEvMXhMK2c3UmRBcQpGQllWRzNtaSs1T1orTExyZlVMUU5qemtoTVllaEhDdHNDRmZJMGF5amJpYk1UUGJLT3lobjV3cHVMZzgvOVdlClNTSnI1TmtnK2R0WHJSZ05YelNpc1JMQVF5MmdEczdOaTN0SklaNjRuRGdIakpyS21HR2dqbEljN1RFdGFUdWcKcnltKy92akVZZ2NxTlhHakY2ekJlT1FXNW5NdUh0K1plYXphZ1QyQTNkUDhGY3lEWVZrSFJVd0RESDBZOVZlcwpOUFAyZnhURzVVZlhWOUV0WVJNQ0F3RUFBYU1qTUNFd0RnWURWUjBQQVFIL0JBUURBZ0trTUE4R0ExVWRFd0VCCi93UUZNQU1CQWY4d0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dFQkFEajZLYXVQR2dvVnlGQmdNUzFZYlVFRXFHQmoKN3IwaG5vclNuOVp4dlUxZkM1UkZ0UEd0OEI0YU40T3RMa1REUno5ZmdFc1ZidFdoMXRXWURIWUF6N2FDYkVZawpMRTArRzZQMkpxR043SHlrd05BZFp1QS96emhOdVFKZnhjZG5qVHlIRWZXZyt5OEd1S2JqSU1QdFJVOU45bFpoCkZTeUxsYjNvektYbURDK2RuSHhHMXhNbnpCM05TQStYeGk3ZDVHakExemUzYXFxZXM2bWVONTNYWnFkeDE2N0gKLzNBNld6NjZ4UE9nOHlsUFNVa3R5bU1HNTFkOTFsdTFiZWJYUExtdmc0K3BBeFdhZGJGZ21MR0Z0UE1URXcrWgpIRHZzK3E2NDBIOWJpeitPV2Rld0hjUXE0TW9oQ1dubDhhVzVJYWVSYW1mWS9zZy8xd1NXMkZteGViQT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo&#x3D;<br>  server: <a target="_blank" rel="noopener" href="https://10.0.4.3:6443/">https://10.0.4.3:6443</a><br>name: default-cluster<br>contexts:</li>
+<li>context:<br>  cluster: default-cluster<br>  namespace: default<br>  user: default-auth<br>name: default-context<br>current-context: default-context<br>kind: Config<br>preferences: {}<br>users:</li>
+<li>name: default-auth<br>user:<br>  client-certificate: &#x2F;var&#x2F;lib&#x2F;kubelet&#x2F;pki&#x2F;kubelet-client-current.pem<br>  client-key: &#x2F;var&#x2F;lib&#x2F;kubelet&#x2F;pki&#x2F;kubelet-client-current.pem<br>[root@VM-4-9-centos pki]# cat &#x2F;var&#x2F;lib&#x2F;kubelet&#x2F;pki&#x2F;kubelet-client-current.pem</li>
+</ul>
+<p>—–BEGIN CERTIFICATE—–<br>MIICZzCCAU+gAwIBAgIUPrHB6WlowbhzImI5+NnT0Y4ZzlAwDQYJKoZIhvcNAQEL<br>BQAwFTETMBEGA1UEAxMKa3ViZXJuZXRlczAeFw0yMDA4MjAwMjI4MDBaFw0yMTA4<br>MjAwMjI4MDBaMDsxFTATBgNVBAoTDHN5c3RlbTpub2RlczEiMCAGA1UEAxMZc3lz<br>dGVtOm5vZGU6dm0tNC05LWNlbnRvczBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IA<br>BJ1Qb3DwFRUjIYaaBxNGTieXObGKdGLG8&#x2F;HVdwXNkVSIWLGBkz9QsFaOh1IsiQ6g<br>5FfxRBneWhyQTOgMmD0yvymjVDBSMA4GA1UdDwEB&#x2F;wQEAwIFoDATBgNVHSUEDDAK<br>BggrBgEFBQcDAjAMBgNVHRMBAf8EAjAAMB0GA1UdDgQWBBR2QsIZ&#x2F;qWdhOExDObO<br>wiBjcpbUMTANBgkqhkiG9w0BAQsFAAOCAQEATF&#x2F;xpZD9kcCMFqFDlbo1Zn4DwXh6<br>X3s5T6r3QNtZQ1SeUHUhnL2Q1DrpICAEFxoqMdB75hxlYCs5UOP6YwBUX77qAVs9<br>QAXW7&#x2F;sEhS5firGGP8pEQXgaUWwv6tu2V574JL7M9p+koHL&#x2F;Fbev9fad8I71XIDQ<br>qkmnf892VCYnkvw1s7wNJENlxNQUQ1rw0wEccyKlYpxbqXCYStSloSaz6JCFnT06<br>+EXV5cr&#x2F;G8UZnYRoMNu6jiajIxhFmYQqBNCqOlJo24TVjeLlNTL5AD8aSXcQ+O16<br>PWhBYNdEOulokdjg84gAg6jSqN2g+hi4+gHMG1Rw2h+9iu5E5txFjKGiMQ&#x3D;&#x3D;<br>—–END CERTIFICATE—–<br>—–BEGIN EC PRIVATE KEY—–<br>MHcCAQEEIN75eP2QG76VLv&#x2F;nRWiLzW9Fg9hCzeb33BrZ5n9PhwhToAoGCCqGSM49<br>AwEHoUQDQgAEnVBvcPAVFSMhhpoHE0ZOJ5c5sYp0Ysbz8dV3Bc2RVIhYsYGTP1Cw<br>Vo6HUiyJDqDkV&#x2F;FEGd5aHJBM6AyYPTK&#x2F;KQ&#x3D;&#x3D;<br>—–END EC PRIVATE KEY—–</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs">现在有一个问题就是，k8s中节点可能有几万个，那么是如何快速给节点自动生成客户端证书和秘钥然后配置给kubelet呢？<br></code></pre></td></tr></table></figure>
+<p>[root@VM-4-11-centos pki]# ps -ef | grep kubelet<br>root     14746     1  0 Aug20 ?        17:50:19 &#x2F;usr&#x2F;bin&#x2F;kubelet –bootstrap-kubeconfig&#x3D;&#x2F;etc&#x2F;kubernetes&#x2F;bootstrap-kubelet.conf –kubeconfig&#x3D;&#x2F;etc&#x2F;kubernetes&#x2F;kubelet.conf –config&#x3D;&#x2F;var&#x2F;lib&#x2F;kubelet&#x2F;config.yaml –cgroup-driver&#x3D;cgroupfs –network-plugin&#x3D;cni –pod-infra-container-image&#x3D;k8s.gcr.io&#x2F;pause:3.1</p>
+<figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs stata">查看kubelet进程可以发现还有一个kubeconfig是<span class="hljs-keyword">bootstrap</span>-kubelet.<span class="hljs-keyword">conf</span>，我们来看看这个文件配置的是什么？<br></code></pre></td></tr></table></figure>
+<p>[root@VM-4-11-centos pki]# cat &#x2F;etc&#x2F;kubernetes&#x2F;bootstrap-kubelet.conf<br>apiVersion: v1<br>clusters:</p>
+<ul>
+<li>cluster:<br>  certificate-authority-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUN5RENDQWJDZ0F3SUJBZ0lCQURBTkJna3Foa2lHOXcwQkFRc0ZBREFWTVJNd0VRWURWUVFERXdwcmRXSmwKY201bGRHVnpNQjRYRFRJd01EZ3lNREF5TXpBd05Wb1hEVE13TURneE9EQXlNekF3TlZvd0ZURVRNQkVHQTFVRQpBeE1LYTNWaVpYSnVaWFJsY3pDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDQVFvQ2dnRUJBSndoCmw4ZVd5SlBsSWpwajlTN09VSWRSTWVxV0Mwb2crN3hQemJQZDhzS2NTemZqWjdHc0ttUXlvQjhoQnNlaVVDdUwKai9teVl5Tk02MkxIa0ZKbDI3MXNFWVdmOEtiWS81Y210UmFjRnlMOEpyaTNLQi91eHZnZlEvMXhMK2c3UmRBcQpGQllWRzNtaSs1T1orTExyZlVMUU5qemtoTVllaEhDdHNDRmZJMGF5amJpYk1UUGJLT3lobjV3cHVMZzgvOVdlClNTSnI1TmtnK2R0WHJSZ05YelNpc1JMQVF5MmdEczdOaTN0SklaNjRuRGdIakpyS21HR2dqbEljN1RFdGFUdWcKcnltKy92akVZZ2NxTlhHakY2ekJlT1FXNW5NdUh0K1plYXphZ1QyQTNkUDhGY3lEWVZrSFJVd0RESDBZOVZlcwpOUFAyZnhURzVVZlhWOUV0WVJNQ0F3RUFBYU1qTUNFd0RnWURWUjBQQVFIL0JBUURBZ0trTUE4R0ExVWRFd0VCCi93UUZNQU1CQWY4d0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dFQkFEajZLYXVQR2dvVnlGQmdNUzFZYlVFRXFHQmoKN3IwaG5vclNuOVp4dlUxZkM1UkZ0UEd0OEI0YU40T3RMa1REUno5ZmdFc1ZidFdoMXRXWURIWUF6N2FDYkVZawpMRTArRzZQMkpxR043SHlrd05BZFp1QS96emhOdVFKZnhjZG5qVHlIRWZXZyt5OEd1S2JqSU1QdFJVOU45bFpoCkZTeUxsYjNvektYbURDK2RuSHhHMXhNbnpCM05TQStYeGk3ZDVHakExemUzYXFxZXM2bWVONTNYWnFkeDE2N0gKLzNBNld6NjZ4UE9nOHlsUFNVa3R5bU1HNTFkOTFsdTFiZWJYUExtdmc0K3BBeFdhZGJGZ21MR0Z0UE1URXcrWgpIRHZzK3E2NDBIOWJpeitPV2Rld0hjUXE0TW9oQ1dubDhhVzVJYWVSYW1mWS9zZy8xd1NXMkZteGViQT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo&#x3D;<br>  server: <a target="_blank" rel="noopener" href="https://10.0.4.3:6443/">https://10.0.4.3:6443</a><br>name: kubernetes<br>contexts:</li>
+<li>context:<br>  cluster: kubernetes<br>  user: tls-bootstrap-token-user<br>name: tls-bootstrap-token-user@kubernetes<br>current-context: tls-bootstrap-token-user@kubernetes<br>kind: Config<br>preferences: {}<br>users:</li>
+<li>name: tls-bootstrap-token-user<br>user:<br>  token: qsciu5.l8b4382ue1m8e61x<br>&#96;&#96;&#96;<br>Kubernetes 提供了 TLS bootstrapping 的方式来简化 Kubelet 证书的生成过程。其原理是预先提供一个 bootstrapping token，kubelet 通过该 kubelet 调用 kube-apiserver 的证书签发 API 来生成 自己需要的证书。要启用该功能，需要在 kube-apiserver 中启用 –enable-bootstrap-token-auth ，并创建一个 kubelet 访问 kube-apiserver 使用的 bootstrap token secret。如果使用 kubeadmin 安装，可以使用 kubeadm token create命令来创建 token。</li>
+</ul>
+<p>采用TLS bootstrapping 生成证书的流程如下：</p>
+<ol>
+<li>调用 kube-apiserver 生成一个 bootstrap token。<br>将该 bootstrap token 写入到一个 kubeconfig 文件中，作为 kubelet 调用 kube-apiserver 的客户端验证方式。</li>
+<li>通过 –bootstrap-kubeconfig 启动参数将 bootstrap token 传递给 kubelet 进程。</li>
+<li>Kubelet 采用 bootstrap token 调用 kube-apiserver API，生成自己所需的服务器和客户端证书。</li>
+<li>证书生成后，Kubelet 采用生成的证书和 kube-apiserver 进行通信，并删除本地的 kubeconfig 文件，以避免 bootstrap token 泄漏风险。</li>
+</ol>
+<h1 id="Service-Account-认证"><a href="#Service-Account-认证" class="headerlink" title="Service Account 认证"></a>Service Account 认证</h1><p>前面我们有说在kube-apiserver 和 kube-controller-manager分配配置的sa的公钥和私钥，这里就是用来对service account来进行认证的，我们一般在RBAC中来限制service account的访问限制。kubernetes 会为该 service account 生成一个 JWT token，并使用 secret 将该 service account token 加载到 pod 上。pod 中的应用可以使用 service account token 来访问 api server。service account 证书被用于生成和验证 service account token。该证书的用法和前面介绍的其他证书不同，因为实际上使用的是其公钥和私钥，而并不需要对证书进行验证。下面是service account的认证方式</p>
+<p><img src="/img/2020-11-07-About-the-kubernetes-certificate/2.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>这里参考大佬的文章根据集群的实际部署对k8s的证书进行了梳理，加深对这方面的知识了解，有什么问题请大家多多指正。</p>
+<h1 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h1><p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/IbxRTQBOeKtL8AlC3R65Rw">https://mp.weixin.qq.com/s/IbxRTQBOeKtL8AlC3R65Rw</a></p>
+<p><a target="_blank" rel="noopener" href="https://kubernetes.io/zh/docs/setup/best-practices/certificates/">https://kubernetes.io/zh/docs/setup/best-practices/certificates/</a></p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Kubernetes/" class="category-chain-item">Kubernetes</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Kubernetes/">#Kubernetes</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>关于Kubernetes证书的那点事</div>
+      <div>http://example.com/2020/11/07/2020-11-07-About-the-kubernetes-certificate/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>VashonNie</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2020年11月7日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2020/11/11/2020-11-11-How-to-read-k8s-source-code/" title="如何加载编译k8s源码">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">如何加载编译k8s源码</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2020/11/05/2020-11-05-Log-aggregation-tool-Loki/" title="TKE集群部署日志聚合工具Loki">
+                        <span class="hidden-mobile">TKE集群部署日志聚合工具Loki</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?bfe4709ccd8c5c9e559c89f4fd0866f3";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+  <script defer src="/js/leancloud.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

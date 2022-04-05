@@ -1,0 +1,874 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="VashonNie">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="本文将带你了解k8s中的StatefulSet控制器，将通过实验的方式来说明StatefulSet的用法和配置，让你快速能够将StatefulSet类型的服务用到你的k8s集群中。 什么是StatefulSetStatefulSet 是用来管理有状态应用的工作负载 API 对象。 StatefulSet 用来管理 Deployment 和扩展一组 Pod，并且能为这些 Pod 提供序号和唯一性保证">
+<meta property="og:type" content="article">
+<meta property="og:title" content="kubernetes之StatefulSet控制器">
+<meta property="og:url" content="http://example.com/2020/10/23/2020-10-23-StatefulSet-controller-of-kubernetes/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="本文将带你了解k8s中的StatefulSet控制器，将通过实验的方式来说明StatefulSet的用法和配置，让你快速能够将StatefulSet类型的服务用到你的k8s集群中。 什么是StatefulSetStatefulSet 是用来管理有状态应用的工作负载 API 对象。 StatefulSet 用来管理 Deployment 和扩展一组 Pod，并且能为这些 Pod 提供序号和唯一性保证">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/2020-10-23-StatefulSet-controller-of-kubernetes/1.png">
+<meta property="og:image" content="http://example.com/img/2020-10-23-StatefulSet-controller-of-kubernetes/2.png">
+<meta property="og:image" content="http://example.com/img/2020-10-23-StatefulSet-controller-of-kubernetes/3.png">
+<meta property="og:image" content="http://example.com/img/2020-10-23-StatefulSet-controller-of-kubernetes/4.png">
+<meta property="og:image" content="http://example.com/img/2020-10-23-StatefulSet-controller-of-kubernetes/5.png">
+<meta property="og:image" content="http://example.com/img/2020-10-23-StatefulSet-controller-of-kubernetes/6.png">
+<meta property="article:published_time" content="2020-10-23T06:10:00.000Z">
+<meta property="article:modified_time" content="2020-10-23T06:10:00.000Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="Kubernetes">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://example.com/img/2020-10-23-StatefulSet-controller-of-kubernetes/1.png">
+  
+  
+  <title>kubernetes之StatefulSet控制器 - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":"www.niewx.cn","path":"/","ignore_local":false}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>聂伟星</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="kubernetes之StatefulSet控制器"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-author" aria-hidden="true"></i>
+        VashonNie
+      </span>
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2020-10-23 14:10" pubdate>
+          2020年10月23日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          15k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          124 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">kubernetes之StatefulSet控制器</h1>
+            
+            <div class="markdown-body">
+              
+              <p>本文将带你了解k8s中的StatefulSet控制器，将通过实验的方式来说明StatefulSet的用法和配置，让你快速能够将StatefulSet类型的服务用到你的k8s集群中。</p>
+<h1 id="什么是StatefulSet"><a href="#什么是StatefulSet" class="headerlink" title="什么是StatefulSet"></a>什么是StatefulSet</h1><p>StatefulSet 是用来管理有状态应用的工作负载 API 对象。</p>
+<p>StatefulSet 用来管理 Deployment 和扩展一组 Pod，并且能为这些 Pod 提供序号和唯一性保证。</p>
+<p>和 Deployment 相同的是，StatefulSet 管理了基于相同容器定义的一组 Pod。但和 Deployment 不同的是，StatefulSet 为它们的每个 Pod 维护了一个固定的 ID。这些 Pod 是基于相同的声明来创建的，但是不能相互替换：无论怎么调度，每个 Pod 都有一个永久不变的 ID。</p>
+<p>StatefulSet 和其他控制器使用相同的工作模式。你在 StatefulSet 对象 中定义你期望的状态，然后 StatefulSet 的 控制器 就会通过各种更新来达到那种你想要的状态。</p>
+<p>StatefulSets 对于需要满足以下一个或多个需求的应用程序很有价值：</p>
+<ul>
+<li>稳定的、唯一的网络标识符。</li>
+<li>稳定的、持久的存储。</li>
+<li>有序的、优雅的部署和缩放。</li>
+<li>有序的、自动的滚动更新。</li>
+</ul>
+<p>在上面，稳定意味着 Pod 调度或重调度的整个过程是有持久性的。如果应用程序不需要任何稳定的标识符或有序的部署、删除或伸缩，则应该使用由一组无状态的副本控制器提供的工作负载来部署应用程序，比如 Deployment 或者 ReplicaSet 可能更适用于您的无状态应用部署需要。</p>
+<p><strong>使用限制</strong></p>
+<ul>
+<li>给定 Pod 的存储必须由 PersistentVolume 驱动 基于所请求的 storage class 来提供，或者由管理员预先提供。</li>
+<li>删除或者收缩 StatefulSet 并不会删除它关联的存储卷。这样做是为了保证数据安全，它通常比自动清除 StatefulSet 所有相关的资源更有价值。</li>
+<li>StatefulSet 当前需要无头服务 来负责 Pod 的网络标识。您需要负责创建此服务。</li>
+<li>当删除 StatefulSets 时，StatefulSet 不提供任何终止 Pod 的保证。为了实现 StatefulSet 中的 Pod 可以有序和优雅的终止，可以在删除之前将 StatefulSet 缩放为 0。</li>
+<li>在默认 Pod 管理策略(OrderedReady) 时使用 滚动更新，可能进入需要 人工干预 才能修复的损坏状态。</li>
+</ul>
+<h1 id="pod的标识符"><a href="#pod的标识符" class="headerlink" title="pod的标识符"></a>pod的标识符</h1><p>StatefulSet Pod 具有唯一的标识，该标识包括顺序标识、稳定的网络标识和稳定的存储。该标识和 Pod 是绑定的，不管它被调度在哪个节点上。注意的是StatefulSet 需要通过无头服务才能解析到pod ip</p>
+<p>有序索引<br>对于具有 N 个副本的 StatefulSet，StatefulSet 中的每个 Pod 将被分配一个整数序号，从 0 到 N-1，该序号在 StatefulSet 上是唯一的。</p>
+<p>稳定的网络 ID<br>StatefulSet 中的每个 Pod 根据 StatefulSet 的名称和 Pod 的序号派生出它的主机名。 组合主机名的格式为$(StatefulSet 名称)-$(序号)。上例将会创建三个名称分别为 web-0、web-1、web-2 的 Pod。 StatefulSet 可以使用 headless 服务 控制它的 Pod 的网络域。管理域的这个服务的格式为： $(服务名称).$(命名空间).svc.cluster.local，其中 cluster.local 是集群域。 一旦每个 Pod 创建成功，就会得到一个匹配的 DNS 子域，格式为： $(pod 名称).$(所属服务的 DNS 域名)，其中所属服务由 StatefulSet 的 serviceName 域来设定。</p>
+<p>下面给出一些选择集群域、服务名、StatefulSet 名、及其怎样影响 StatefulSet 的 Pod 上的 DNS 名称的示例  </p>
+<table>
+<thead>
+<tr>
+<th>集群域名</th>
+<th>服务(名字空间&#x2F;名字)</th>
+<th>StatefulSet(名字空间&#x2F;名字)</th>
+<th>StatefulSet 域名</th>
+<th>Pod DNS</th>
+<th>Pod 主机名</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>cluster.local</td>
+<td>default&#x2F;nginx</td>
+<td>default&#x2F;web</td>
+<td>nginx.default.svc.cluster.local</td>
+<td>web-{0..N-1}.nginx.default.svc.cluster.local</td>
+<td>web-{0..N-1}</td>
+</tr>
+<tr>
+<td>cluster.local</td>
+<td>foo&#x2F;nginx</td>
+<td>foo&#x2F;web</td>
+<td>nginx.foo.svc.cluster.local</td>
+<td>web-{0..N-1}.nginx.foo.svc.cluster.local</td>
+<td>web-{0..N-1}</td>
+</tr>
+<tr>
+<td>kube.local</td>
+<td>foo&#x2F;nginx</td>
+<td>foo&#x2F;web</td>
+<td>nginx.foo.svc.kube.local</td>
+<td>web-{0..N-1}.nginx.foo.svc.kube.local</td>
+<td>web-{0..N-1}</td>
+</tr>
+</tbody></table>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Service</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">nginx</span><br>  <span class="hljs-attr">labels:</span><br>    <span class="hljs-attr">app:</span> <span class="hljs-string">nginx</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">ports:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">port:</span> <span class="hljs-number">80</span><br>    <span class="hljs-attr">name:</span> <span class="hljs-string">web</span><br>  <span class="hljs-attr">clusterIP:</span> <span class="hljs-string">None</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">app:</span> <span class="hljs-string">nginx</span><br><span class="hljs-meta">---</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">apps/v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">StatefulSet</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">webs</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">matchLabels:</span><br>      <span class="hljs-attr">app:</span> <span class="hljs-string">nginx</span> <span class="hljs-comment"># has to match .spec.template.metadata.labels</span><br>  <span class="hljs-attr">serviceName:</span> <span class="hljs-string">&quot;nginx&quot;</span><br>  <span class="hljs-attr">replicas:</span> <span class="hljs-number">3</span> <span class="hljs-comment"># by default is 1</span><br>  <span class="hljs-attr">template:</span><br>    <span class="hljs-attr">metadata:</span><br>      <span class="hljs-attr">labels:</span><br>        <span class="hljs-attr">app:</span> <span class="hljs-string">nginx</span> <span class="hljs-comment"># has to match .spec.selector.matchLabels</span><br>    <span class="hljs-attr">spec:</span><br>      <span class="hljs-attr">terminationGracePeriodSeconds:</span> <span class="hljs-number">10</span><br>      <span class="hljs-attr">containers:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">nginx</span><br>        <span class="hljs-attr">image:</span> <span class="hljs-string">k8s.gcr.io/nginx-slim:0.8</span><br>        <span class="hljs-attr">ports:</span><br>        <span class="hljs-bullet">-</span> <span class="hljs-attr">containerPort:</span> <span class="hljs-number">80</span><br>          <span class="hljs-attr">name:</span> <span class="hljs-string">web</span><br></code></pre></td></tr></table></figure>
+<p>下面我们在其他容器中解析一下pod名称看一下是否能解析到pod ip</p>
+<p><img src="/img/2020-10-23-StatefulSet-controller-of-kubernetes/1.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>我们在centos容器中解析对应的pod名称看看,可以发现解析每个pod名称都能成功到pod ip，pod标识符也正是StatefulSet 独有的特性。</p>
+<p><img src="/img/2020-10-23-StatefulSet-controller-of-kubernetes/2.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<h1 id="稳定的存储"><a href="#稳定的存储" class="headerlink" title="稳定的存储"></a>稳定的存储</h1><p>Kubernetes 为每个 VolumeClaimTemplate 创建一个 PersistentVolumes。 在上面的 nginx 示例中，每个 Pod 将会得到基于 StorageClass  cbs  提供的 10 Gib 的 PersistentVolume。如果没有声明 StorageClass，就会使用默认的 StorageClass。 当一个 Pod 被调度（重新调度）到节点上时，它的 volumeMounts 会挂载与其 PersistentVolumeClaims 相关联的 PersistentVolume。 请注意，当 Pod 或者 StatefulSet 被删除时，与 PersistentVolumeClaims 相关联的 PersistentVolume 并不会被删除。要删除它必须通过手动方式来完成。</p>
+<p>下面我们来测试一下将pod都删除看看，对应的pvc是否会删除</p>
+<p><img src="/img/2020-10-23-StatefulSet-controller-of-kubernetes/3.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2020-10-23-StatefulSet-controller-of-kubernetes/4.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>删除了所有pod，对用挂载的pvc卷是不会删除的。</p>
+<h1 id="Pod-名称标签"><a href="#Pod-名称标签" class="headerlink" title="Pod 名称标签"></a>Pod 名称标签</h1><p>当 StatefulSet 控制器 创建 Pod 时，它会添加一个标签 statefulset.kubernetes.io&#x2F;pod-name，该标签设置为 Pod 名称。这个标签允许您给 StatefulSet 中的特定 Pod 绑定一个 Service。</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs awk">[root@VM_1_4_centos ~]<span class="hljs-comment"># kubectl get pod --show-labels | grep webss</span><br>webss-<span class="hljs-number">0</span>                                   <span class="hljs-number">2</span><span class="hljs-regexp">/2     Running   0          76m   app=nginx,controller-revision-hash=webss-6d657db877,k8s-app=webss,qcloud-app=webss,security.istio.io/</span>tlsMode=istio,service.istio.io<span class="hljs-regexp">/canonical-name=nginx,service.istio.io/</span>canonical-revision=latest,statefulset.kubernetes.io/pod-name=webss-<span class="hljs-number">0</span><br>webss-<span class="hljs-number">1</span>                                   <span class="hljs-number">2</span><span class="hljs-regexp">/2     Running   0          75m   app=nginx,controller-revision-hash=webss-6d657db877,k8s-app=webss,qcloud-app=webss,security.istio.io/</span>tlsMode=istio,service.istio.io<span class="hljs-regexp">/canonical-name=nginx,service.istio.io/</span>canonical-revision=latest,statefulset.kubernetes.io/pod-name=webss-<span class="hljs-number">1</span><br>webss-<span class="hljs-number">2</span>                                   <span class="hljs-number">2</span><span class="hljs-regexp">/2     Running   0          74m   app=nginx,controller-revision-hash=webss-6d657db877,k8s-app=webss,qcloud-app=webss,security.istio.io/</span>tlsMode=istio,service.istio.io<span class="hljs-regexp">/canonical-name=nginx,service.istio.io/</span>canonical-revision=latest,statefulset.kubernetes.io/pod-name=webss-<span class="hljs-number">2</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs dts">[root@VM_1_4_centos ~]<span class="hljs-meta"># kubectl get svc  webss-0 -o yaml</span><br><span class="hljs-symbol">apiVersion:</span> v1<br><span class="hljs-symbol">kind:</span> Service<br><span class="hljs-symbol">metadata:</span><br><span class="hljs-symbol">  creationTimestamp:</span> <span class="hljs-string">&quot;2020-10-25T03:06:35Z&quot;</span><br><span class="hljs-symbol">  labels:</span><br><span class="hljs-symbol">    app:</span> nginx<br><span class="hljs-symbol">  name:</span> webss<span class="hljs-number">-0</span><br><span class="hljs-symbol">  namespace:</span> default<br><span class="hljs-symbol">  resourceVersion:</span> <span class="hljs-string">&quot;14187854412&quot;</span><br><span class="hljs-symbol">  selfLink:</span> <span class="hljs-keyword">/api/</span>v1<span class="hljs-keyword">/namespaces/</span>default<span class="hljs-keyword">/services/</span>webss<span class="hljs-number">-0</span><br><span class="hljs-symbol">  uid:</span> <span class="hljs-number">16f</span>50d64<span class="hljs-number">-533</span>c<span class="hljs-number">-4</span>c55-acb6-d7512d86cc58<br><span class="hljs-symbol">spec:</span><br><span class="hljs-symbol">  clusterIP:</span> <span class="hljs-number">172.16</span><span class="hljs-number">.255</span><span class="hljs-number">.138</span><br><span class="hljs-symbol">  ports:</span><br>  - name: web<br><span class="hljs-symbol">    port:</span> <span class="hljs-number">80</span><br><span class="hljs-symbol">    protocol:</span> TCP<br><span class="hljs-symbol">    targetPort:</span> <span class="hljs-number">80</span><br><span class="hljs-symbol">  selector:</span><br>    statefulset.kubernetes.io/pod-name: webss<span class="hljs-number">-0</span><br><span class="hljs-symbol">  sessionAffinity:</span> None<br><span class="hljs-symbol">  type:</span> ClusterIP<br><span class="hljs-symbol">status:</span><br><span class="hljs-symbol">  loadBalancer:</span> <span class="hljs-punctuation">&#123;</span><span class="hljs-punctuation">&#125;</span><br></code></pre></td></tr></table></figure>
+<p>这边可以通过这个svc单独访问到webss-0</p>
+<h1 id="StatefulSet的创建和扩缩容"><a href="#StatefulSet的创建和扩缩容" class="headerlink" title="StatefulSet的创建和扩缩容"></a>StatefulSet的创建和扩缩容</h1><ul>
+<li>对于包含 N 个 副本的 StatefulSet，当部署 Pod 时，它们是依次创建的，顺序为 0..N-1。</li>
+<li>当删除 Pod 时，它们是逆序终止的，顺序为 N-1..0。</li>
+<li>在将缩放操作应用到 Pod 之前，它前面的所有 Pod 必须是 Running 和 Ready 状态。</li>
+<li>在 Pod 终止之前，所有的继任者必须完全关闭。</li>
+</ul>
+<p>StatefulSet 不应将 pod.Spec.TerminationGracePeriodSeconds 设置为 0。 这种做法是不安全的，要强烈阻止。更多的解释请参考 强制删除 StatefulSet Pod。</p>
+<p><img src="/img/2020-10-23-StatefulSet-controller-of-kubernetes/5.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>在上面的 nginx 示例被创建后，会按照 webss-0、webss-1、webss-2 的顺序部署三个 Pod。 在 web-0 进入 Running 和 Ready 状态前不会部署 webss-1。在 webss-1 进入 Running 和 Ready 状态前不会部署 webss-2。 如果 web-1 已经处于 Running 和 Ready 状态，而 webss-2 尚未部署，在此期间发生了 web-0 运行失败，那么 webss-2 将不会被部署，要等到 webss-0 部署完成并进入 Running 和 Ready 状态后，才会部署 web-2。</p>
+<p>如果用户想将示例中的 StatefulSet 收缩为 replicas&#x3D;0，首先被终止的是 webss-2。在 webss-2 没有被完全停止和删除前，webss-1 不会被终止。当 webss-2 已被终止和删除、webss-1 尚未被终止，如果在此期间发生 webss-0 运行失败，那么就不会终止 webss-1，必须等到 webss-0 进入 Running 和 Ready 状态后才会终止 webss-1。</p>
+<p>我们可以先删除pod，然后创建pod，看下对应的event日志</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs sql">[root<span class="hljs-variable">@VM</span>_1_4_centos <span class="hljs-operator">~</span>]# kubectl <span class="hljs-keyword">describe</span> sts webss<br>Name:               webss<br>Namespace:          <span class="hljs-keyword">default</span><br>CreationTimestamp:  Sun, <span class="hljs-number">25</span> Oct <span class="hljs-number">2020</span> <span class="hljs-number">09</span>:<span class="hljs-number">39</span>:<span class="hljs-number">47</span> <span class="hljs-operator">+</span><span class="hljs-number">0800</span><br>Selector:           app<span class="hljs-operator">=</span>nginx,k8s<span class="hljs-operator">-</span>app<span class="hljs-operator">=</span>webss,qcloud<span class="hljs-operator">-</span>app<span class="hljs-operator">=</span>webss<br>Labels:             app<span class="hljs-operator">=</span>nginx<br>                    k8s<span class="hljs-operator">-</span>app<span class="hljs-operator">=</span>webss<br>                    qcloud<span class="hljs-operator">-</span>app<span class="hljs-operator">=</span>webss<br>Annotations:        <span class="hljs-operator">&lt;</span><span class="hljs-keyword">none</span><span class="hljs-operator">&gt;</span><br>Replicas:           <span class="hljs-number">3</span> desired <span class="hljs-operator">|</span> <span class="hljs-number">3</span> total<br><span class="hljs-keyword">Update</span> Strategy:    RollingUpdate<br>...............<br>Events:<br>  Type    Reason            Age                  <span class="hljs-keyword">From</span>                    Message<br>  <span class="hljs-comment">----    ------            ----                 ----                    -------</span><br>  Normal  SuccessfulDelete  <span class="hljs-number">118</span>s (x2 <span class="hljs-keyword">over</span> <span class="hljs-number">151</span>m)  statefulset<span class="hljs-operator">-</span>controller  <span class="hljs-keyword">delete</span> Pod webss<span class="hljs-number">-2</span> <span class="hljs-keyword">in</span> StatefulSet webss successful<br>  Normal  SuccessfulDelete  <span class="hljs-number">111</span>s (x2 <span class="hljs-keyword">over</span> <span class="hljs-number">151</span>m)  statefulset<span class="hljs-operator">-</span>controller  <span class="hljs-keyword">delete</span> Pod webss<span class="hljs-number">-1</span> <span class="hljs-keyword">in</span> StatefulSet webss successful<br>  Normal  SuccessfulDelete  <span class="hljs-number">97</span>s (x2 <span class="hljs-keyword">over</span> <span class="hljs-number">151</span>m)   statefulset<span class="hljs-operator">-</span>controller  <span class="hljs-keyword">delete</span> Pod webss<span class="hljs-number">-0</span> <span class="hljs-keyword">in</span> StatefulSet webss successful<br>  Normal  SuccessfulCreate  <span class="hljs-number">70</span>s (x3 <span class="hljs-keyword">over</span> <span class="hljs-number">3</span>h49m)  statefulset<span class="hljs-operator">-</span>controller  <span class="hljs-keyword">create</span> Pod webss<span class="hljs-number">-0</span> <span class="hljs-keyword">in</span> StatefulSet webss successful<br>  Normal  SuccessfulCreate  <span class="hljs-number">47</span>s (x3 <span class="hljs-keyword">over</span> <span class="hljs-number">3</span>h49m)  statefulset<span class="hljs-operator">-</span>controller  <span class="hljs-keyword">create</span> Pod webss<span class="hljs-number">-1</span> <span class="hljs-keyword">in</span> StatefulSet webss successful<br>  Normal  SuccessfulCreate  <span class="hljs-number">24</span>s (x3 <span class="hljs-keyword">over</span> <span class="hljs-number">3</span>h48m)  statefulset<span class="hljs-operator">-</span>controller  <span class="hljs-keyword">create</span> Pod webss<span class="hljs-number">-2</span> <span class="hljs-keyword">in</span> StatefulSet webss successful<br></code></pre></td></tr></table></figure>
+<p>可以发现pod的启动是按照顺序创建和删除的</p>
+<p><strong>podManagementPolicy管理pod</strong></p>
+<p>那么StatefulSet 是如何保证对应的pod按照顺序启动的呢，必须需要等前面一个pod启动才能启动后面的pod，那么我们可以去除这个依赖来启动pod吗？让pod并行启动，这边当然是可以的。StatefulSet可以通过podManagementPolicy这个参数来配置pod的启动顺序。</p>
+<p>podManagementPolicy: OrderedReady这个是默认的配置，就是按照一定的顺序先后启动。</p>
+<p>podManagementPolicy可以将值设置为Parallel，这个值就是StatefulSet 控制器并行的启动或终止所有的 Pod， 启动或者终止其他 Pod 前，无需等待 Pod 进入 Running 和 ready 或者完全停止状态。</p>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs dts"><span class="hljs-symbol">apiVersion:</span> apps/v1<br><span class="hljs-symbol">kind:</span> StatefulSet<br><span class="hljs-symbol">metadata:</span><br><span class="hljs-symbol">  annotations:</span><br>    kubectl.kubernetes.io/last-applied-configuration: |<br>      <span class="hljs-punctuation">&#123;</span><span class="hljs-string">&quot;apiVersion&quot;</span>:<span class="hljs-string">&quot;apps/v1&quot;</span>,<span class="hljs-string">&quot;kind&quot;</span>:<span class="hljs-string">&quot;StatefulSet&quot;</span>,<span class="hljs-string">&quot;metadata&quot;</span>:<span class="hljs-punctuation">&#123;</span><span class="hljs-string">&quot;annotations&quot;</span>:<span class="hljs-punctuation">&#123;</span><span class="hljs-punctuation">&#125;</span>,<span class="hljs-string">&quot;name&quot;</span>:<span class="hljs-string">&quot;web&quot;</span>,<span class="hljs-string">&quot;namespace&quot;</span>:<span class="hljs-string">&quot;default&quot;</span><span class="hljs-punctuation">&#125;</span>,<span class="hljs-string">&quot;spec&quot;</span>:<span class="hljs-punctuation">&#123;</span><span class="hljs-string">&quot;podManagementPolicy&quot;</span>:<span class="hljs-string">&quot;Parallel&quot;</span>,<span class="hljs-string">&quot;replicas&quot;</span>:<span class="hljs-number">3</span>,<span class="hljs-string">&quot;selector&quot;</span>:<span class="hljs-punctuation">&#123;</span><span class="hljs-string">&quot;matchLabels&quot;</span>:<span class="hljs-punctuation">&#123;</span><span class="hljs-string">&quot;app&quot;</span>:<span class="hljs-string">&quot;nginx&quot;</span><span class="hljs-punctuation">&#125;</span><span class="hljs-punctuation">&#125;</span>,<span class="hljs-string">&quot;serviceName&quot;</span>:<span class="hljs-string">&quot;nginx&quot;</span>,<span class="hljs-string">&quot;template&quot;</span>:<span class="hljs-punctuation">&#123;</span><span class="hljs-string">&quot;metadata&quot;</span>:<span class="hljs-punctuation">&#123;</span><span class="hljs-string">&quot;labels&quot;</span>:<span class="hljs-punctuation">&#123;</span><span class="hljs-string">&quot;app&quot;</span>:<span class="hljs-string">&quot;nginx&quot;</span><span class="hljs-punctuation">&#125;</span><span class="hljs-punctuation">&#125;</span>,<span class="hljs-string">&quot;spec&quot;</span>:<span class="hljs-punctuation">&#123;</span><span class="hljs-string">&quot;containers&quot;</span>:[<span class="hljs-punctuation">&#123;</span><span class="hljs-string">&quot;image&quot;</span>:<span class="hljs-string">&quot;k8s.gcr.io/nginx-slim:0.8&quot;</span>,<span class="hljs-string">&quot;name&quot;</span>:<span class="hljs-string">&quot;nginx&quot;</span>,<span class="hljs-string">&quot;ports&quot;</span>:[<span class="hljs-punctuation">&#123;</span><span class="hljs-string">&quot;containerPort&quot;</span>:<span class="hljs-number">80</span>,<span class="hljs-string">&quot;name&quot;</span>:<span class="hljs-string">&quot;web&quot;</span><span class="hljs-punctuation">&#125;</span>]<span class="hljs-punctuation">&#125;</span>],<span class="hljs-string">&quot;terminationGracePeriodSeconds&quot;</span>:<span class="hljs-number">10</span><span class="hljs-punctuation">&#125;</span><span class="hljs-punctuation">&#125;</span><span class="hljs-punctuation">&#125;</span><span class="hljs-punctuation">&#125;</span><br><span class="hljs-symbol">  creationTimestamp:</span> <span class="hljs-string">&quot;2020-10-25T05:42:38Z&quot;</span><br><span class="hljs-symbol">  generation:</span> <span class="hljs-number">2</span><br><span class="hljs-symbol">  name:</span> web<br><span class="hljs-symbol">  namespace:</span> default<br><span class="hljs-symbol">  resourceVersion:</span> <span class="hljs-string">&quot;8286286&quot;</span><br><span class="hljs-symbol">  selfLink:</span> <span class="hljs-keyword">/apis/</span>apps<span class="hljs-keyword">/v1/</span>namespaces<span class="hljs-keyword">/default/</span>statefulsets/web<br><span class="hljs-symbol">  uid:</span> <span class="hljs-number">4e50</span>f5b0-d23d<span class="hljs-number">-4</span>fca<span class="hljs-number">-978</span>e-f3547c047dd3<br><span class="hljs-symbol">spec:</span><br><span class="hljs-symbol">  podManagementPolicy:</span> Parallel<br><span class="hljs-symbol">  replicas:</span> <span class="hljs-number">3</span><br><span class="hljs-symbol">  revisionHistoryLimit:</span> <span class="hljs-number">10</span><br><span class="hljs-symbol">  selector:</span><br><span class="hljs-symbol">    matchLabels:</span><br><span class="hljs-symbol">      app:</span> nginx<br><span class="hljs-symbol">  serviceName:</span> nginx<br>....................<br></code></pre></td></tr></table></figure>
+<p><img src="/img/2020-10-23-StatefulSet-controller-of-kubernetes/6.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>可以从上面event事件看出，我们将podManagementPolicy设置为Parallel，pod是并行同时启动的</p>
+<h1 id="StatefulSet的更新"><a href="#StatefulSet的更新" class="headerlink" title="StatefulSet的更新"></a>StatefulSet的更新</h1><p>在 Kubernetes 1.7 及以后的版本中，StatefulSet 的.spec.updateStrategy字段让您可以配置和禁用掉自动滚动更新 Pod 的容器、标签、资源请求或限制、以及注解。默认的配置是滚动更新</p>
+<h2 id="RollingUpdate更新"><a href="#RollingUpdate更新" class="headerlink" title="RollingUpdate更新"></a>RollingUpdate更新</h2><p>RollingUpdate更新策略对 StatefulSet 中的 Pod 执行自动的滚动更新。在没有声明.spec.updateStrategy时，RollingUpdate是默认配置。 当 StatefulSet 的.spec.updateStrategy.type被设置为RollingUpdate时，StatefulSet 控制器会删除和重建 StatefulSet 中的每个 Pod。 它将按照与 Pod 终止相同的顺序（从最大序号到最小序号）进行，每次更新一个 Pod。它会等到被更新的 Pod 进入 Running 和 Ready 状态，然后再更新其前身。</p>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs dts"><span class="hljs-symbol">    terminationGracePeriodSeconds:</span> <span class="hljs-number">30</span><br><span class="hljs-symbol">updateStrategy:</span><br><span class="hljs-symbol">  rollingUpdate:</span><br><span class="hljs-symbol">    partition:</span> <span class="hljs-number">0</span><br><span class="hljs-symbol">  type:</span> RollingUpdate<br></code></pre></td></tr></table></figure>
+<p>下面我们修改下镜像，看看滚动更新是否和上面描述一致，我们修改镜像版本为1.17版本，从事件看，更新顺序是先更新最大号序号，再更新最小序号的</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs sql">   nginx:<br>    Image:        nginx:<span class="hljs-number">1.17</span><br>    Port:         <span class="hljs-number">80</span><span class="hljs-operator">/</span>TCP<br>    Host Port:    <span class="hljs-number">0</span><span class="hljs-operator">/</span>TCP<br>    Environment:  <span class="hljs-operator">&lt;</span><span class="hljs-keyword">none</span><span class="hljs-operator">&gt;</span><br>    Mounts:       <span class="hljs-operator">&lt;</span><span class="hljs-keyword">none</span><span class="hljs-operator">&gt;</span><br>  Volumes:        <span class="hljs-operator">&lt;</span><span class="hljs-keyword">none</span><span class="hljs-operator">&gt;</span><br>Volume Claims:    <span class="hljs-operator">&lt;</span><span class="hljs-keyword">none</span><span class="hljs-operator">&gt;</span><br>Events:<br>  Type    Reason            Age                  <span class="hljs-keyword">From</span>                    Message<br>  <span class="hljs-comment">----    ------            ----                 ----                    -------</span><br>  Normal  SuccessfulDelete  <span class="hljs-number">93</span>s                  statefulset<span class="hljs-operator">-</span>controller  <span class="hljs-keyword">delete</span> Pod web<span class="hljs-number">-2</span> <span class="hljs-keyword">in</span> StatefulSet web successful<br>  Normal  SuccessfulCreate  <span class="hljs-number">85</span>s (x2 <span class="hljs-keyword">over</span> <span class="hljs-number">3</span>m28s)  statefulset<span class="hljs-operator">-</span>controller  <span class="hljs-keyword">create</span> Pod web<span class="hljs-number">-2</span> <span class="hljs-keyword">in</span> StatefulSet web successful<br>  Normal  SuccessfulDelete  <span class="hljs-number">46</span>s                  statefulset<span class="hljs-operator">-</span>controller  <span class="hljs-keyword">delete</span> Pod web<span class="hljs-number">-1</span> <span class="hljs-keyword">in</span> StatefulSet web successful<br>  Normal  SuccessfulCreate  <span class="hljs-number">36</span>s (x2 <span class="hljs-keyword">over</span> <span class="hljs-number">4</span>m20s)  statefulset<span class="hljs-operator">-</span>controller  <span class="hljs-keyword">create</span> Pod web<span class="hljs-number">-1</span> <span class="hljs-keyword">in</span> StatefulSet web successful<br>  Normal  SuccessfulDelete  <span class="hljs-number">12</span>s                  statefulset<span class="hljs-operator">-</span>controller  <span class="hljs-keyword">delete</span> Pod web<span class="hljs-number">-0</span> <span class="hljs-keyword">in</span> StatefulSet web successful<br>  Normal  SuccessfulCreate  <span class="hljs-number">5</span>s (x2 <span class="hljs-keyword">over</span> <span class="hljs-number">4</span>m59s)   statefulset<span class="hljs-operator">-</span>controller  <span class="hljs-keyword">create</span> Pod web<span class="hljs-number">-0</span> <span class="hljs-keyword">in</span> StatefulSet web successful<br></code></pre></td></tr></table></figure>
+<h2 id="OnDelete-更新"><a href="#OnDelete-更新" class="headerlink" title="OnDelete 更新"></a>OnDelete 更新</h2><p>OnDelete 更新策略实现了 1.6 及以前版本的历史遗留行为。当 StatefulSet 的 .spec.updateStrategy.type 设置为 OnDelete 时，它的控制器将不会自动更新 StatefulSet 中的 Pod。用户必须手动删除 Pod 以便让控制器创建新的 Pod，以此来对 StatefulSet 的 .spec.template 的变动作出反应。</p>
+<figure class="highlight nestedtext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs nestedtext">    <span class="hljs-attribute">containers</span><span class="hljs-punctuation">:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-string">image: nginx:1.17</span><br>      <span class="hljs-attribute">imagePullPolicy</span><span class="hljs-punctuation">:</span> <span class="hljs-string">Always</span><br>      <span class="hljs-attribute">name</span><span class="hljs-punctuation">:</span> <span class="hljs-string">nginx</span><br>      <span class="hljs-attribute">ports</span><span class="hljs-punctuation">:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">containerPort: 80</span><br>        <span class="hljs-attribute">name</span><span class="hljs-punctuation">:</span> <span class="hljs-string">web</span><br>        <span class="hljs-attribute">protocol</span><span class="hljs-punctuation">:</span> <span class="hljs-string">TCP</span><br>      <span class="hljs-attribute">resources</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&#123;&#125;</span><br>      <span class="hljs-attribute">terminationMessagePath</span><span class="hljs-punctuation">:</span> <span class="hljs-string">/dev/termination-log</span><br>      <span class="hljs-attribute">terminationMessagePolicy</span><span class="hljs-punctuation">:</span> <span class="hljs-string">File</span><br>    <span class="hljs-attribute">dnsPolicy</span><span class="hljs-punctuation">:</span> <span class="hljs-string">ClusterFirst</span><br>    <span class="hljs-attribute">restartPolicy</span><span class="hljs-punctuation">:</span> <span class="hljs-string">Always</span><br>    <span class="hljs-attribute">schedulerName</span><span class="hljs-punctuation">:</span> <span class="hljs-string">default-scheduler</span><br>    <span class="hljs-attribute">securityContext</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&#123;&#125;</span><br>    <span class="hljs-attribute">terminationGracePeriodSeconds</span><span class="hljs-punctuation">:</span> <span class="hljs-string">10</span><br><span class="hljs-attribute">updateStrategy</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-attribute">type</span><span class="hljs-punctuation">:</span> <span class="hljs-string">OnDelete</span><br></code></pre></td></tr></table></figure>
+<p>下面我们把修改镜像成latest，看下对应的pod会不会更新</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">podManagementPolicy:</span> <span class="hljs-string">OrderedReady</span><br>  <span class="hljs-attr">replicas:</span> <span class="hljs-number">3</span><br>  <span class="hljs-attr">revisionHistoryLimit:</span> <span class="hljs-number">10</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">matchLabels:</span><br>      <span class="hljs-attr">app:</span> <span class="hljs-string">nginx</span><br>  <span class="hljs-attr">serviceName:</span> <span class="hljs-string">nginx</span><br>  <span class="hljs-attr">template:</span><br>    <span class="hljs-attr">metadata:</span><br>      <span class="hljs-attr">creationTimestamp:</span> <span class="hljs-literal">null</span><br>      <span class="hljs-attr">labels:</span><br>        <span class="hljs-attr">app:</span> <span class="hljs-string">nginx</span><br>    <span class="hljs-attr">spec:</span><br>      <span class="hljs-attr">containers:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">image:</span> <span class="hljs-string">nginx:latest</span><br>        <span class="hljs-attr">imagePullPolicy:</span> <span class="hljs-string">Always</span><br>        <span class="hljs-attr">name:</span> <span class="hljs-string">nginx</span><br><br>[<span class="hljs-string">root@VM-4-3-centos</span> <span class="hljs-string">~</span>]<span class="hljs-comment"># kubectl delete pod web-1</span><br><span class="hljs-string">pod</span> <span class="hljs-string">&quot;web-1&quot;</span> <span class="hljs-string">deleted</span><br>[<span class="hljs-string">root@VM-4-3-centos</span> <span class="hljs-string">~</span>]<span class="hljs-comment"># kubectl get pod </span><br><span class="hljs-string">NAME</span>    <span class="hljs-string">READY</span>   <span class="hljs-string">STATUS</span>              <span class="hljs-string">RESTARTS</span>   <span class="hljs-string">AGE</span><br><span class="hljs-string">web-0</span>   <span class="hljs-number">1</span><span class="hljs-string">/1</span>     <span class="hljs-string">Running</span>             <span class="hljs-number">0</span>          <span class="hljs-string">6m</span><br><span class="hljs-string">web-1</span>   <span class="hljs-number">0</span><span class="hljs-string">/1</span>     <span class="hljs-string">ContainerCreating</span>   <span class="hljs-number">0</span>          <span class="hljs-string">2s</span><br><span class="hljs-string">web-2</span>   <span class="hljs-number">1</span><span class="hljs-string">/1</span>     <span class="hljs-string">Running</span>             <span class="hljs-number">0</span>          <span class="hljs-string">7m20s</span><br>[<span class="hljs-string">root@VM-4-3-centos</span> <span class="hljs-string">~</span>]<span class="hljs-comment"># kubectl describe pod web-1</span><br><span class="hljs-attr">Name:</span>           <span class="hljs-string">web-1</span><br><span class="hljs-attr">Namespace:</span>      <span class="hljs-string">default</span><br><span class="hljs-string">.....................</span><br><span class="hljs-attr">Events:</span><br>  <span class="hljs-string">Type</span>    <span class="hljs-string">Reason</span>     <span class="hljs-string">Age</span>   <span class="hljs-string">From</span>                     <span class="hljs-string">Message</span><br>  <span class="hljs-string">----</span>    <span class="hljs-string">------</span>     <span class="hljs-string">----</span>  <span class="hljs-string">----</span>                     <span class="hljs-string">-------</span><br>  <span class="hljs-string">Normal</span>  <span class="hljs-string">Scheduled</span>  <span class="hljs-string">11s</span>   <span class="hljs-string">default-scheduler</span>        <span class="hljs-string">Successfully</span> <span class="hljs-string">assigned</span> <span class="hljs-string">default/web-1</span> <span class="hljs-string">to</span> <span class="hljs-string">vm-4-11-centos</span><br>  <span class="hljs-string">Normal</span>  <span class="hljs-string">Pulling</span>    <span class="hljs-string">10s</span>   <span class="hljs-string">kubelet,</span> <span class="hljs-string">vm-4-11-centos</span>  <span class="hljs-string">Pulling</span> <span class="hljs-string">image</span> <span class="hljs-string">&quot;nginx:latest&quot;</span><br>  <span class="hljs-string">Normal</span>  <span class="hljs-string">Pulled</span>     <span class="hljs-string">0s</span>    <span class="hljs-string">kubelet,</span> <span class="hljs-string">vm-4-11-centos</span>  <span class="hljs-string">Successfully</span> <span class="hljs-string">pulled</span> <span class="hljs-string">image</span> <span class="hljs-string">&quot;nginx:latest&quot;</span><br>  <span class="hljs-string">Normal</span>  <span class="hljs-string">Created</span>    <span class="hljs-string">0s</span>    <span class="hljs-string">kubelet,</span> <span class="hljs-string">vm-4-11-centos</span>  <span class="hljs-string">Created</span> <span class="hljs-string">container</span> <span class="hljs-string">nginx</span><br>  <span class="hljs-string">Normal</span>  <span class="hljs-string">Started</span>    <span class="hljs-string">0s</span>    <span class="hljs-string">kubelet,</span> <span class="hljs-string">vm-4-11-centos</span>  <span class="hljs-string">Started</span> <span class="hljs-string">container</span> <span class="hljs-string">nginx</span><br></code></pre></td></tr></table></figure>
+<p>可以发现我们修改yaml后，pod并没有更新，只有手动删除某个pod后，pod才会进行更新</p>
+<h2 id="分区更新"><a href="#分区更新" class="headerlink" title="分区更新"></a>分区更新</h2><p>通过声明.spec.updateStrategy.rollingUpdate.partition的方式，RollingUpdate更新策略可以实现分区。如果声明了一个分区，当 StatefulSet 的.spec.template被更新时，所有序号大于等于该分区序号的 Pod 都会被更新。所有序号小于该分区序号的 Pod 都不会被更新，并且，即使他们被删除也会依据之前的版本进行重建。如果 StatefulSet 的.spec.updateStrategy.rollingUpdate.partition大于它的.spec.replicas，对它的.spec.template的更新将不会传递到它的 Pod。 在大多数情况下，您不需要使用分区，但如果您希望进行阶段更新、执行金丝雀或执行分阶段展开，则这些分区会非常有用</p>
+<p>这边通常spec.updateStrategy.rollingUpdate.partition一般需要小于replicas的数值，这样才会生效，下面我们来测试一下分区更新</p>
+<figure class="highlight nestedtext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><code class="hljs nestedtext"><span class="hljs-attribute">spec</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-attribute">podManagementPolicy</span><span class="hljs-punctuation">:</span> <span class="hljs-string">OrderedReady</span><br>  <span class="hljs-attribute">replicas</span><span class="hljs-punctuation">:</span> <span class="hljs-string">3</span><br>  <span class="hljs-attribute">revisionHistoryLimit</span><span class="hljs-punctuation">:</span> <span class="hljs-string">10</span><br>  <span class="hljs-attribute">selector</span><span class="hljs-punctuation">:</span><br>    <span class="hljs-attribute">matchLabels</span><span class="hljs-punctuation">:</span><br>      <span class="hljs-attribute">app</span><span class="hljs-punctuation">:</span> <span class="hljs-string">nginx</span><br>  <span class="hljs-attribute">serviceName</span><span class="hljs-punctuation">:</span> <span class="hljs-string">nginx</span><br>  <span class="hljs-attribute">template</span><span class="hljs-punctuation">:</span><br>    <span class="hljs-attribute">metadata</span><span class="hljs-punctuation">:</span><br>      <span class="hljs-attribute">creationTimestamp</span><span class="hljs-punctuation">:</span> <span class="hljs-string">null</span><br>      <span class="hljs-attribute">labels</span><span class="hljs-punctuation">:</span><br>        <span class="hljs-attribute">app</span><span class="hljs-punctuation">:</span> <span class="hljs-string">nginx</span><br>    <span class="hljs-attribute">spec</span><span class="hljs-punctuation">:</span><br>      <span class="hljs-attribute">containers</span><span class="hljs-punctuation">:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">image: nginx</span><br>        <span class="hljs-attribute">imagePullPolicy</span><span class="hljs-punctuation">:</span> <span class="hljs-string">Always</span><br>        <span class="hljs-attribute">name</span><span class="hljs-punctuation">:</span> <span class="hljs-string">nginx</span><br>        <span class="hljs-attribute">ports</span><span class="hljs-punctuation">:</span><br>        <span class="hljs-bullet">-</span> <span class="hljs-string">containerPort: 80</span><br>          <span class="hljs-attribute">name</span><span class="hljs-punctuation">:</span> <span class="hljs-string">web</span><br>          <span class="hljs-attribute">protocol</span><span class="hljs-punctuation">:</span> <span class="hljs-string">TCP</span><br>        <span class="hljs-attribute">resources</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&#123;&#125;</span><br>        <span class="hljs-attribute">terminationMessagePath</span><span class="hljs-punctuation">:</span> <span class="hljs-string">/dev/termination-log</span><br>        <span class="hljs-attribute">terminationMessagePolicy</span><span class="hljs-punctuation">:</span> <span class="hljs-string">File</span><br>      <span class="hljs-attribute">dnsPolicy</span><span class="hljs-punctuation">:</span> <span class="hljs-string">ClusterFirst</span><br>      <span class="hljs-attribute">restartPolicy</span><span class="hljs-punctuation">:</span> <span class="hljs-string">Always</span><br>      <span class="hljs-attribute">schedulerName</span><span class="hljs-punctuation">:</span> <span class="hljs-string">default-scheduler</span><br>      <span class="hljs-attribute">securityContext</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&#123;&#125;</span><br>      <span class="hljs-attribute">terminationGracePeriodSeconds</span><span class="hljs-punctuation">:</span> <span class="hljs-string">10</span><br>  <span class="hljs-attribute">updateStrategy</span><span class="hljs-punctuation">:</span><br>    <span class="hljs-attribute">rollingUpdate</span><span class="hljs-punctuation">:</span><br>      <span class="hljs-attribute">partition</span><span class="hljs-punctuation">:</span> <span class="hljs-string">2</span><br>    <span class="hljs-attribute">type</span><span class="hljs-punctuation">:</span> <span class="hljs-string">RollingUpdate</span><br><span class="hljs-attribute">[root@VM-4-3-centos ~]# kubectl describe sts web</span><br><span class="hljs-attribute">Name</span><span class="hljs-punctuation">:</span> <span class="hljs-string">              web</span><br><span class="hljs-attribute">Namespace</span><span class="hljs-punctuation">:</span> <span class="hljs-string">         default</span><br><span class="hljs-attribute">CreationTimestamp</span><span class="hljs-punctuation">:</span> <span class="hljs-string"> Sun, 25 Oct 2020 14:09:02 +0800</span><br><span class="hljs-attribute">Selector</span><span class="hljs-punctuation">:</span> <span class="hljs-string">          app=nginx</span><br><span class="hljs-attribute">Labels</span><span class="hljs-punctuation">:</span> <span class="hljs-string">            &lt;none&gt;</span><br><span class="hljs-attribute">Annotations</span><span class="hljs-punctuation">:</span> <span class="hljs-string">       kubectl.kubernetes.io/last-applied-configuration:</span><br>                      &#123;&quot;apiVersion&quot;:&quot;apps/v1&quot;,&quot;kind&quot;:&quot;StatefulSet&quot;,&quot;metadata&quot;:&#123;&quot;annotations&quot;:&#123;&#125;,&quot;name&quot;:&quot;web&quot;,&quot;namespace&quot;:&quot;default&quot;&#125;,&quot;spec&quot;:&#123;&quot;podManagementPolicy...<br><span class="hljs-attribute">Replicas</span><span class="hljs-punctuation">:</span> <span class="hljs-string">          3 desired | 3 total</span><br><span class="hljs-attribute">Update Strategy</span><span class="hljs-punctuation">:</span> <span class="hljs-string">   RollingUpdate</span><br>  <span class="hljs-attribute">Partition</span><span class="hljs-punctuation">:</span> <span class="hljs-string">       824636860812</span><br><span class="hljs-attribute">Pods Status</span><span class="hljs-punctuation">:</span> <span class="hljs-string">       3 Running / 0 Waiting / 0 Succeeded / 0 Failed</span><br><span class="hljs-attribute">........</span><br><span class="hljs-attribute">Events</span><span class="hljs-punctuation">:</span><br>  Type    Reason            Age                  From                    Message<br>  ----    ------            ----                 ----                    -------<br>  Normal  SuccessfulCreate  5m8s                 statefulset-controller  create Pod web-0 in StatefulSet web successful<br>  Normal  SuccessfulCreate  4m32s                statefulset-controller  create Pod web-1 in StatefulSet web successful<br>  Normal  SuccessfulDelete  26s                  statefulset-controller  delete Pod web-2 in StatefulSet web successful<br>  Normal  SuccessfulCreate  19s (x2 over 4m12s)  statefulset-controller  create Pod web-2 in StatefulSet web successful<br>[root@VM-4-3-centos ~]# kubectl get pod <br>NAME    READY   STATUS    RESTARTS   AGE<br>web-0   1/1     Running   0          5m12s<br>web-1   1/1     Running   0          4m36s<br>web-2   1/1     Running   0          23s<br></code></pre></td></tr></table></figure>
+<p>可以发现，只有大于等于分区需要才会被更新，这里也只有web-2被更新</p>
+<h2 id="强制回滚"><a href="#强制回滚" class="headerlink" title="强制回滚"></a>强制回滚</h2><p>在默认 Pod 管理策略(OrderedReady) 时使用 滚动更新 ，可能进入需要人工干预才能修复的损坏状态。</p>
+<p>如果更新后 Pod 模板配置进入无法运行或就绪的状态（例如，由于错误的二进制文件或应用程序级配置错误），StatefulSet 将停止回滚并等待。</p>
+<p>在这种状态下，仅将 Pod 模板还原为正确的配置是不够的。由于 已知问题，StatefulSet 将继续等待损坏状态的 Pod 准备就绪（永远不会发生），然后再尝试将其恢复为正常工作配置。</p>
+<p>恢复模板后，还必须删除 StatefulSet 尝试使用错误的配置来运行的 Pod。这样， StatefulSet 才会开始使用被还原的模板来重新创建 Pod</p>
+<p>我们日常在更新镜像的时候，发现服务启动失败了，然后将镜像回滚成之前的版本，这样仅仅是不够的，因为StatefulSet 还会一直等待新更新的pod状态ready，但是这个永远不会发生，所以为了恢复正常，我们需要删除更新启动失败的pod。</p>
+<p>下面我们来测试下，我们将pod修改成k8s.gcr.io&#x2F;nginx-slim:0.8，节点上无法拉取这个镜像的，所以web-2这个pod会一直启动失败。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><code class="hljs yaml">[<span class="hljs-string">root@VM-4-3-centos</span> <span class="hljs-string">~</span>]<span class="hljs-comment"># kubectl get pod </span><br><span class="hljs-string">NAME</span>    <span class="hljs-string">READY</span>   <span class="hljs-string">STATUS</span>             <span class="hljs-string">RESTARTS</span>   <span class="hljs-string">AGE</span><br><span class="hljs-string">web-0</span>   <span class="hljs-number">1</span><span class="hljs-string">/1</span>     <span class="hljs-string">Running</span>            <span class="hljs-number">0</span>          <span class="hljs-string">13m</span><br><span class="hljs-string">web-1</span>   <span class="hljs-number">1</span><span class="hljs-string">/1</span>     <span class="hljs-string">Running</span>            <span class="hljs-number">0</span>          <span class="hljs-string">12m</span><br><span class="hljs-string">web-2</span>   <span class="hljs-number">0</span><span class="hljs-string">/1</span>     <span class="hljs-string">ImagePullBackOff</span>   <span class="hljs-number">0</span>          <span class="hljs-string">44s</span><br><span class="hljs-string">下面我们将镜像改成之前的nginx:1.17，看看会不会恢复</span><br><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">podManagementPolicy:</span> <span class="hljs-string">OrderedReady</span><br>  <span class="hljs-attr">replicas:</span> <span class="hljs-number">3</span><br>  <span class="hljs-attr">revisionHistoryLimit:</span> <span class="hljs-number">10</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">matchLabels:</span><br>      <span class="hljs-attr">app:</span> <span class="hljs-string">nginx</span><br>  <span class="hljs-attr">serviceName:</span> <span class="hljs-string">nginx</span><br>  <span class="hljs-attr">template:</span><br>    <span class="hljs-attr">metadata:</span><br>      <span class="hljs-attr">creationTimestamp:</span> <span class="hljs-literal">null</span><br>      <span class="hljs-attr">labels:</span><br>        <span class="hljs-attr">app:</span> <span class="hljs-string">nginx</span><br>    <span class="hljs-attr">spec:</span><br>      <span class="hljs-attr">containers:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">image:</span> <span class="hljs-string">nginx:1.17</span><br>        <span class="hljs-attr">imagePullPolicy:</span> <span class="hljs-string">Always</span><br>[<span class="hljs-string">root@VM-4-3-centos</span> <span class="hljs-string">~</span>]<span class="hljs-comment"># kubectl get pod </span><br><span class="hljs-string">NAME</span>    <span class="hljs-string">READY</span>   <span class="hljs-string">STATUS</span>         <span class="hljs-string">RESTARTS</span>   <span class="hljs-string">AGE</span><br><span class="hljs-string">web-0</span>   <span class="hljs-number">1</span><span class="hljs-string">/1</span>     <span class="hljs-string">Running</span>        <span class="hljs-number">0</span>          <span class="hljs-string">15m</span><br><span class="hljs-string">web-1</span>   <span class="hljs-number">1</span><span class="hljs-string">/1</span>     <span class="hljs-string">Running</span>        <span class="hljs-number">0</span>          <span class="hljs-string">14m</span><br><span class="hljs-string">web-2</span>   <span class="hljs-number">0</span><span class="hljs-string">/1</span>     <span class="hljs-string">ErrImagePull</span>   <span class="hljs-number">0</span>          <span class="hljs-string">2m52s</span><br>[<span class="hljs-string">root@VM-4-3-centos</span> <span class="hljs-string">~</span>]<span class="hljs-comment"># kubectl delete pod web-2 </span><br><span class="hljs-string">pod</span> <span class="hljs-string">&quot;web-2&quot;</span> <span class="hljs-string">deleted</span><br>[<span class="hljs-string">root@VM-4-3-centos</span> <span class="hljs-string">~</span>]<span class="hljs-comment"># kubectl get pod </span><br><span class="hljs-string">NAME</span>    <span class="hljs-string">READY</span>   <span class="hljs-string">STATUS</span>    <span class="hljs-string">RESTARTS</span>   <span class="hljs-string">AGE</span><br><span class="hljs-string">web-0</span>   <span class="hljs-number">1</span><span class="hljs-string">/1</span>     <span class="hljs-string">Running</span>   <span class="hljs-number">0</span>          <span class="hljs-string">14s</span><br><span class="hljs-string">web-1</span>   <span class="hljs-number">1</span><span class="hljs-string">/1</span>     <span class="hljs-string">Running</span>   <span class="hljs-number">0</span>          <span class="hljs-string">33s</span><br><span class="hljs-string">web-2</span>   <span class="hljs-number">1</span><span class="hljs-string">/1</span>     <span class="hljs-string">Running</span>   <span class="hljs-number">0</span>          <span class="hljs-string">45s</span><br></code></pre></td></tr></table></figure>
+<p>从上面的结果可以看出，我们不删除web-2这个更新异常的pod，所以的pod都不会更新的，只有删除了web-2这个更新失败的pod，sts才会进行正常更新。</p>
+<h1 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h1><p><a target="_blank" rel="noopener" href="https://kubernetes.io/zh/docs/concepts/workloads/controllers/statefulset/#deployment-and-scaling-guarantees">https://kubernetes.io/zh/docs/concepts/workloads/controllers/statefulset/#deployment-and-scaling-guarantees</a></p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Kubernetes/" class="category-chain-item">Kubernetes</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Kubernetes/">#Kubernetes</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>kubernetes之StatefulSet控制器</div>
+      <div>http://example.com/2020/10/23/2020-10-23-StatefulSet-controller-of-kubernetes/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>VashonNie</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2020年10月23日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2020/11/01/2020-11-01-kubewatch-monitors-k8s-cluster-resource-changes/" title="kubewatch监控k8s集群资源变更">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">kubewatch监控k8s集群资源变更</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2020/10/14/2020-10-15-Force-delete-Terminating-ns/" title="Kubernetes强制删除Terminating的ns">
+                        <span class="hidden-mobile">Kubernetes强制删除Terminating的ns</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?bfe4709ccd8c5c9e559c89f4fd0866f3";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+  <script defer src="/js/leancloud.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

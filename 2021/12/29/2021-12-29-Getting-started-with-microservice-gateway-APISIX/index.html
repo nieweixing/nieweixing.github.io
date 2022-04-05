@@ -1,0 +1,864 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="John Doe">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="APISIX 是一个云原生、高性能、可扩展的微服务 API 开源网关，基于OpenResty(Nginx+Lua)和etcd来实现，对比传统的API网关，具有动态路由和热插件加载的特点。系统本身自带前端，可以手动配置路由、负载均衡、限速限流、熔断、金丝雀发布、身份验证、可监控等插件，操作方便。可以使用Apache APISIX来处理传统的南北流量，以及服务之间的东西流量。它也可以用作k8s入口控制">
+<meta property="og:type" content="article">
+<meta property="og:title" content="微服务网关APISIX入门">
+<meta property="og:url" content="http://example.com/2021/12/29/2021-12-29-Getting-started-with-microservice-gateway-APISIX/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="APISIX 是一个云原生、高性能、可扩展的微服务 API 开源网关，基于OpenResty(Nginx+Lua)和etcd来实现，对比传统的API网关，具有动态路由和热插件加载的特点。系统本身自带前端，可以手动配置路由、负载均衡、限速限流、熔断、金丝雀发布、身份验证、可监控等插件，操作方便。可以使用Apache APISIX来处理传统的南北流量，以及服务之间的东西流量。它也可以用作k8s入口控制">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/1.JPG">
+<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/2.png">
+<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/2.JPG">
+<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/3.JPG">
+<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/4.JPG">
+<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/5.JPG">
+<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/6.JPG">
+<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/7.JPG">
+<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/8.JPG">
+<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/9.JPG">
+<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/10.JPG">
+<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/11.JPG">
+<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/12.JPG">
+<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/13.JPG">
+<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/14.JPG">
+<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/15.JPG">
+<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/16.JPG">
+<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/17.JPG">
+<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/18.JPG">
+<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/19.JPG">
+<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/20.JPG">
+<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/21.JPG">
+<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/22.JPG">
+<meta property="og:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/23.JPG">
+<meta property="article:published_time" content="2021-12-29T12:20:48.000Z">
+<meta property="article:modified_time" content="2022-04-05T03:45:26.091Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="Kubernetes">
+<meta property="article:tag" content="apisix">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://example.com/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/1.JPG">
+  
+  
+  <title>微服务网关APISIX入门 - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":"www.niewx.cn","path":"/","ignore_local":false}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>聂伟星</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="微服务网关APISIX入门"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-author" aria-hidden="true"></i>
+        John Doe
+      </span>
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2021-12-29 20:20" pubdate>
+          2021年12月29日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          8k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          67 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">微服务网关APISIX入门</h1>
+            
+            <div class="markdown-body">
+              
+              <p>APISIX 是一个云原生、高性能、可扩展的微服务 API 开源网关，基于OpenResty(Nginx+Lua)和etcd来实现，对比传统的API网关，具有动态路由和热插件加载的特点。系统本身自带前端，可以手动配置路由、负载均衡、限速限流、熔断、金丝雀发布、身份验证、可监控等插件，操作方便。可以使用Apache APISIX来处理传统的南北流量，以及服务之间的东西流量。它也可以用作k8s入口控制器，APISIX是用Lua语言开发，语言相对简单，容易上手，同时可以按自己的需求进行系统的二次开发以及开发自己的插件。</p>
+<p>apisix的整体架构图如下</p>
+<p><img src="/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/1.JPG" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>apisix-ingress-controller是一个Apache APISIX 控制平面组件。目前它服务于Kubernetes集群，具体架构图如下，具体介绍可以参考github文档<a target="_blank" rel="noopener" href="https://github.com/apache/apisix-ingress-controller">https://github.com/apache/apisix-ingress-controller</a></p>
+<p><img src="/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/2.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/2.JPG" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>apisix-ingress-controller是Kubernetes的另一个入口控制器，使用Apache APISIX作为高性能反向代理。</p>
+<p>它是通过使用声明性配置来配置的，例如ApisixRoute， ApisixUpstream， Ingress。所有这些资源都会被监视并转换为Apache APISIX中的相应资源。</p>
+<h1 id="部署apisix"><a href="#部署apisix" class="headerlink" title="部署apisix"></a>部署apisix</h1><p>因为现在是部署apisix到k8s集群上，所以我们这里采用helm方式部署，这里默认将dashboard也部署上，具体部署步骤如下。</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs routeros"><span class="hljs-comment"># helm repo add apisix https://charts.apiseven.com</span><br><span class="hljs-comment"># helm repo add bitnami https://charts.bitnami.com/bitnami</span><br><span class="hljs-comment"># helm repo update</span><br><span class="hljs-comment"># kubectl create ns ingress-apisix</span><br><span class="hljs-comment"># helm fetch apisix/apisix</span><br><span class="hljs-comment"># tar -zxvf apisix-0.7.2.tgz</span><br><span class="hljs-comment"># helm install apisix ./apisix \</span><br>  --<span class="hljs-built_in">set</span> gateway.<span class="hljs-attribute">type</span>=LoadBalancer \<br>  --<span class="hljs-built_in">set</span> ingress-controller.<span class="hljs-attribute">enabled</span>=<span class="hljs-literal">true</span> \<br>  --<span class="hljs-built_in">set</span> dashboard.<span class="hljs-attribute">enabled</span>=<span class="hljs-literal">true</span> \<br>  --<span class="hljs-built_in">set</span> etcd.persistence.<span class="hljs-attribute">size</span>=<span class="hljs-string">&quot;10Gi&quot;</span> \<br>  --namespace ingress-apisix \<br>  --<span class="hljs-built_in">set</span> ingress-controller.config.apisix.<span class="hljs-attribute">serviceNamespace</span>=ingress-apisix<br></code></pre></td></tr></table></figure>
+
+<p>helm部署成功后，会部署etcd、dashboard、apisix-ingress-controller和apisix到集群中</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs awk">[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">13</span>-centos ~]<span class="hljs-comment"># kubectl get pod,svc -n ingress-apisix</span><br>NAME                                           READY   STATUS    RESTARTS   AGE<br>pod<span class="hljs-regexp">/apisix-848c9485d4-qs4xp                    1/</span><span class="hljs-number">1</span>     Running   <span class="hljs-number">0</span>          <span class="hljs-number">23</span>h<br>pod<span class="hljs-regexp">/apisix-dashboard-75d4485df7-z8g67          1/</span><span class="hljs-number">1</span>     Running   <span class="hljs-number">0</span>          <span class="hljs-number">20</span>h<br>pod<span class="hljs-regexp">/apisix-etcd-0                              1/</span><span class="hljs-number">1</span>     Running   <span class="hljs-number">0</span>          <span class="hljs-number">23</span>h<br>pod<span class="hljs-regexp">/apisix-etcd-1                              1/</span><span class="hljs-number">1</span>     Running   <span class="hljs-number">0</span>          <span class="hljs-number">23</span>h<br>pod<span class="hljs-regexp">/apisix-etcd-2                              1/</span><span class="hljs-number">1</span>     Running   <span class="hljs-number">0</span>          <span class="hljs-number">23</span>h<br>pod<span class="hljs-regexp">/apisix-ingress-controller-84b76475-zkxj7   1/</span><span class="hljs-number">1</span>     Running   <span class="hljs-number">0</span>          <span class="hljs-number">23</span>h<br><br>NAME                                TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)             AGE<br>service<span class="hljs-regexp">/apisix-admin                ClusterIP      172.16.82.101    &lt;none&gt;        9180/</span>TCP            <span class="hljs-number">23</span>h<br>service<span class="hljs-regexp">/apisix-dashboard            ClusterIP      172.16.9.37      &lt;none&gt;        80/</span>TCP              <span class="hljs-number">23</span>h<br>service<span class="hljs-regexp">/apisix-etcd                 ClusterIP      172.16.104.205   &lt;none&gt;        2379/</span>TCP,<span class="hljs-number">2380</span>/TCP   <span class="hljs-number">23</span>h<br>service<span class="hljs-regexp">/apisix-etcd-headless        ClusterIP      None             &lt;none&gt;        2379/</span>TCP,<span class="hljs-number">2380</span>/TCP   <span class="hljs-number">23</span>h<br>service<span class="hljs-regexp">/apisix-gateway              LoadBalancer   172.16.16.160    10.0.21.21     80:31659/</span>TCP        <span class="hljs-number">23</span>h<br>service<span class="hljs-regexp">/apisix-ingress-controller   ClusterIP      172.16.45.68     &lt;none&gt;        80/</span>TCP              <span class="hljs-number">23</span>h<br></code></pre></td></tr></table></figure>
+
+<p>这里一共创建了6个service，具体作用如下：</p>
+<ul>
+<li>apisix-gateway：处理真实流量</li>
+<li>apisix-admin：它充当处理所有配置更改的控制平面</li>
+<li>apisix-ingress-controller，它公开apisix-ingress-controller的指标</li>
+<li>apisix-etcd、apisix-etcd-headless：并用于 etcd 服务和内部通信</li>
+<li>apisix-dashboard：Apache APISIX前端界面</li>
+</ul>
+<p>这里部署也可以用原生的yaml部署，具体可以参考文档<a target="_blank" rel="noopener" href="https://github.com/apache/apisix-ingress-controller/blob/master/docs/en/latest/practices/the-hard-way.md">https://github.com/apache/apisix-ingress-controller/blob/master/docs/en/latest/practices/the-hard-way.md</a></p>
+<h1 id="apisix-dashboard的使用"><a href="#apisix-dashboard的使用" class="headerlink" title="apisix-dashboard的使用"></a>apisix-dashboard的使用</h1><h2 id="配置ingress访问dashboard"><a href="#配置ingress访问dashboard" class="headerlink" title="配置ingress访问dashboard"></a>配置ingress访问dashboard</h2><p>ingress的yaml配置如下，这里我ingress-controller的class配置的是ingress，这里根据实际配置即可</p>
+<figure class="highlight nestedtext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs nestedtext"><span class="hljs-attribute">apiVersion</span><span class="hljs-punctuation">:</span> <span class="hljs-string">networking.k8s.io/v1beta1</span><br><span class="hljs-attribute">kind</span><span class="hljs-punctuation">:</span> <span class="hljs-string">Ingress</span><br><span class="hljs-attribute">metadata</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-attribute">annotations</span><span class="hljs-punctuation">:</span><br>    <span class="hljs-attribute">kubernetes.io/ingress.class</span><span class="hljs-punctuation">:</span> <span class="hljs-string">ingress</span><br>  <span class="hljs-attribute">name</span><span class="hljs-punctuation">:</span> <span class="hljs-string">apisix-ingress</span><br>  <span class="hljs-attribute">namespace</span><span class="hljs-punctuation">:</span> <span class="hljs-string">ingress-apisix</span><br><span class="hljs-attribute">spec</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-attribute">rules</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-string">host: apisix.tke.niewx.cn</span><br>    <span class="hljs-attribute">http</span><span class="hljs-punctuation">:</span><br>      <span class="hljs-attribute">paths</span><span class="hljs-punctuation">:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">backend:</span><br>          <span class="hljs-attribute">serviceName</span><span class="hljs-punctuation">:</span> <span class="hljs-string">apisix-dashboard</span><br>          <span class="hljs-attribute">servicePort</span><span class="hljs-punctuation">:</span> <span class="hljs-string">80</span><br>        <span class="hljs-attribute">path</span><span class="hljs-punctuation">:</span> <span class="hljs-string">/</span><br>        <span class="hljs-attribute">pathType</span><span class="hljs-punctuation">:</span> <span class="hljs-string">ImplementationSpecific</span><br></code></pre></td></tr></table></figure>
+
+<p>浏览器输入apisix.tke.niewx.cn，会出现登录页面，登录账号密码默认为admin&#x2F;admin</p>
+<p><img src="/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/3.JPG" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/4.JPG" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<h2 id="嵌入grafana监控图"><a href="#嵌入grafana监控图" class="headerlink" title="嵌入grafana监控图"></a>嵌入grafana监控图</h2><p>apisix的Dashboard是支持嵌入grafana的监控面板，如果你将监控接入了prometheus话，可以在上面配置下grafana的监控面板，这里需要grafana支持嵌入才行，需要在grafana加上如下配置。</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs awk">vim <span class="hljs-regexp">/usr/</span>share<span class="hljs-regexp">/grafana/</span>conf/defaults.ini<br><br><span class="hljs-comment"># 允许嵌入</span><br>allow_embedding = true<br><br><span class="hljs-comment"># 允许匿名登录</span><br>[auth.anonymous]<br>enabled = true<br></code></pre></td></tr></table></figure>
+
+<p>配置好之后，在apisix的Dashboard配置grafana面板地址即可，这里apisix的监控模板可以在grafana官网搜11719这个id进行配置。</p>
+<p><img src="/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/5.JPG" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<h1 id="apisix的入门使用"><a href="#apisix的入门使用" class="headerlink" title="apisix的入门使用"></a>apisix的入门使用</h1><h2 id="apisix-Dashboard配置路由规则访问"><a href="#apisix-Dashboard配置路由规则访问" class="headerlink" title="apisix-Dashboard配置路由规则访问"></a>apisix-Dashboard配置路由规则访问</h2><h3 id="部署springboot-demo"><a href="#部署springboot-demo" class="headerlink" title="部署springboot demo"></a>部署springboot demo</h3><p>可以参考下面yaml部署spiringboot这个demo到k8s集群，后面配置apisix来访问这个服务。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">apps/v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Deployment</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">labels:</span><br>    <span class="hljs-attr">k8s-app:</span> <span class="hljs-string">springboot</span><br>    <span class="hljs-attr">qcloud-app:</span> <span class="hljs-string">springboot</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">springboot</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">tke-test</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">replicas:</span> <span class="hljs-number">1</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">matchLabels:</span><br>      <span class="hljs-attr">k8s-app:</span> <span class="hljs-string">springboot</span><br>      <span class="hljs-attr">qcloud-app:</span> <span class="hljs-string">springboot</span><br>  <span class="hljs-attr">template:</span><br>    <span class="hljs-attr">metadata:</span><br>      <span class="hljs-attr">labels:</span><br>        <span class="hljs-attr">k8s-app:</span> <span class="hljs-string">springboot</span><br>        <span class="hljs-attr">qcloud-app:</span> <span class="hljs-string">springboot</span><br>    <span class="hljs-attr">spec:</span><br>      <span class="hljs-attr">containers:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">env:</span><br>        <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">PATH</span><br>          <span class="hljs-attr">value:</span> <span class="hljs-string">/usr/local/openjdk-8/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin</span><br>        <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">JAVA_HOME</span><br>          <span class="hljs-attr">value:</span> <span class="hljs-string">/usr/local/openjdk-8</span><br>        <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">LANG</span><br>          <span class="hljs-attr">value:</span> <span class="hljs-string">C.UTF-8</span><br>        <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">JAVA_VERSION</span><br>          <span class="hljs-attr">value:</span> <span class="hljs-string">8u292</span><br>        <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">MAVEN_HOME</span><br>          <span class="hljs-attr">value:</span> <span class="hljs-string">/usr/share/maven</span><br>        <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">MAVEN_CONFIG</span><br>          <span class="hljs-attr">value:</span> <span class="hljs-string">/root/.m2</span><br>        <span class="hljs-attr">image:</span> <span class="hljs-string">nwx-test.tencentcloudcr.com/nwx/springboot:springboot-a4799906973669a3f4ece49a26b537e0554c32de</span><br>        <span class="hljs-attr">imagePullPolicy:</span> <span class="hljs-string">IfNotPresent</span><br>        <span class="hljs-attr">name:</span> <span class="hljs-string">springboot</span><br>        <span class="hljs-attr">resources:</span><br>          <span class="hljs-attr">limits:</span><br>            <span class="hljs-attr">cpu:</span> <span class="hljs-string">&quot;1&quot;</span><br>            <span class="hljs-attr">memory:</span> <span class="hljs-string">2Gi</span><br>          <span class="hljs-attr">requests:</span><br>            <span class="hljs-attr">cpu:</span> <span class="hljs-string">100m</span><br>            <span class="hljs-attr">memory:</span> <span class="hljs-string">128Mi</span><br>      <span class="hljs-attr">dnsPolicy:</span> <span class="hljs-string">ClusterFirst</span><br>      <span class="hljs-attr">restartPolicy:</span> <span class="hljs-string">Always</span><br><span class="hljs-meta">---</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Service</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">springboot</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">tke-test</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">ports:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-number">8080</span><span class="hljs-number">-8080</span><span class="hljs-string">-tcp</span><br>    <span class="hljs-attr">port:</span> <span class="hljs-number">8080</span><br>    <span class="hljs-attr">protocol:</span> <span class="hljs-string">TCP</span><br>    <span class="hljs-attr">targetPort:</span> <span class="hljs-number">8080</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">k8s-app:</span> <span class="hljs-string">springboot</span><br>    <span class="hljs-attr">qcloud-app:</span> <span class="hljs-string">springboot</span><br>  <span class="hljs-attr">sessionAffinity:</span> <span class="hljs-string">None</span><br>  <span class="hljs-attr">type:</span> <span class="hljs-string">ClusterIP</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="上游"><a href="#上游" class="headerlink" title="上游"></a>上游</h3><p>上游列表包含了已创建的上游服务（即后端服务），可以对上游服务的多个目标节点进行负载均衡和健康检查，这里我们给部署的springboot服务配置一个上游</p>
+<p><img src="/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/6.JPG" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/7.JPG" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/8.JPG" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<h3 id="服务"><a href="#服务" class="headerlink" title="服务"></a>服务</h3><p>服务由路由中公共的插件配置、上游目标信息组合而成。服务与路由、上游关联，一个服务可对应一组上游节点、可被多条路由绑定。我们新建一个服务，绑定springboot这个上游，并配置basic-auth这个插件</p>
+<p><img src="/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/9.JPG" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/10.JPG" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/11.JPG" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/12.JPG" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<h3 id="消费者"><a href="#消费者" class="headerlink" title="消费者"></a>消费者</h3><p>消费者是路由的消费方，形式包括开发者、最终用户、API 调用等。创建消费者时，需绑定至少一个认证类插件。</p>
+<p>如果有多个消费者，这里会根据请求头携带的信息，自动去匹配对应的消费者，这里我们配置2个消费者，分别绑定basic-auth，设置不同的认证信息，然后分别测试看下是否都可以登录</p>
+<p><img src="/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/13.JPG" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/14.JPG" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/15.JPG" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/16.JPG" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/17.JPG" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<h3 id="路由"><a href="#路由" class="headerlink" title="路由"></a>路由</h3><p>路由（Route）是请求的入口点，它定义了客户端请求与服务之间的匹配规则。路由可以与服务（Service）、上游（Upstream）关联，一个服务可对应一组路由，一个路由可以对应一个上游对象（一组后端服务节点），因此，每个匹配到路由的请求将被网关代理到路由绑定的上游服务中。</p>
+<p><img src="/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/18.JPG" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/19.JPG" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/20.JPG" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/21.JPG" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/22.JPG" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<h3 id="通过apisix-gateway的service访问springboot服务"><a href="#通过apisix-gateway的service访问springboot服务" class="headerlink" title="通过apisix-gateway的service访问springboot服务"></a>通过apisix-gateway的service访问springboot服务</h3><p>apisix-gateway的service是用的clb，这里我们通过clb的vip访问下后端的springboot服务看下。</p>
+<figure class="highlight coffeescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs coffeescript">[root@VM<span class="hljs-number">-0</span><span class="hljs-number">-13</span>-centos ~]<span class="hljs-comment"># curl http://10.0.21.21/</span><br>&#123;<span class="hljs-string">&quot;message&quot;</span>:<span class="hljs-string">&quot;Missing authorization in request&quot;</span>&#125;<br>[root@VM<span class="hljs-number">-0</span><span class="hljs-number">-13</span>-centos ~]<span class="hljs-comment"># curl -u admin:admin  http://10.0.21.21/</span><br>you access path <span class="hljs-keyword">is</span> root<br>[root@VM<span class="hljs-number">-0</span><span class="hljs-number">-13</span>-centos ~]<span class="hljs-comment"># curl -u root:123456  http://10.0.21.21/</span><br>you access path <span class="hljs-keyword">is</span> root<br></code></pre></td></tr></table></figure>
+
+<p>从上面的测试结果可以看出，我们的basic-auth生效了，不加账号密码是无法访问服务的，并且这里2个消费者都生效了。</p>
+<h2 id="通过yaml配置路由访问"><a href="#通过yaml配置路由访问" class="headerlink" title="通过yaml配置路由访问"></a>通过yaml配置路由访问</h2><h3 id="配置ApisixRoute提供路由访问"><a href="#配置ApisixRoute提供路由访问" class="headerlink" title="配置ApisixRoute提供路由访问"></a>配置ApisixRoute提供路由访问</h3><p>首先我们部署下httpbin服务到集群中</p>
+<figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs applescript">kubectl <span class="hljs-built_in">run</span> httpbin <span class="hljs-comment">--image kennethreitz/httpbin --port 80</span><br>kubectl expose pod httpbin <span class="hljs-comment">--port 80</span><br></code></pre></td></tr></table></figure>
+
+<p>接下来创建一个ApisixRoute用来通过服务访问</p>
+<figure class="highlight nestedtext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs nestedtext"><span class="hljs-attribute">kubectl apply -f - &lt;&lt;EOF</span><br><span class="hljs-attribute">apiVersion</span><span class="hljs-punctuation">:</span> <span class="hljs-string">apisix.apache.org/v2beta2</span><br><span class="hljs-attribute">kind</span><span class="hljs-punctuation">:</span> <span class="hljs-string">ApisixRoute</span><br><span class="hljs-attribute">metadata</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-attribute">name</span><span class="hljs-punctuation">:</span> <span class="hljs-string">httpserver-route</span><br><span class="hljs-attribute">spec</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-attribute">http</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-string">name: rule1</span><br>    <span class="hljs-attribute">match</span><span class="hljs-punctuation">:</span><br>      <span class="hljs-attribute">hosts</span><span class="hljs-punctuation">:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">local.httpbin.org</span><br>      <span class="hljs-attribute">paths</span><span class="hljs-punctuation">:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">/*</span><br>    <span class="hljs-attribute">backends</span><span class="hljs-punctuation">:</span><br>       <span class="hljs-bullet">-</span> <span class="hljs-string">serviceName: httpbin</span><br>         <span class="hljs-attribute">servicePort</span><span class="hljs-punctuation">:</span> <span class="hljs-string">80</span><br>EOF<br></code></pre></td></tr></table></figure>
+
+<p>然后我们通过Apisix-getaway的入口service来访问httpbin服务</p>
+<figure class="highlight autoit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs autoit">[root<span class="hljs-symbol">@VM</span><span class="hljs-number">-0</span><span class="hljs-number">-13</span>-centos ~]<span class="hljs-meta"># curl http://10.0.21.21/headers -H <span class="hljs-string">&#x27;Host: local.httpbin.org&#x27;</span></span><br>&#123;<br>  <span class="hljs-string">&quot;headers&quot;</span>: &#123;<br>    <span class="hljs-string">&quot;Accept&quot;</span>: <span class="hljs-string">&quot;*/*&quot;</span>,<br>    <span class="hljs-string">&quot;Host&quot;</span>: <span class="hljs-string">&quot;local.httpbin.org&quot;</span>,<br>    <span class="hljs-string">&quot;User-Agent&quot;</span>: <span class="hljs-string">&quot;curl/7.29.0&quot;</span>,<br>    <span class="hljs-string">&quot;X-B3-Sampled&quot;</span>: <span class="hljs-string">&quot;0&quot;</span>,<br>    <span class="hljs-string">&quot;X-B3-Spanid&quot;</span>: <span class="hljs-string">&quot;f5da42b3650e5b56&quot;</span>,<br>    <span class="hljs-string">&quot;X-B3-Traceid&quot;</span>: <span class="hljs-string">&quot;9610fc22dd3bbd63f5da42b3650e5b56&quot;</span>,<br>    <span class="hljs-string">&quot;X-Envoy-Internal&quot;</span>: <span class="hljs-string">&quot;true&quot;</span>,<br>    <span class="hljs-string">&quot;X-Forwarded-Host&quot;</span>: <span class="hljs-string">&quot;local.httpbin.org&quot;</span><br>  &#125;<br>&#125;<br>[root<span class="hljs-symbol">@VM</span><span class="hljs-number">-0</span><span class="hljs-number">-13</span>-centos ~]<span class="hljs-meta"># curl http://10.0.21.21/ip -H <span class="hljs-string">&#x27;Host: local.httpbin.org&#x27;</span></span><br>&#123;<br>  <span class="hljs-string">&quot;origin&quot;</span>: <span class="hljs-string">&quot;10.0.0.10&quot;</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="配置Ingress提供路由访问"><a href="#配置Ingress提供路由访问" class="headerlink" title="配置Ingress提供路由访问"></a>配置Ingress提供路由访问</h3><p>这里配置ingress，apisix-ingress-controller会将规则同步到apisix，一般ingress和ApisixRoute不要同时配制，配置一个即可。</p>
+<figure class="highlight nestedtext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs nestedtext"><span class="hljs-attribute">apiVersion</span><span class="hljs-punctuation">:</span> <span class="hljs-string">networking.k8s.io/v1beta1</span><br><span class="hljs-attribute">kind</span><span class="hljs-punctuation">:</span> <span class="hljs-string">Ingress</span><br><span class="hljs-attribute">metadata</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-attribute">name</span><span class="hljs-punctuation">:</span> <span class="hljs-string">httpserver-ingress</span><br>  <span class="hljs-comment"># Note for ingress.networking.k8s.io/v1beta1,</span><br>  <span class="hljs-comment"># you have to carry annotation kubernetes.io/ingress.class,</span><br>  <span class="hljs-comment"># and its value must be matched with the one configured in</span><br>  <span class="hljs-comment"># apisix-ingress-controller, in our case, it&#x27;s apisix.</span><br>  <span class="hljs-attribute">annotations</span><span class="hljs-punctuation">:</span><br>    <span class="hljs-attribute">kubernetes.io/ingress.class</span><span class="hljs-punctuation">:</span> <span class="hljs-string">apisix</span><br><span class="hljs-attribute">spec</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-attribute">rules</span><span class="hljs-punctuation">:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-string">host: local.httpbin.org</span><br>      <span class="hljs-attribute">http</span><span class="hljs-punctuation">:</span><br>        <span class="hljs-attribute">paths</span><span class="hljs-punctuation">:</span><br>          <span class="hljs-bullet">-</span> <span class="hljs-string">backend:</span><br>              <span class="hljs-attribute">serviceName</span><span class="hljs-punctuation">:</span> <span class="hljs-string">httpbin</span><br>              <span class="hljs-attribute">servicePort</span><span class="hljs-punctuation">:</span> <span class="hljs-string">80</span><br>            <span class="hljs-attribute">path</span><span class="hljs-punctuation">:</span> <span class="hljs-string">/</span><br>            <span class="hljs-attribute">pathType</span><span class="hljs-punctuation">:</span> <span class="hljs-string">Prefix</span><br></code></pre></td></tr></table></figure>
+
+<p>配置好，直接通过Apisix-getaway的入口service来访问httpbin服务，这里默认会自动生成一个上游，可以在dashboard上查到</p>
+<p><img src="/img/2021-12-29-Getting-started-with-microservice-gateway-APISIX/23.JPG" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<figure class="highlight autoit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs autoit">[root<span class="hljs-symbol">@VM</span><span class="hljs-number">-0</span><span class="hljs-number">-13</span>-centos ~]<span class="hljs-meta"># curl http://10.0.21.21/ip -H <span class="hljs-string">&#x27;Host: local.httpbin.org&#x27;</span></span><br>&#123;<br>  <span class="hljs-string">&quot;origin&quot;</span>: <span class="hljs-string">&quot;10.0.0.10&quot;</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>问题</strong></p>
+<p>使用apisix-ingress-controller的过程中，遇到一些问题，就是发现配置了ingress规则，但是apisix-ingress-controller没有将配置同步到apisix，查看日志一直报错</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs pgsql">failed <span class="hljs-keyword">to</span> list route <span class="hljs-keyword">in</span> APISIX: <span class="hljs-keyword">Get</span> http://apisix-<span class="hljs-keyword">admin</span>.ingress-apisix.svc.<span class="hljs-keyword">cluster</span>.<span class="hljs-keyword">local</span>:<span class="hljs-number">9180</span>/apisix/<span class="hljs-keyword">admin</span>/routes: context canceled<br></code></pre></td></tr></table></figure>
+
+<p>这个时候我怀疑是哪里配置不对，检查了下apisix-ingress-controller的configmap配置，发现ingress_version配置的networking&#x2F;v1，但是我集群版本是1.18，不支持networking&#x2F;v1，配置的ingress版本是networking&#x2F;v1beta1，导致controller一直同步配置不成功，</p>
+<p>ingress_version的配置是什么含义呢，这里查看了下对应的配置说明文档<a target="_blank" rel="noopener" href="https://github.com/apache/apisix-ingress-controller/blob/master/conf/config-default.yaml">https://github.com/apache/apisix-ingress-controller/blob/master/conf/config-default.yaml</a></p>
+<p>ingress_version: 支持的入口 api 组版本，可以是 “networking&#x2F;v1beta1” 、”networking&#x2F;v1”（适用于 Kubernetes 版本 v1.19.0 或更高版本），以及extensions&#x2F;v1beta1”，默认值为”networking&#x2F;v1”。</p>
+<p>由于我是用的默认部署，所以是networking&#x2F;v1，但是我集群不支持networking&#x2F;v1，所以这里需要将configmap的ingress_version改成networking&#x2F;v1beta1，然后重建下apisix-ingress-controller的pod即可。</p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/apisix/" class="category-chain-item">apisix</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Kubernetes/">#Kubernetes</a>
+      
+        <a href="/tags/apisix/">#apisix</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>微服务网关APISIX入门</div>
+      <div>http://example.com/2021/12/29/2021-12-29-Getting-started-with-microservice-gateway-APISIX/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>John Doe</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2021年12月29日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2022/01/13/2022-01-13-This-article-will-take-you-to-get-the-rbac-authentication-of-k8s/" title="一文带你搞定k8s的rbac鉴权">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">一文带你搞定k8s的rbac鉴权</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2021/12/22/2021-12-22-k8s-collects-business-logs-through-elk-kafka/" title="k8s通过elk+kafka采集业务日志">
+                        <span class="hidden-mobile">k8s通过elk+kafka采集业务日志</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?bfe4709ccd8c5c9e559c89f4fd0866f3";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+  <script defer src="/js/leancloud.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

@@ -1,0 +1,791 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="VashonNie">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="流量镜像，也称为影子流量，是一个以尽可能低的风险为生产带来变化的强大的功能。镜像会将实时流量的副本发送到镜像服务。镜像流量发生在主服务的关键请求路径之外。   我们会经常遇到一些这样的问题，就是在本地测试是正常的，一上线就出问题了，测试覆盖率很高，但是为什么，还是会出现问题，这是因为线上的访问环境和本地有很大差异，特别是流量和数据。这里我们可以用流量镜像来解决这个问题。 首先部署2个httpbin">
+<meta property="og:type" content="article">
+<meta property="og:title" content="istio入门系列之流量镜像">
+<meta property="og:url" content="http://example.com/2020/12/03/2020-12-03-Traffic-mirroring-of-istio-entry-series/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="流量镜像，也称为影子流量，是一个以尽可能低的风险为生产带来变化的强大的功能。镜像会将实时流量的副本发送到镜像服务。镜像流量发生在主服务的关键请求路径之外。   我们会经常遇到一些这样的问题，就是在本地测试是正常的，一上线就出问题了，测试覆盖率很高，但是为什么，还是会出现问题，这是因为线上的访问环境和本地有很大差异，特别是流量和数据。这里我们可以用流量镜像来解决这个问题。 首先部署2个httpbin">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/2020-12-03-Traffic-mirroring-of-istio-entry-series/1.png">
+<meta property="article:published_time" content="2020-12-03T02:10:00.000Z">
+<meta property="article:modified_time" content="2020-12-03T02:10:00.000Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="Kubernetes">
+<meta property="article:tag" content="Istio">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://example.com/img/2020-12-03-Traffic-mirroring-of-istio-entry-series/1.png">
+  
+  
+  <title>istio入门系列之流量镜像 - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":"www.niewx.cn","path":"/","ignore_local":false}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>聂伟星</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="istio入门系列之流量镜像"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-author" aria-hidden="true"></i>
+        VashonNie
+      </span>
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2020-12-03 10:10" pubdate>
+          2020年12月3日 上午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          11k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          96 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">istio入门系列之流量镜像</h1>
+            
+            <div class="markdown-body">
+              
+              <p>流量镜像，也称为影子流量，是一个以尽可能低的风险为生产带来变化的强大的功能。镜像会将实时流量的副本发送到镜像服务。镜像流量发生在主服务的关键请求路径之外。</p>
+<p><img src="/img/2020-12-03-Traffic-mirroring-of-istio-entry-series/1.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>我们会经常遇到一些这样的问题，就是在本地测试是正常的，一上线就出问题了，测试覆盖率很高，但是为什么，还是会出现问题，这是因为线上的访问环境和本地有很大差异，特别是流量和数据。这里我们可以用流量镜像来解决这个问题。</p>
+<p>首先部署2个httpbin的版本，把流量全部路由到v1版本的测试服务。然后，执行规则将一部分流量镜像到v2版本</p>
+<p>httpbin-v1</p>
+<figure class="highlight nestedtext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs nestedtext"><span class="hljs-attribute">cat &lt;&lt;EOF | istioctl kube-inject -f - | kubectl create -f -</span><br><span class="hljs-attribute">apiVersion</span><span class="hljs-punctuation">:</span> <span class="hljs-string">apps/v1</span><br><span class="hljs-attribute">kind</span><span class="hljs-punctuation">:</span> <span class="hljs-string">Deployment</span><br><span class="hljs-attribute">metadata</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-attribute">name</span><span class="hljs-punctuation">:</span> <span class="hljs-string">httpbin-v1</span><br><span class="hljs-attribute">spec</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-attribute">replicas</span><span class="hljs-punctuation">:</span> <span class="hljs-string">1</span><br>  <span class="hljs-attribute">selector</span><span class="hljs-punctuation">:</span><br>    <span class="hljs-attribute">matchLabels</span><span class="hljs-punctuation">:</span><br>      <span class="hljs-attribute">app</span><span class="hljs-punctuation">:</span> <span class="hljs-string">httpbin</span><br>      <span class="hljs-attribute">version</span><span class="hljs-punctuation">:</span> <span class="hljs-string">v1</span><br>  <span class="hljs-attribute">template</span><span class="hljs-punctuation">:</span><br>    <span class="hljs-attribute">metadata</span><span class="hljs-punctuation">:</span><br>      <span class="hljs-attribute">labels</span><span class="hljs-punctuation">:</span><br>        <span class="hljs-attribute">app</span><span class="hljs-punctuation">:</span> <span class="hljs-string">httpbin</span><br>        <span class="hljs-attribute">version</span><span class="hljs-punctuation">:</span> <span class="hljs-string">v1</span><br>    <span class="hljs-attribute">spec</span><span class="hljs-punctuation">:</span><br>      <span class="hljs-attribute">containers</span><span class="hljs-punctuation">:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">image: docker.io/kennethreitz/httpbin</span><br>        <span class="hljs-attribute">imagePullPolicy</span><span class="hljs-punctuation">:</span> <span class="hljs-string">IfNotPresent</span><br>        <span class="hljs-attribute">name</span><span class="hljs-punctuation">:</span> <span class="hljs-string">httpbin</span><br>        <span class="hljs-attribute">command</span><span class="hljs-punctuation">:</span> <span class="hljs-string">[&quot;gunicorn&quot;, &quot;--access-logfile&quot;, &quot;-&quot;, &quot;-b&quot;, &quot;0.0.0.0:80&quot;, &quot;httpbin:app&quot;]</span><br>        <span class="hljs-attribute">ports</span><span class="hljs-punctuation">:</span><br>        <span class="hljs-bullet">-</span> <span class="hljs-string">containerPort: 80</span><br>EOF<br></code></pre></td></tr></table></figure>
+
+<p>httpbin-v2</p>
+<figure class="highlight nestedtext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs nestedtext"><span class="hljs-attribute">cat &lt;&lt;EOF | istioctl kube-inject -f - | kubectl create -f -</span><br><span class="hljs-attribute">apiVersion</span><span class="hljs-punctuation">:</span> <span class="hljs-string">apps/v1</span><br><span class="hljs-attribute">kind</span><span class="hljs-punctuation">:</span> <span class="hljs-string">Deployment</span><br><span class="hljs-attribute">metadata</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-attribute">name</span><span class="hljs-punctuation">:</span> <span class="hljs-string">httpbin-v2</span><br><span class="hljs-attribute">spec</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-attribute">replicas</span><span class="hljs-punctuation">:</span> <span class="hljs-string">1</span><br>  <span class="hljs-attribute">selector</span><span class="hljs-punctuation">:</span><br>    <span class="hljs-attribute">matchLabels</span><span class="hljs-punctuation">:</span><br>      <span class="hljs-attribute">app</span><span class="hljs-punctuation">:</span> <span class="hljs-string">httpbin</span><br>      <span class="hljs-attribute">version</span><span class="hljs-punctuation">:</span> <span class="hljs-string">v2</span><br>  <span class="hljs-attribute">template</span><span class="hljs-punctuation">:</span><br>    <span class="hljs-attribute">metadata</span><span class="hljs-punctuation">:</span><br>      <span class="hljs-attribute">labels</span><span class="hljs-punctuation">:</span><br>        <span class="hljs-attribute">app</span><span class="hljs-punctuation">:</span> <span class="hljs-string">httpbin</span><br>        <span class="hljs-attribute">version</span><span class="hljs-punctuation">:</span> <span class="hljs-string">v2</span><br>    <span class="hljs-attribute">spec</span><span class="hljs-punctuation">:</span><br>      <span class="hljs-attribute">containers</span><span class="hljs-punctuation">:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">image: docker.io/kennethreitz/httpbin</span><br>        <span class="hljs-attribute">imagePullPolicy</span><span class="hljs-punctuation">:</span> <span class="hljs-string">IfNotPresent</span><br>        <span class="hljs-attribute">name</span><span class="hljs-punctuation">:</span> <span class="hljs-string">httpbin</span><br>        <span class="hljs-attribute">command</span><span class="hljs-punctuation">:</span> <span class="hljs-string">[&quot;gunicorn&quot;, &quot;--access-logfile&quot;, &quot;-&quot;, &quot;-b&quot;, &quot;0.0.0.0:80&quot;, &quot;httpbin:app&quot;]</span><br>        <span class="hljs-attribute">ports</span><span class="hljs-punctuation">:</span><br>        <span class="hljs-bullet">-</span> <span class="hljs-string">containerPort: 80</span><br>EOF<br></code></pre></td></tr></table></figure>
+
+<p>查看下pod的运行情况,这里v1和v2版本都已经运行</p>
+<figure class="highlight subunit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs subunit">[root@VM<span class="hljs-string">-0</span><span class="hljs-string">-13</span>-centos istio<span class="hljs-string">-1</span>.5.1]# kubectl get pod  | grep httpbin-v<br>httpbin-v1<span class="hljs-string">-649</span>dfb4766-kscz5       2/2     Running   0          51s<br>httpbin-v2<span class="hljs-string">-76</span>dcc56c5<span class="hljs-string">-99</span>q65        2/2     Running   0          26s<br></code></pre></td></tr></table></figure>
+
+<p>接下来我们给httpbin部署一个service</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-string">$</span> <span class="hljs-string">kubectl</span> <span class="hljs-string">create</span> <span class="hljs-string">-f</span> <span class="hljs-bullet">-</span> <span class="hljs-string">&lt;&lt;EOF</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Service</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">httpbin</span><br>  <span class="hljs-attr">labels:</span><br>    <span class="hljs-attr">app:</span> <span class="hljs-string">httpbin</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">ports:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">http</span><br>    <span class="hljs-attr">port:</span> <span class="hljs-number">8000</span><br>    <span class="hljs-attr">targetPort:</span> <span class="hljs-number">80</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">app:</span> <span class="hljs-string">httpbin</span><br><span class="hljs-string">EOF</span><br></code></pre></td></tr></table></figure>
+
+<p>部署一个sleep服务用来执行curl请求</p>
+<figure class="highlight nestedtext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs nestedtext"><span class="hljs-attribute">cat &lt;&lt;EOF | istioctl kube-inject -f - | kubectl create -f -</span><br><span class="hljs-attribute">apiVersion</span><span class="hljs-punctuation">:</span> <span class="hljs-string">apps/v1</span><br><span class="hljs-attribute">kind</span><span class="hljs-punctuation">:</span> <span class="hljs-string">Deployment</span><br><span class="hljs-attribute">metadata</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-attribute">name</span><span class="hljs-punctuation">:</span> <span class="hljs-string">sleep</span><br><span class="hljs-attribute">spec</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-attribute">replicas</span><span class="hljs-punctuation">:</span> <span class="hljs-string">1</span><br>  <span class="hljs-attribute">selector</span><span class="hljs-punctuation">:</span><br>    <span class="hljs-attribute">matchLabels</span><span class="hljs-punctuation">:</span><br>      <span class="hljs-attribute">app</span><span class="hljs-punctuation">:</span> <span class="hljs-string">sleep</span><br>  <span class="hljs-attribute">template</span><span class="hljs-punctuation">:</span><br>    <span class="hljs-attribute">metadata</span><span class="hljs-punctuation">:</span><br>      <span class="hljs-attribute">labels</span><span class="hljs-punctuation">:</span><br>        <span class="hljs-attribute">app</span><span class="hljs-punctuation">:</span> <span class="hljs-string">sleep</span><br>    <span class="hljs-attribute">spec</span><span class="hljs-punctuation">:</span><br>      <span class="hljs-attribute">containers</span><span class="hljs-punctuation">:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">name: sleep</span><br>        <span class="hljs-attribute">image</span><span class="hljs-punctuation">:</span> <span class="hljs-string">tutum/curl</span><br>        <span class="hljs-attribute">command</span><span class="hljs-punctuation">:</span> <span class="hljs-string">[&quot;/bin/sleep&quot;,&quot;infinity&quot;]</span><br>        <span class="hljs-attribute">imagePullPolicy</span><span class="hljs-punctuation">:</span> <span class="hljs-string">IfNotPresent</span><br>EOF<br></code></pre></td></tr></table></figure>
+
+<p>默认svc会将流量负载到v1和v2版本，这里我们配置将流量只转发到v1版本</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-string">kubectl</span> <span class="hljs-string">apply</span> <span class="hljs-string">-f</span> <span class="hljs-bullet">-</span> <span class="hljs-string">&lt;&lt;EOF</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">networking.istio.io/v1alpha3</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">VirtualService</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">httpbin</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">hosts:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-string">httpbin</span><br>  <span class="hljs-attr">http:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">route:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-attr">destination:</span><br>        <span class="hljs-attr">host:</span> <span class="hljs-string">httpbin</span><br>        <span class="hljs-attr">subset:</span> <span class="hljs-string">v1</span><br>      <span class="hljs-attr">weight:</span> <span class="hljs-number">100</span><br><span class="hljs-meta">---</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">networking.istio.io/v1alpha3</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">DestinationRule</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">httpbin</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">host:</span> <span class="hljs-string">httpbin</span><br>  <span class="hljs-attr">subsets:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">v1</span><br>    <span class="hljs-attr">labels:</span><br>      <span class="hljs-attr">version:</span> <span class="hljs-string">v1</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">v2</span><br>    <span class="hljs-attr">labels:</span><br>      <span class="hljs-attr">version:</span> <span class="hljs-string">v2</span><br><span class="hljs-string">EOF</span><br></code></pre></td></tr></table></figure>
+
+<p>下面我们来对httpbin发起请求来测试一下</p>
+<figure class="highlight prolog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><code class="hljs prolog">[root@<span class="hljs-symbol">VM</span><span class="hljs-number">-0</span><span class="hljs-number">-13</span>-centos istio<span class="hljs-number">-1.5</span><span class="hljs-number">.1</span>]# kubectl exec -it sleep<span class="hljs-number">-5</span>b7bf56c54-krj9n -c sleep -- sh -c <span class="hljs-string">&#x27;curl  http://httpbin:8000/headers&#x27;</span> | python -m json.tool<br>&#123;<br>    <span class="hljs-string">&quot;headers&quot;</span>: &#123;<br>        <span class="hljs-string">&quot;Accept&quot;</span>: <span class="hljs-string">&quot;*/*&quot;</span>,<br>        <span class="hljs-string">&quot;Content-Length&quot;</span>: <span class="hljs-string">&quot;0&quot;</span>,<br>        <span class="hljs-string">&quot;Host&quot;</span>: <span class="hljs-string">&quot;httpbin:8000&quot;</span>,<br>        <span class="hljs-string">&quot;User-Agent&quot;</span>: <span class="hljs-string">&quot;curl/7.69.1&quot;</span>,<br>        <span class="hljs-string">&quot;X-B3-Parentspanid&quot;</span>: <span class="hljs-string">&quot;fe987c2ce7e2b1ed&quot;</span>,<br>        <span class="hljs-string">&quot;X-B3-Sampled&quot;</span>: <span class="hljs-string">&quot;1&quot;</span>,<br>        <span class="hljs-string">&quot;X-B3-Spanid&quot;</span>: <span class="hljs-string">&quot;2ad53d6b71ccbc6c&quot;</span>,<br>        <span class="hljs-string">&quot;X-B3-Traceid&quot;</span>: <span class="hljs-string">&quot;ebc0ec67ece15107fe987c2ce7e2b1ed&quot;</span>,<br>        <span class="hljs-string">&quot;X-Forwarded-Client-Cert&quot;</span>: <span class="hljs-string">&quot;By=spiffe://cluster.local/ns/default/sa/default;Hash=fc446005ac6e411b601b432459d05464eb3355fb081401eddce96ee810a5074a;Subject=\&quot;\&quot;;URI=spiffe://cluster.local/ns/default/sa/sleep&quot;</span><br>    &#125;<br>&#125;<br>[root@<span class="hljs-symbol">VM</span><span class="hljs-number">-0</span><span class="hljs-number">-13</span>-centos istio<span class="hljs-number">-1.5</span><span class="hljs-number">.1</span>]# kubectl logs -f httpbin-v1<span class="hljs-number">-649</span>dfb4766-kscz5 -c httpbin<br>[<span class="hljs-number">2020</span><span class="hljs-number">-12</span><span class="hljs-number">-07</span> <span class="hljs-number">02</span>:<span class="hljs-number">54</span>:<span class="hljs-number">26</span> +<span class="hljs-number">0000</span>] [<span class="hljs-number">1</span>] [<span class="hljs-symbol">INFO</span>] <span class="hljs-symbol">Starting</span> gunicorn <span class="hljs-number">19.9</span><span class="hljs-number">.0</span><br>[<span class="hljs-number">2020</span><span class="hljs-number">-12</span><span class="hljs-number">-07</span> <span class="hljs-number">02</span>:<span class="hljs-number">54</span>:<span class="hljs-number">26</span> +<span class="hljs-number">0000</span>] [<span class="hljs-number">1</span>] [<span class="hljs-symbol">INFO</span>] <span class="hljs-symbol">Listening</span> at: http://<span class="hljs-number">0.0</span><span class="hljs-number">.0</span><span class="hljs-number">.0</span>:<span class="hljs-number">80</span> (<span class="hljs-number">1</span>)<br>[<span class="hljs-number">2020</span><span class="hljs-number">-12</span><span class="hljs-number">-07</span> <span class="hljs-number">02</span>:<span class="hljs-number">54</span>:<span class="hljs-number">26</span> +<span class="hljs-number">0000</span>] [<span class="hljs-number">1</span>] [<span class="hljs-symbol">INFO</span>] <span class="hljs-symbol">Using</span> worker: sync<br>[<span class="hljs-number">2020</span><span class="hljs-number">-12</span><span class="hljs-number">-07</span> <span class="hljs-number">02</span>:<span class="hljs-number">54</span>:<span class="hljs-number">26</span> +<span class="hljs-number">0000</span>] [<span class="hljs-number">9</span>] [<span class="hljs-symbol">INFO</span>] <span class="hljs-symbol">Booting</span> worker with pid: <span class="hljs-number">9</span><br><span class="hljs-number">127.0</span><span class="hljs-number">.0</span><span class="hljs-number">.1</span> - - [<span class="hljs-number">07</span>/<span class="hljs-symbol">Dec</span>/<span class="hljs-number">2020</span>:<span class="hljs-number">03</span>:<span class="hljs-number">00</span>:<span class="hljs-number">37</span> +<span class="hljs-number">0000</span>] <span class="hljs-string">&quot;GET /headers HTTP/1.1&quot;</span> <span class="hljs-number">200</span> <span class="hljs-number">516</span> <span class="hljs-string">&quot;-&quot;</span> <span class="hljs-string">&quot;curl/7.69.1&quot;</span><br><br><br><br>[root@<span class="hljs-symbol">VM</span><span class="hljs-number">-0</span><span class="hljs-number">-13</span>-centos istio<span class="hljs-number">-1.5</span><span class="hljs-number">.1</span>]# kubectl logs -f httpbin-v2<span class="hljs-number">-76</span>dcc56c5<span class="hljs-number">-99</span>q65 -c httpbin<br>[<span class="hljs-number">2020</span><span class="hljs-number">-12</span><span class="hljs-number">-07</span> <span class="hljs-number">02</span>:<span class="hljs-number">54</span>:<span class="hljs-number">40</span> +<span class="hljs-number">0000</span>] [<span class="hljs-number">1</span>] [<span class="hljs-symbol">INFO</span>] <span class="hljs-symbol">Starting</span> gunicorn <span class="hljs-number">19.9</span><span class="hljs-number">.0</span><br>[<span class="hljs-number">2020</span><span class="hljs-number">-12</span><span class="hljs-number">-07</span> <span class="hljs-number">02</span>:<span class="hljs-number">54</span>:<span class="hljs-number">40</span> +<span class="hljs-number">0000</span>] [<span class="hljs-number">1</span>] [<span class="hljs-symbol">INFO</span>] <span class="hljs-symbol">Listening</span> at: http://<span class="hljs-number">0.0</span><span class="hljs-number">.0</span><span class="hljs-number">.0</span>:<span class="hljs-number">80</span> (<span class="hljs-number">1</span>)<br>[<span class="hljs-number">2020</span><span class="hljs-number">-12</span><span class="hljs-number">-07</span> <span class="hljs-number">02</span>:<span class="hljs-number">54</span>:<span class="hljs-number">40</span> +<span class="hljs-number">0000</span>] [<span class="hljs-number">1</span>] [<span class="hljs-symbol">INFO</span>] <span class="hljs-symbol">Using</span> worker: sync<br>[<span class="hljs-number">2020</span><span class="hljs-number">-12</span><span class="hljs-number">-07</span> <span class="hljs-number">02</span>:<span class="hljs-number">54</span>:<span class="hljs-number">40</span> +<span class="hljs-number">0000</span>] [<span class="hljs-number">8</span>] [<span class="hljs-symbol">INFO</span>] <span class="hljs-symbol">Booting</span> worker with pid: <span class="hljs-number">8</span><br></code></pre></td></tr></table></figure>
+
+<p>从上面的日志可以发下，只有httpbin v1中有产生日志，这里说明流量只转发到v1版本，接下来我们改变流量规则将流量镜像到v2</p>
+<figure class="highlight nestedtext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs nestedtext"><span class="hljs-attribute">kubectl apply -f - &lt;&lt;EOF</span><br><span class="hljs-attribute">apiVersion</span><span class="hljs-punctuation">:</span> <span class="hljs-string">networking.istio.io/v1alpha3</span><br><span class="hljs-attribute">kind</span><span class="hljs-punctuation">:</span> <span class="hljs-string">VirtualService</span><br><span class="hljs-attribute">metadata</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-attribute">name</span><span class="hljs-punctuation">:</span> <span class="hljs-string">httpbin</span><br><span class="hljs-attribute">spec</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-attribute">hosts</span><span class="hljs-punctuation">:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-string">httpbin</span><br>  <span class="hljs-attribute">http</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-string">route:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-string">destination:</span><br>        <span class="hljs-attribute">host</span><span class="hljs-punctuation">:</span> <span class="hljs-string">httpbin</span><br>        <span class="hljs-attribute">subset</span><span class="hljs-punctuation">:</span> <span class="hljs-string">v1</span><br>      <span class="hljs-attribute">weight</span><span class="hljs-punctuation">:</span> <span class="hljs-string">100</span><br>    <span class="hljs-attribute">mirror</span><span class="hljs-punctuation">:</span><br>      <span class="hljs-attribute">host</span><span class="hljs-punctuation">:</span> <span class="hljs-string">httpbin</span><br>      <span class="hljs-attribute">subset</span><span class="hljs-punctuation">:</span> <span class="hljs-string">v2</span><br>    <span class="hljs-attribute">mirror_percent</span><span class="hljs-punctuation">:</span> <span class="hljs-string">100</span><br>EOF<br></code></pre></td></tr></table></figure>
+
+<p>这个路由规则发送 100% 流量到 v1。最后一段mirror字段表示你将镜像流量到 httpbin:v2 服务。当流量被镜像时，请求将发送到镜像服务中，并在 headers 中的 Host&#x2F;Authority 属性值上追加 -shadow。例如cluster-1变为cluster-1-shadow。</p>
+<p>此外，重点注意这些被镜像的流量是『即发即弃』的，就是说镜像请求的响应会被丢弃。</p>
+<p>您可以使用mirror_percent属性来设置镜像流量的百分比，而不是镜像全部请求。为了兼容老版本，如果这个属性不存在，将镜像所有流量。</p>
+<p>下面我们来进行测试下，对httpbin发起请求，看看v1和v2版本是否会收到请求</p>
+<figure class="highlight prolog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><code class="hljs prolog">[root@<span class="hljs-symbol">VM</span><span class="hljs-number">-0</span><span class="hljs-number">-13</span>-centos istio<span class="hljs-number">-1.5</span><span class="hljs-number">.1</span>]# kubectl exec -it sleep<span class="hljs-number">-5</span>b7bf56c54-krj9n -c sleep -- sh -c <span class="hljs-string">&#x27;curl  http://httpbin:8000/headers&#x27;</span> | python -m json.tool<br>&#123;<br>    <span class="hljs-string">&quot;headers&quot;</span>: &#123;<br>        <span class="hljs-string">&quot;Accept&quot;</span>: <span class="hljs-string">&quot;*/*&quot;</span>,<br>        <span class="hljs-string">&quot;Content-Length&quot;</span>: <span class="hljs-string">&quot;0&quot;</span>,<br>        <span class="hljs-string">&quot;Host&quot;</span>: <span class="hljs-string">&quot;httpbin:8000&quot;</span>,<br>        <span class="hljs-string">&quot;User-Agent&quot;</span>: <span class="hljs-string">&quot;curl/7.69.1&quot;</span>,<br>        <span class="hljs-string">&quot;X-B3-Parentspanid&quot;</span>: <span class="hljs-string">&quot;cb8d626990ce882b&quot;</span>,<br>        <span class="hljs-string">&quot;X-B3-Sampled&quot;</span>: <span class="hljs-string">&quot;1&quot;</span>,<br>        <span class="hljs-string">&quot;X-B3-Spanid&quot;</span>: <span class="hljs-string">&quot;3f57b73d4468f2a2&quot;</span>,<br>        <span class="hljs-string">&quot;X-B3-Traceid&quot;</span>: <span class="hljs-string">&quot;a61409e7f4c4d713cb8d626990ce882b&quot;</span>,<br>        <span class="hljs-string">&quot;X-Forwarded-Client-Cert&quot;</span>: <span class="hljs-string">&quot;By=spiffe://cluster.local/ns/default/sa/httpbin;Hash=fc446005ac6e411b601b432459d05464eb3355fb081401eddce96ee810a5074a;Subject=\&quot;\&quot;;URI=spiffe://cluster.local/ns/default/sa/sleep&quot;</span><br>    &#125;<br>&#125;<br>[root@<span class="hljs-symbol">VM</span><span class="hljs-number">-0</span><span class="hljs-number">-13</span>-centos istio<span class="hljs-number">-1.5</span><span class="hljs-number">.1</span>]# kubectl logs -f httpbin-v1<span class="hljs-number">-649</span>dfb4766-kscz5 -c httpbin<br>[<span class="hljs-number">2020</span><span class="hljs-number">-12</span><span class="hljs-number">-07</span> <span class="hljs-number">02</span>:<span class="hljs-number">54</span>:<span class="hljs-number">26</span> +<span class="hljs-number">0000</span>] [<span class="hljs-number">1</span>] [<span class="hljs-symbol">INFO</span>] <span class="hljs-symbol">Starting</span> gunicorn <span class="hljs-number">19.9</span><span class="hljs-number">.0</span><br>[<span class="hljs-number">2020</span><span class="hljs-number">-12</span><span class="hljs-number">-07</span> <span class="hljs-number">02</span>:<span class="hljs-number">54</span>:<span class="hljs-number">26</span> +<span class="hljs-number">0000</span>] [<span class="hljs-number">1</span>] [<span class="hljs-symbol">INFO</span>] <span class="hljs-symbol">Listening</span> at: http://<span class="hljs-number">0.0</span><span class="hljs-number">.0</span><span class="hljs-number">.0</span>:<span class="hljs-number">80</span> (<span class="hljs-number">1</span>)<br>[<span class="hljs-number">2020</span><span class="hljs-number">-12</span><span class="hljs-number">-07</span> <span class="hljs-number">02</span>:<span class="hljs-number">54</span>:<span class="hljs-number">26</span> +<span class="hljs-number">0000</span>] [<span class="hljs-number">1</span>] [<span class="hljs-symbol">INFO</span>] <span class="hljs-symbol">Using</span> worker: sync<br>[<span class="hljs-number">2020</span><span class="hljs-number">-12</span><span class="hljs-number">-07</span> <span class="hljs-number">02</span>:<span class="hljs-number">54</span>:<span class="hljs-number">26</span> +<span class="hljs-number">0000</span>] [<span class="hljs-number">9</span>] [<span class="hljs-symbol">INFO</span>] <span class="hljs-symbol">Booting</span> worker with pid: <span class="hljs-number">9</span><br><span class="hljs-number">127.0</span><span class="hljs-number">.0</span><span class="hljs-number">.1</span> - - [<span class="hljs-number">07</span>/<span class="hljs-symbol">Dec</span>/<span class="hljs-number">2020</span>:<span class="hljs-number">03</span>:<span class="hljs-number">00</span>:<span class="hljs-number">37</span> +<span class="hljs-number">0000</span>] <span class="hljs-string">&quot;GET /headers HTTP/1.1&quot;</span> <span class="hljs-number">200</span> <span class="hljs-number">516</span> <span class="hljs-string">&quot;-&quot;</span> <span class="hljs-string">&quot;curl/7.69.1&quot;</span><br>^<span class="hljs-symbol">C</span><br>[root@<span class="hljs-symbol">VM</span><span class="hljs-number">-0</span><span class="hljs-number">-13</span>-centos istio<span class="hljs-number">-1.5</span><span class="hljs-number">.1</span>]# kubectl logs -f httpbin-v2<span class="hljs-number">-76</span>dcc56c5<span class="hljs-number">-99</span>q65 -c httpbin<br>[<span class="hljs-number">2020</span><span class="hljs-number">-12</span><span class="hljs-number">-07</span> <span class="hljs-number">02</span>:<span class="hljs-number">54</span>:<span class="hljs-number">40</span> +<span class="hljs-number">0000</span>] [<span class="hljs-number">1</span>] [<span class="hljs-symbol">INFO</span>] <span class="hljs-symbol">Starting</span> gunicorn <span class="hljs-number">19.9</span><span class="hljs-number">.0</span><br>[<span class="hljs-number">2020</span><span class="hljs-number">-12</span><span class="hljs-number">-07</span> <span class="hljs-number">02</span>:<span class="hljs-number">54</span>:<span class="hljs-number">40</span> +<span class="hljs-number">0000</span>] [<span class="hljs-number">1</span>] [<span class="hljs-symbol">INFO</span>] <span class="hljs-symbol">Listening</span> at: http://<span class="hljs-number">0.0</span><span class="hljs-number">.0</span><span class="hljs-number">.0</span>:<span class="hljs-number">80</span> (<span class="hljs-number">1</span>)<br>[<span class="hljs-number">2020</span><span class="hljs-number">-12</span><span class="hljs-number">-07</span> <span class="hljs-number">02</span>:<span class="hljs-number">54</span>:<span class="hljs-number">40</span> +<span class="hljs-number">0000</span>] [<span class="hljs-number">1</span>] [<span class="hljs-symbol">INFO</span>] <span class="hljs-symbol">Using</span> worker: sync<br>[<span class="hljs-number">2020</span><span class="hljs-number">-12</span><span class="hljs-number">-07</span> <span class="hljs-number">02</span>:<span class="hljs-number">54</span>:<span class="hljs-number">40</span> +<span class="hljs-number">0000</span>] [<span class="hljs-number">8</span>] [<span class="hljs-symbol">INFO</span>] <span class="hljs-symbol">Booting</span> worker with pid: <span class="hljs-number">8</span><br><span class="hljs-number">127.0</span><span class="hljs-number">.0</span><span class="hljs-number">.1</span> - - [<span class="hljs-number">07</span>/<span class="hljs-symbol">Dec</span>/<span class="hljs-number">2020</span>:<span class="hljs-number">03</span>:<span class="hljs-number">06</span>:<span class="hljs-number">36</span> +<span class="hljs-number">0000</span>] <span class="hljs-string">&quot;GET /headers HTTP/1.1&quot;</span> <span class="hljs-number">200</span> <span class="hljs-number">556</span> <span class="hljs-string">&quot;-&quot;</span> <span class="hljs-string">&quot;curl/7.69.1&quot;</span><br></code></pre></td></tr></table></figure>
+
+<p>可以发现，我们对httpbin发起访问，v1和v2版本日志都会打印，说明都会有流量进来，如果需要检查内部流量，我们可以通过如下方法</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br></pre></td><td class="code"><pre><code class="hljs makefile">[root@VM-0-13-centos istio-1.5.1]<span class="hljs-comment"># export SLEEP_POD=$(kubectl get pod -l app=sleep -o jsonpath=&#123;.items..metadata.name&#125;)</span><br>[root@VM-0-13-centos istio-1.5.1]<span class="hljs-comment"># export V1_POD_IP=$(kubectl get pod -l app=httpbin,version=v1 -o jsonpath=&#123;.items..status.podIP&#125;)</span><br>[root@VM-0-13-centos istio-1.5.1]<span class="hljs-comment"># export V2_POD_IP=$(kubectl get pod -l app=httpbin,version=v2 -o jsonpath=&#123;.items..status.podIP&#125;)</span><br>[root@VM-0-13-centos istio-1.5.1]<span class="hljs-comment"># kubectl exec -it $SLEEP_POD -c istio-proxy -- sudo tcpdump -A -s 0 host $V1_POD_IP or host $V2_POD_IP</span><br><span class="hljs-section">tcpdump: verbose output suppressed, use -v or -vv for full protocol decode</span><br>listening on eth0, link-type EN10MB (Ethernet), capture size 262144 bytes<br><span class="hljs-section">05:47:50.159513 IP sleep-7b9f8bfcd-2djx5.38836 &gt; 10-233-75-11.httpbin.default.svc.cluster.local.80: Flags [P.], seq 4039989036:4039989832, ack 3139734980, win 254, options [nop,nop,TS val 77427918 ecr 76730809], length 796: HTTP: GET /headers HTTP/1.1</span><br>E..P2.X.X.X.<br>.K.<br>.K....P..W,.$.......+.....<br>..t.....GET /headers HTTP/1.1<br><span class="hljs-section">host: httpbin:8000</span><br><span class="hljs-section">user-agent: curl/7.35.0</span><br><span class="hljs-section">accept: */*</span><br><span class="hljs-section">x-forwarded-proto: http</span><br><span class="hljs-section">x-request-id: 571c0fd6-98d4-4c93-af79-6a2fe2945847</span><br><span class="hljs-section">x-envoy-decorator-operation: httpbin.default.svc.cluster.local:8000/*</span><br><span class="hljs-section">x-b3-traceid: 82f3e0a76dcebca2</span><br><span class="hljs-section">x-b3-spanid: 82f3e0a76dcebca2</span><br><span class="hljs-section">x-b3-sampled: 0</span><br><span class="hljs-section">x-istio-attributes: Cj8KGGRlc3RpbmF0aW9uLnNlcnZpY2UuaG9zdBIjEiFodHRwYmluLmRlZmF1bHQuc3ZjLmNsdXN0ZXIubG9jYWwKPQoXZGVzdGluYXRpb24uc2VydmljZS51aWQSIhIgaXN0aW86Ly9kZWZhdWx0L3NlcnZpY2VzL2h0dHBiaW4KKgodZGVzdGluYXRpb24uc2VydmljZS5uYW1lc3BhY2USCRIHZGVmYXVsdAolChhkZXN0aW5hdGlvbi5zZXJ2aWNlLm5hbWUSCRIHaHR0cGJpbgo6Cgpzb3VyY2UudWlkEiwSKmt1YmVybmV0ZXM6Ly9zbGVlcC03YjlmOGJmY2QtMmRqeDUuZGVmYXVsdAo6ChNkZXN0aW5hdGlvbi5zZXJ2aWNlEiMSIWh0dHBiaW4uZGVmYXVsdC5zdmMuY2x1c3Rlci5sb2NhbA==</span><br><span class="hljs-section">content-length: 0</span><br><br><br><span class="hljs-section">05:47:50.159609 IP sleep-7b9f8bfcd-2djx5.49560 &gt; 10-233-71-7.httpbin.default.svc.cluster.local.80: Flags [P.], seq 296287713:296288571, ack 4029574162, win 254, options [nop,nop,TS val 77427918 ecr 76732809], length 858: HTTP: GET /headers HTTP/1.1</span><br>E.....X.X...<br>.K.<br>.G....P......l......e.....<br>..t.....GET /headers HTTP/1.1<br><span class="hljs-section">host: httpbin-shadow:8000</span><br><span class="hljs-section">user-agent: curl/7.35.0</span><br><span class="hljs-section">accept: */*</span><br><span class="hljs-section">x-forwarded-proto: http</span><br><span class="hljs-section">x-request-id: 571c0fd6-98d4-4c93-af79-6a2fe2945847</span><br><span class="hljs-section">x-envoy-decorator-operation: httpbin.default.svc.cluster.local:8000/*</span><br><span class="hljs-section">x-b3-traceid: 82f3e0a76dcebca2</span><br><span class="hljs-section">x-b3-spanid: 82f3e0a76dcebca2</span><br><span class="hljs-section">x-b3-sampled: 0</span><br><span class="hljs-section">x-istio-attributes: Cj8KGGRlc3RpbmF0aW9uLnNlcnZpY2UuaG9zdBIjEiFodHRwYmluLmRlZmF1bHQuc3ZjLmNsdXN0ZXIubG9jYWwKPQoXZGVzdGluYXRpb24uc2VydmljZS51aWQSIhIgaXN0aW86Ly9kZWZhdWx0L3NlcnZpY2VzL2h0dHBiaW4KKgodZGVzdGluYXRpb24uc2VydmljZS5uYW1lc3BhY2USCRIHZGVmYXVsdAolChhkZXN0aW5hdGlvbi5zZXJ2aWNlLm5hbWUSCRIHaHR0cGJpbgo6Cgpzb3VyY2UudWlkEiwSKmt1YmVybmV0ZXM6Ly9zbGVlcC03YjlmOGJmY2QtMmRqeDUuZGVmYXVsdAo6ChNkZXN0aW5hdGlvbi5zZXJ2aWNlEiMSIWh0dHBiaW4uZGVmYXVsdC5zdmMuY2x1c3Rlci5sb2NhbA==</span><br><span class="hljs-section">x-envoy-internal: true</span><br><span class="hljs-section">x-forwarded-for: 10.233.75.12</span><br><span class="hljs-section">content-length: 0</span><br><br><br><span class="hljs-section">05:47:50.166734 IP 10-233-75-11.httpbin.default.svc.cluster.local.80 &gt; sleep-7b9f8bfcd-2djx5.38836: Flags [P.], seq 1:472, ack 796, win 276, options [nop,nop,TS val 77427925 ecr 77427918], length 471: HTTP: HTTP/1.1 200 OK</span><br>E....3X.?...<br>.K.<br>.K..P...$....ZH...........<br>..t...t.HTTP/1.1 200 OK<br><span class="hljs-section">server: envoy</span><br><span class="hljs-section">date: Fri, 15 Feb 2019 05:47:50 GMT</span><br><span class="hljs-section">content-type: application/json</span><br><span class="hljs-section">content-length: 241</span><br><span class="hljs-section">access-control-allow-origin: *</span><br><span class="hljs-section">access-control-allow-credentials: true</span><br><span class="hljs-section">x-envoy-upstream-service-time: 3</span><br><br>&#123;<br>  <span class="hljs-string">&quot;headers&quot;</span>: &#123;<br>    <span class="hljs-string">&quot;Accept&quot;</span>: <span class="hljs-string">&quot;*/*&quot;</span>,<br>    <span class="hljs-string">&quot;Content-Length&quot;</span>: <span class="hljs-string">&quot;0&quot;</span>,<br>    <span class="hljs-string">&quot;Host&quot;</span>: <span class="hljs-string">&quot;httpbin:8000&quot;</span>,<br>    <span class="hljs-string">&quot;User-Agent&quot;</span>: <span class="hljs-string">&quot;curl/7.35.0&quot;</span>,<br>    <span class="hljs-string">&quot;X-B3-Sampled&quot;</span>: <span class="hljs-string">&quot;0&quot;</span>,<br>    <span class="hljs-string">&quot;X-B3-Spanid&quot;</span>: <span class="hljs-string">&quot;82f3e0a76dcebca2&quot;</span>,<br>    <span class="hljs-string">&quot;X-B3-Traceid&quot;</span>: <span class="hljs-string">&quot;82f3e0a76dcebca2&quot;</span><br>  &#125;<br>&#125;<br><br><span class="hljs-section">05:47:50.166789 IP sleep-7b9f8bfcd-2djx5.38836 &gt; 10-233-75-11.httpbin.default.svc.cluster.local.80: Flags [.], ack 472, win 262, options [nop,nop,TS val 77427925 ecr 77427925], length 0</span><br>E..42.X.X.\.<br>.K.<br>.K....P..ZH.$.............<br>..t...t.<br><span class="hljs-section">05:47:50.167234 IP 10-233-71-7.httpbin.default.svc.cluster.local.80 &gt; sleep-7b9f8bfcd-2djx5.49560: Flags [P.], seq 1:512, ack 858, win 280, options [nop,nop,TS val 77429926 ecr 77427918], length 511: HTTP: HTTP/1.1 200 OK</span><br>E..3..X.&gt;...<br>.G.<br>.K..P....l....;...........<br>..|...t.HTTP/1.1 200 OK<br><span class="hljs-section">server: envoy</span><br><span class="hljs-section">date: Fri, 15 Feb 2019 05:47:49 GMT</span><br><span class="hljs-section">content-type: application/json</span><br><span class="hljs-section">content-length: 281</span><br><span class="hljs-section">access-control-allow-origin: *</span><br><span class="hljs-section">access-control-allow-credentials: true</span><br><span class="hljs-section">x-envoy-upstream-service-time: 3</span><br><br>&#123;<br>  <span class="hljs-string">&quot;headers&quot;</span>: &#123;<br>    <span class="hljs-string">&quot;Accept&quot;</span>: <span class="hljs-string">&quot;*/*&quot;</span>,<br>    <span class="hljs-string">&quot;Content-Length&quot;</span>: <span class="hljs-string">&quot;0&quot;</span>,<br>    <span class="hljs-string">&quot;Host&quot;</span>: <span class="hljs-string">&quot;httpbin-shadow:8000&quot;</span>,<br>    <span class="hljs-string">&quot;User-Agent&quot;</span>: <span class="hljs-string">&quot;curl/7.35.0&quot;</span>,<br>    <span class="hljs-string">&quot;X-B3-Sampled&quot;</span>: <span class="hljs-string">&quot;0&quot;</span>,<br>    <span class="hljs-string">&quot;X-B3-Spanid&quot;</span>: <span class="hljs-string">&quot;82f3e0a76dcebca2&quot;</span>,<br>    <span class="hljs-string">&quot;X-B3-Traceid&quot;</span>: <span class="hljs-string">&quot;82f3e0a76dcebca2&quot;</span>,<br>    <span class="hljs-string">&quot;X-Envoy-Internal&quot;</span>: <span class="hljs-string">&quot;true&quot;</span><br>  &#125;<br>&#125;<br><br><span class="hljs-section">05:47:50.167253 IP sleep-7b9f8bfcd-2djx5.49560 &gt; 10-233-71-7.httpbin.default.svc.cluster.local.80: Flags [.], ack 512, win 262, options [nop,nop,TS val 77427926 ecr 77429926], length 0</span><br>E..4..X.X...<br>.K.<br>.G....P...;..n............<br>..t...|.<br></code></pre></td></tr></table></figure>
+
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Istio/" class="category-chain-item">Istio</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Kubernetes/">#Kubernetes</a>
+      
+        <a href="/tags/Istio/">#Istio</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>istio入门系列之流量镜像</div>
+      <div>http://example.com/2020/12/03/2020-12-03-Traffic-mirroring-of-istio-entry-series/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>VashonNie</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2020年12月3日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2020/12/04/2020-12-04-Kiali-network-visualization-of-istio-entry-series/" title="istio入门系列之Kiali网络可视化">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">istio入门系列之Kiali网络可视化</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2020/12/02/2020-12-02-Fault-injection-of-istio-entry-series/" title="istio入门系列之故障注入">
+                        <span class="hidden-mobile">istio入门系列之故障注入</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?bfe4709ccd8c5c9e559c89f4fd0866f3";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+  <script defer src="/js/leancloud.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

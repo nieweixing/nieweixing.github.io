@@ -1,0 +1,799 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="VashonNie">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="本文介绍下如何在k8s上搭建kong网关及kong网关的简单使用，kong是一个服务控制平台，通过允许客户管理服务和 API 的整个生命周期，将组织的信息代理到所有服务。Kong Enterprise 建立在 Kong Gateway 之上，使用户能够简化跨混合云和多云部署的 API 和微服务管理。 Kong Enterprise 旨在利用工作流自动化和现代 GitOps 实践在分散式体系结构上运">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TKE上搭建kong网关">
+<meta property="og:url" content="http://example.com/2020/12/22/2020-12-22-Build-Kong-Gateway-on-TKE/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="本文介绍下如何在k8s上搭建kong网关及kong网关的简单使用，kong是一个服务控制平台，通过允许客户管理服务和 API 的整个生命周期，将组织的信息代理到所有服务。Kong Enterprise 建立在 Kong Gateway 之上，使用户能够简化跨混合云和多云部署的 API 和微服务管理。 Kong Enterprise 旨在利用工作流自动化和现代 GitOps 实践在分散式体系结构上运">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/2020-12-22-Build-Kong-Gateway-on-TKE/1.png">
+<meta property="og:image" content="http://example.com/img/2020-12-22-Build-Kong-Gateway-on-TKE/2.png">
+<meta property="og:image" content="http://example.com/img/2020-12-22-Build-Kong-Gateway-on-TKE/3.png">
+<meta property="og:image" content="http://example.com/img/2020-12-22-Build-Kong-Gateway-on-TKE/4.png">
+<meta property="article:published_time" content="2020-12-22T06:10:00.000Z">
+<meta property="article:modified_time" content="2020-12-22T06:10:00.000Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="TKE">
+<meta property="article:tag" content="Kong">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://example.com/img/2020-12-22-Build-Kong-Gateway-on-TKE/1.png">
+  
+  
+  <title>TKE上搭建kong网关 - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":"www.niewx.cn","path":"/","ignore_local":false}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>聂伟星</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="TKE上搭建kong网关"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-author" aria-hidden="true"></i>
+        VashonNie
+      </span>
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2020-12-22 14:10" pubdate>
+          2020年12月22日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          5.2k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          44 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">TKE上搭建kong网关</h1>
+            
+            <div class="markdown-body">
+              
+              <p>本文介绍下如何在k8s上搭建kong网关及kong网关的简单使用，kong是一个服务控制平台，通过允许客户管理服务和 API 的整个生命周期，将组织的信息代理到所有服务。Kong Enterprise 建立在 Kong Gateway 之上，使用户能够简化跨混合云和多云部署的 API 和微服务管理。</p>
+<p>Kong Enterprise 旨在利用工作流自动化和现代 GitOps 实践在分散式体系结构上运行。通过kong，用户可以：</p>
+<ul>
+<li>分散应用程序&#x2F;服务并过渡到微服务</li>
+<li>创建丰富的的 API 开发人员生态系统</li>
+<li>主动识别与 API 相关的异常和威胁</li>
+<li>保护和管理 API&#x2F;服务，并在整个组织中提高 API 可见性</li>
+</ul>
+<p>kong的架构大致如下图</p>
+<p><img src="/img/2020-12-22-Build-Kong-Gateway-on-TKE/1.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2020-12-22-Build-Kong-Gateway-on-TKE/2.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<h1 id="部署kong网关"><a href="#部署kong网关" class="headerlink" title="部署kong网关"></a>部署kong网关</h1><p>我们在部署kong网关的时候可以选择用数据库Postgres来存储路由规则，也可部署一个单机的kong服务，注意部署kong的过程中，如果官方镜像拉不下来可以替换镜像成siriuszg&#x2F;kong-ingress-controller</p>
+<h2 id="不带数据库部署kong"><a href="#不带数据库部署kong" class="headerlink" title="不带数据库部署kong"></a>不带数据库部署kong</h2><p>部署单机的kong服务，我们可以通过helm和kustomize来部署</p>
+<p>helm部署的方式，我们将kong部署到kong这个命名空间下</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">kubectl create kong</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">helm repo add kong https://charts.konghq.com</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">helm repo update</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">helm install kong --generate-name --<span class="hljs-built_in">set</span> ingressController.installCRDs=<span class="hljs-literal">false</span> --namespace kong</span><br></code></pre></td></tr></table></figure>
+
+<p>kustomize部署kong到集群，首先需要安装下kustomize则个工具</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">wget https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">sh install_kustomize.sh</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash"><span class="hljs-built_in">cp</span> kustomize /usr/local/bin</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">kustomize build github.com/kubernetes-ingress-controller/deploy/manifests/base | kubectl apply -f -</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="带数据库部署kong"><a href="#带数据库部署kong" class="headerlink" title="带数据库部署kong"></a>带数据库部署kong</h2><p>github的kubernetes-ingress-controller项目上有带数据库的yaml文件，我们下周下来修改下就可以了</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash"><span class="hljs-built_in">cd</span> /root</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">git <span class="hljs-built_in">clone</span> https://github.com/Kong/kubernetes-ingress-controller.git</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash"><span class="hljs-built_in">cd</span> /root/kubernetes-ingress-controller/deploy/manifests/postgres</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">修改下postgres.yaml的卷大小为10G和base目录下kong-ingress-dbless.yaml的镜像</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">kustomize build /root/kubernetes-ingress-controller/deploy/manifests/postgres | kubectl apply -f -</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="验证kong网关是否部署成功"><a href="#验证kong网关是否部署成功" class="headerlink" title="验证kong网关是否部署成功"></a>验证kong网关是否部署成功</h2><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs routeros">[root@VM-0-13-centos ~]# <span class="hljs-attribute">HOST</span>=$(kubectl <span class="hljs-built_in">get</span> svc --namespace kong kong-proxy -o <span class="hljs-attribute">jsonpath</span>=<span class="hljs-string">&#x27;&#123;.status.loadBalancer.ingress[0].ip&#125;&#x27;</span>)<br>[root@VM-0-13-centos ~]# <span class="hljs-attribute">PORT</span>=$(kubectl <span class="hljs-built_in">get</span> svc --namespace kong kong-proxy -o <span class="hljs-attribute">jsonpath</span>=<span class="hljs-string">&#x27;&#123;.spec.ports[0].port&#125;&#x27;</span>)<br>[root@VM-0-13-centos ~]# <span class="hljs-built_in">export</span> <span class="hljs-attribute">PROXY_IP</span>=<span class="hljs-variable">$&#123;HOST&#125;</span>:$&#123;PORT&#125;<br>[root@VM-0-13-centos base]# curl <span class="hljs-variable">$PROXY_IP</span><br>&#123;<span class="hljs-string">&quot;message&quot;</span>:<span class="hljs-string">&quot;no Route matched with those values&quot;</span>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>出现这个信息表示kong网关部署成功</p>
+<h1 id="部署kong的UI管理服务konga"><a href="#部署kong的UI管理服务konga" class="headerlink" title="部署kong的UI管理服务konga"></a>部署kong的UI管理服务konga</h1><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">apps/v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Deployment</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">kong</span><br>  <span class="hljs-attr">labels:</span><br>    <span class="hljs-attr">app:</span> <span class="hljs-string">konga</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">konga</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">replicas:</span> <span class="hljs-number">1</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">matchLabels:</span><br>      <span class="hljs-attr">app:</span> <span class="hljs-string">konga</span><br>  <span class="hljs-attr">strategy:</span><br>    <span class="hljs-attr">rollingUpdate:</span><br>      <span class="hljs-attr">maxSurge:</span> <span class="hljs-number">1</span><br>      <span class="hljs-attr">maxUnavailable:</span> <span class="hljs-number">1</span><br>    <span class="hljs-attr">type:</span> <span class="hljs-string">RollingUpdate</span><br>  <span class="hljs-attr">template:</span><br>    <span class="hljs-attr">metadata:</span><br>      <span class="hljs-attr">labels:</span><br>        <span class="hljs-attr">app:</span> <span class="hljs-string">konga</span><br>    <span class="hljs-attr">spec:</span><br>      <span class="hljs-attr">containers:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">env:</span><br>        <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">DB_ADAPTER</span><br>          <span class="hljs-attr">value:</span> <span class="hljs-string">postgres</span><br>        <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">DB_URI</span><br>          <span class="hljs-attr">value:</span> <span class="hljs-string">&quot;postgresql://kong:kong@postgres:5432/kong&quot;</span>  <span class="hljs-comment">#根据实际的kong数据库配置</span><br>        <span class="hljs-attr">image:</span> <span class="hljs-string">pantsel/konga</span><br>        <span class="hljs-attr">imagePullPolicy:</span> <span class="hljs-string">Always</span><br>        <span class="hljs-attr">name:</span> <span class="hljs-string">konga</span><br>        <span class="hljs-attr">ports:</span><br>        <span class="hljs-bullet">-</span> <span class="hljs-attr">containerPort:</span> <span class="hljs-number">1337</span><br>          <span class="hljs-attr">protocol:</span> <span class="hljs-string">TCP</span><br>      <span class="hljs-attr">restartPolicy:</span> <span class="hljs-string">Always</span><br><br><span class="hljs-meta">---</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Service</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">konga</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">kong</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">ports:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">http</span><br>    <span class="hljs-attr">port:</span> <span class="hljs-number">1337</span><br>    <span class="hljs-attr">targetPort:</span> <span class="hljs-number">1337</span><br>    <span class="hljs-attr">protocol:</span> <span class="hljs-string">TCP</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">app:</span> <span class="hljs-string">konga</span><br><br><span class="hljs-meta">---</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">extensions/v1beta1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Ingress</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">konga-ingress</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">kong</span><br>  <span class="hljs-attr">annotations:</span><br>    <span class="hljs-attr">kubernetes.io/ingress.class:</span> <span class="hljs-string">nwx-ingress</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">rules:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">host:</span> <span class="hljs-string">kong.tke.niewx.cn</span><br>    <span class="hljs-attr">http:</span><br>      <span class="hljs-attr">paths:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">path:</span> <span class="hljs-string">/</span><br>        <span class="hljs-attr">backend:</span><br>          <span class="hljs-attr">serviceName:</span> <span class="hljs-string">konga</span><br>          <span class="hljs-attr">servicePort:</span> <span class="hljs-number">1337</span><br></code></pre></td></tr></table></figure>
+
+<p>在浏览器输入<a target="_blank" rel="noopener" href="http://kong.tke.niewx.cn访问页面/">http://kong.tke.niewx.cn访问页面</a></p>
+<p><img src="/img/2020-12-22-Build-Kong-Gateway-on-TKE/3.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p>
+<p>创建一个admin账号，这里我们账号为tke，创建完登录即可，这里需要暴露kong的8001端口，作为kong admin api</p>
+<p><img src="/img/2020-12-22-Build-Kong-Gateway-on-TKE/4.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p>
+<p>然后配置一个链接连接后端的amin api，这里填写kong的serviceip和端口即可</p>
+<h1 id="配置kong-ingress"><a href="#配置kong-ingress" class="headerlink" title="配置kong-ingress"></a>配置kong-ingress</h1><p>首先我们在default下部署一个httpbin服务和service在，这里我们已经部署好了</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">apps/v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Deployment</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">httpbin</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">default</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">replicas:</span> <span class="hljs-number">1</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">matchLabels:</span><br>      <span class="hljs-attr">app:</span> <span class="hljs-string">httpbin</span><br>      <span class="hljs-attr">version:</span> <span class="hljs-string">v1</span><br>  <span class="hljs-attr">template:</span><br>    <span class="hljs-attr">metadata:</span><br>      <span class="hljs-attr">labels:</span><br>        <span class="hljs-attr">app:</span> <span class="hljs-string">httpbin</span><br>        <span class="hljs-attr">version:</span> <span class="hljs-string">v1</span><br>    <span class="hljs-attr">spec:</span><br>      <span class="hljs-attr">containers:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">image:</span> <span class="hljs-string">docker.io/kennethreitz/httpbin</span><br>        <span class="hljs-attr">imagePullPolicy:</span> <span class="hljs-string">IfNotPresent</span><br>        <span class="hljs-attr">name:</span> <span class="hljs-string">httpbin</span><br>        <span class="hljs-attr">ports:</span><br>        <span class="hljs-bullet">-</span> <span class="hljs-attr">containerPort:</span> <span class="hljs-number">80</span><br>          <span class="hljs-attr">protocol:</span> <span class="hljs-string">TCP</span><br>        <span class="hljs-attr">resources:</span> &#123;&#125;<br>        <span class="hljs-attr">terminationMessagePath:</span> <span class="hljs-string">/dev/termination-log</span><br>        <span class="hljs-attr">terminationMessagePolicy:</span> <span class="hljs-string">File</span><br>      <span class="hljs-attr">dnsPolicy:</span> <span class="hljs-string">ClusterFirst</span><br>      <span class="hljs-attr">restartPolicy:</span> <span class="hljs-string">Always</span><br><br><span class="hljs-meta">---</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Service</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">labels:</span><br>    <span class="hljs-attr">app:</span> <span class="hljs-string">httpbin</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">httpbin</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">default</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">ports:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">http</span><br>    <span class="hljs-attr">nodePort:</span> <span class="hljs-number">30178</span><br>    <span class="hljs-attr">port:</span> <span class="hljs-number">8000</span><br>    <span class="hljs-attr">protocol:</span> <span class="hljs-string">TCP</span><br>    <span class="hljs-attr">targetPort:</span> <span class="hljs-number">80</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">app:</span> <span class="hljs-string">httpbin</span><br>  <span class="hljs-attr">sessionAffinity:</span> <span class="hljs-string">None</span><br>  <span class="hljs-attr">type:</span> <span class="hljs-string">NodePort</span><br></code></pre></td></tr></table></figure>
+
+<p>接下来我们创建一个kong的ingress网关来访问后端的httpbin服务</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">networking.k8s.io/v1beta1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Ingress</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">annotations:</span><br>    <span class="hljs-attr">konghq.com/strip-path:</span> <span class="hljs-string">&quot;true&quot;</span><br>    <span class="hljs-attr">kubernetes.io/ingress.class:</span> <span class="hljs-string">kong</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">kong-ingress</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">default</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">rules:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">http:</span><br>      <span class="hljs-attr">paths:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">backend:</span><br>          <span class="hljs-attr">serviceName:</span> <span class="hljs-string">httpbin</span><br>          <span class="hljs-attr">servicePort:</span> <span class="hljs-number">8000</span><br>        <span class="hljs-attr">path:</span> <span class="hljs-string">/foo</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">backend:</span><br>          <span class="hljs-attr">serviceName:</span> <span class="hljs-string">httpbin</span><br>          <span class="hljs-attr">servicePort:</span> <span class="hljs-number">8000</span><br>        <span class="hljs-attr">path:</span> <span class="hljs-string">/bar</span><br></code></pre></td></tr></table></figure>
+
+<p>创建好之后，我们通过kong的入口lb类型service的vip访问后端的httpbin服务，其他的ingress配置方式可以参考<a target="_blank" rel="noopener" href="https://docs.konghq.com/kubernetes-ingress-controller/1.1.x/guides/using-kongplugin-resource/">https://docs.konghq.com/kubernetes-ingress-controller/1.1.x/guides/using-kongplugin-resource/</a></p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs yaml">[<span class="hljs-string">root@VM-0-13-centos</span> <span class="hljs-string">manifests</span>]<span class="hljs-comment"># curl -i 159.75.145.38/bar/status/200</span><br><span class="hljs-string">HTTP/1.1</span> <span class="hljs-number">200</span> <span class="hljs-string">OK</span><br><span class="hljs-attr">Content-Type:</span> <span class="hljs-string">text/html;</span> <span class="hljs-string">charset=utf-8</span><br><span class="hljs-attr">Content-Length:</span> <span class="hljs-number">0</span><br><span class="hljs-attr">Connection:</span> <span class="hljs-string">keep-alive</span><br><span class="hljs-attr">server:</span> <span class="hljs-string">istio-envoy</span><br><span class="hljs-attr">date:</span> <span class="hljs-string">Sun,</span> <span class="hljs-number">10</span> <span class="hljs-string">Jan</span> <span class="hljs-number">2021 07:44:25 </span><span class="hljs-string">GMT</span><br><span class="hljs-attr">access-control-allow-origin:</span> <span class="hljs-string">*</span><br><span class="hljs-attr">access-control-allow-credentials:</span> <span class="hljs-literal">true</span><br><span class="hljs-attr">x-envoy-upstream-service-time:</span> <span class="hljs-number">1</span><br><span class="hljs-attr">x-envoy-decorator-operation:</span> <span class="hljs-string">httpbin.default.svc.cluster.local:8000/*</span><br><span class="hljs-attr">X-Kong-Upstream-Latency:</span> <span class="hljs-number">3</span><br><span class="hljs-attr">X-Kong-Proxy-Latency:</span> <span class="hljs-number">1</span><br><span class="hljs-attr">Via:</span> <span class="hljs-number">2.2</span><span class="hljs-number">.1</span><br><br>[<span class="hljs-string">root@VM-0-13-centos</span> <span class="hljs-string">manifests</span>]<span class="hljs-comment"># curl -i 159.75.145.38/foo/status/200</span><br><span class="hljs-string">HTTP/1.1</span> <span class="hljs-number">200</span> <span class="hljs-string">OK</span><br><span class="hljs-attr">Content-Type:</span> <span class="hljs-string">text/html;</span> <span class="hljs-string">charset=utf-8</span><br><span class="hljs-attr">Content-Length:</span> <span class="hljs-number">0</span><br><span class="hljs-attr">Connection:</span> <span class="hljs-string">keep-alive</span><br><span class="hljs-attr">server:</span> <span class="hljs-string">istio-envoy</span><br><span class="hljs-attr">date:</span> <span class="hljs-string">Sun,</span> <span class="hljs-number">10</span> <span class="hljs-string">Jan</span> <span class="hljs-number">2021 08:02:37 </span><span class="hljs-string">GMT</span><br><span class="hljs-attr">access-control-allow-origin:</span> <span class="hljs-string">*</span><br><span class="hljs-attr">access-control-allow-credentials:</span> <span class="hljs-literal">true</span><br><span class="hljs-attr">x-envoy-upstream-service-time:</span> <span class="hljs-number">1</span><br><span class="hljs-attr">x-envoy-decorator-operation:</span> <span class="hljs-string">httpbin.default.svc.cluster.local:8000/*</span><br><span class="hljs-attr">X-Kong-Upstream-Latency:</span> <span class="hljs-number">4</span><br><span class="hljs-attr">X-Kong-Proxy-Latency:</span> <span class="hljs-number">1</span><br><span class="hljs-attr">Via:</span> <span class="hljs-number">2.2</span><span class="hljs-number">.1</span><br></code></pre></td></tr></table></figure>
+
+<p>从上面的访问我们可以发现已经成功的通过kong访问到了后端的httpbin服务。</p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Kong/" class="category-chain-item">Kong</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/TKE/">#TKE</a>
+      
+        <a href="/tags/Kong/">#Kong</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>TKE上搭建kong网关</div>
+      <div>http://example.com/2020/12/22/2020-12-22-Build-Kong-Gateway-on-TKE/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>VashonNie</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2020年12月22日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2020/12/25/2020-12-25-How-to-control-the-startup-sequence-of-containers-in-pod-in-k8s/" title="k8s中如何控制pod中容器的启动顺序">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">k8s中如何控制pod中容器的启动顺序</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2020/12/20/2020-12-20-Build-an-enterprise-level-mirror-warehouse-Harbor-on-TKE/" title="TKE上搭建企业级镜像仓库Harbor">
+                        <span class="hidden-mobile">TKE上搭建企业级镜像仓库Harbor</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?bfe4709ccd8c5c9e559c89f4fd0866f3";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+  <script defer src="/js/leancloud.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
