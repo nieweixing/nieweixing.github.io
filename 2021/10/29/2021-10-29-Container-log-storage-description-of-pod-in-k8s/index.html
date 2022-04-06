@@ -23,12 +23,14 @@
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="使用k8s的过程中，我们的服务都会打印大量的日志，为了方便查看排查定位问题，大部分时候会将日志打印在标准输出，但是有的时候为了方便日志的切割和收集，会将日志写到容器内的某个目录下日志文件。如果我们的日志会占用大量的磁盘空间，有可能还会外挂存储来将日志持久化。 容器内的业务日志有多种输出方式，其实不同日志输出方式，最终都是存在了pod所在的宿主机上，不同的方式对应了宿主机不同的目录，下面我们来详细说">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-10-29-Container-log-storage-description-of-pod-in-k8s/bg.jpg">
 <meta property="article:published_time" content="2021-10-29T05:47:39.000Z">
-<meta property="article:modified_time" content="2021-12-31T09:31:00.476Z">
+<meta property="article:modified_time" content="2022-04-06T03:47:45.481Z">
 <meta property="article:author" content="VashonNie">
 <meta property="article:tag" content="Kubernetes">
 <meta property="article:tag" content="containers">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.niewx.cn/img/2021-10-29-Container-log-storage-description-of-pod-in-k8s/bg.jpg">
   
   
   <title>k8s中pod的容器日志存储说明 - Hexo</title>

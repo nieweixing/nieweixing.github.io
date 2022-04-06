@@ -23,19 +23,7 @@
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="我们在使用TKE的过程中会遇到一个这样的场景，就是我在服务端想获取到有哪些客户端在访问我，并且获取到客户端的真实ip。但是在k8s集群中经过多次的网络的转发，一般是无法获取到客户端真实ip。 为了满足这个常见TKE这边提供了lb直连pod的方式来获取客户端真实的ip，其实tke中能够实现这个方案的主要还是基于在vpc-cni的网络模式下实现的，因为vpc-cni模式可以使pod处于和node节点，">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/1.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/2.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/3.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/4.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/5.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/6.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/7.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/8.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/9.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/10.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/11.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/12.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/13.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/snail-bg.jpg">
 <meta property="article:published_time" content="2020-07-28T06:10:00.000Z">
 <meta property="article:modified_time" content="2020-07-28T06:10:00.000Z">
 <meta property="article:author" content="VashonNie">
@@ -43,7 +31,7 @@
 <meta property="article:tag" content="TKE">
 <meta property="article:tag" content="Service">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://www.niewx.cn/img/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/1.png">
+<meta name="twitter:image" content="https://www.niewx.cn/img/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/snail-bg.jpg">
   
   
   <title>TKE中使用lb直连获取客户端真实IP - Hexo</title>

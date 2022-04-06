@@ -23,46 +23,7 @@
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="本周讲述了在TKE上如何监控集群并发送告警，简单部署wordpress到集群中 TKE监控使用和查看良好的监控环境为腾讯云容器服务高可靠性、高可用性和高性能提供重要保证。您可以方便为不同资源收集不同维度的监控数据，能方便掌握资源的使用状况，轻松定位故障。 腾讯云容器服务提供集群、节点、工作负载、Pod、Container 5个层面的监控数据收集和展示功能。 收集监控数据有助于您建立容器集群性能的正">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/1.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/2.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/3.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/4.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/5.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/6.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/7.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/8.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/9.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/10.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/11.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/12.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/13.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/14.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/15.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/16.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/17.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/18.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/19.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/20.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/21.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/22.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/23.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/24.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/25.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/26.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/27.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/28.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/29.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/30.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/31.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/32.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/33.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/34.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/35.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/36.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/37.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/38.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/39.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/40.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/snail-bg.jpg">
 <meta property="article:published_time" content="2020-06-05T06:10:00.000Z">
 <meta property="article:modified_time" content="2020-06-05T06:10:00.000Z">
 <meta property="article:author" content="VashonNie">
@@ -70,7 +31,7 @@
 <meta property="article:tag" content="Docker">
 <meta property="article:tag" content="TKE">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/1.png">
+<meta name="twitter:image" content="https://www.niewx.cn/img/2020-06-05-TKE-operation-notes-04/snail-bg.jpg">
   
   
   <title>TKE操作笔记04 - Hexo</title>

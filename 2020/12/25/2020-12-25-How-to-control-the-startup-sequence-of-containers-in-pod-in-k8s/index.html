@@ -23,16 +23,14 @@
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="我们在部署服务的时候，通常会遇到这种场景就是2个服务部署在同一个pod中，但是这2个服务又有先后的依赖关系，那么我们如何在pod中如何来控制容器的启动顺序呢？今天我们来讲一下如何在pod如何控制2个容器的启动顺序，我们在这里在一个pod里面部署springboot和centos的2个容器作为示例，centos的启动需要依赖于springboot的服务启动正常再启动。 正常我们在一个pod中部署2个">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-12-25-How-to-control-the-startup-sequence-of-containers-in-pod-in-k8s/1.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-12-25-How-to-control-the-startup-sequence-of-containers-in-pod-in-k8s/2.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-12-25-How-to-control-the-startup-sequence-of-containers-in-pod-in-k8s/3.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-12-25-How-to-control-the-startup-sequence-of-containers-in-pod-in-k8s/snail-bg.jpg">
 <meta property="article:published_time" content="2020-12-25T06:10:00.000Z">
 <meta property="article:modified_time" content="2020-12-25T06:10:00.000Z">
 <meta property="article:author" content="VashonNie">
 <meta property="article:tag" content="Kubernetes">
 <meta property="article:tag" content="Docker">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://www.niewx.cn/img/2020-12-25-How-to-control-the-startup-sequence-of-containers-in-pod-in-k8s/1.png">
+<meta name="twitter:image" content="https://www.niewx.cn/img/2020-12-25-How-to-control-the-startup-sequence-of-containers-in-pod-in-k8s/snail-bg.jpg">
   
   
   <title>k8s中如何控制pod中容器的启动顺序 - Hexo</title>

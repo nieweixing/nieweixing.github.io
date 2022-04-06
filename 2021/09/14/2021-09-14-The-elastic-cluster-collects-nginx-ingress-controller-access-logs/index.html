@@ -23,19 +23,14 @@
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="弹性集群是无需购买节点就可以部署服务的k8s服务，是现在服务部署在k8s的主流方案，相比于传统的k8s集群，弹性集群隔离性更好，成本更低，但是也存在一些限制，不能部署DaemonSet、不能使用nodeport等。 下面我们实践下在腾讯云的eks上部署nginx-ingress并采集nginx-ingress controller访问日志到es，最终通过kibana来查询。其实腾讯云也提供了日志采">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://www.niewx.cn/img/2021-09-14-The-elastic-cluster-collects-nginx-ingress-controller-access-logs/Snipaste_2021-09-14_20-01-16.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2021-09-14-The-elastic-cluster-collects-nginx-ingress-controller-access-logs/Snipaste_2021-09-14_20-00-33.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2021-09-14-The-elastic-cluster-collects-nginx-ingress-controller-access-logs/Snipaste_2021-09-15_13-57-20.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2021-09-14-The-elastic-cluster-collects-nginx-ingress-controller-access-logs/Snipaste_2021-09-15_13-57-43.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2021-09-14-The-elastic-cluster-collects-nginx-ingress-controller-access-logs/Snipaste_2021-09-15_14-11-07.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2021-09-14-The-elastic-cluster-collects-nginx-ingress-controller-access-logs/Snipaste_2021-09-15_14-11-44.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-09-14-The-elastic-cluster-collects-nginx-ingress-controller-access-logs/snail-bg.jpg">
 <meta property="article:published_time" content="2021-09-14T11:35:44.000Z">
-<meta property="article:modified_time" content="2022-04-05T03:44:33.888Z">
+<meta property="article:modified_time" content="2022-04-06T03:47:45.249Z">
 <meta property="article:author" content="VashonNie">
 <meta property="article:tag" content="Kubernetes">
 <meta property="article:tag" content="ingress">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://www.niewx.cn/img/2021-09-14-The-elastic-cluster-collects-nginx-ingress-controller-access-logs/Snipaste_2021-09-14_20-01-16.png">
+<meta name="twitter:image" content="https://www.niewx.cn/img/2021-09-14-The-elastic-cluster-collects-nginx-ingress-controller-access-logs/snail-bg.jpg">
   
   
   <title>弹性集群收集nginx-ingress controller访问日志 - Hexo</title>

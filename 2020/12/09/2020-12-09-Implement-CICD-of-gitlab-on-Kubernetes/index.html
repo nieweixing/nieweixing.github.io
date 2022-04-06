@@ -23,20 +23,7 @@
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="本次我们来讲解下如何在k8s上搭建gitlab，并且通过gitlab内Pipeline的ci&#x2F;cd将代码部署到k8s集群内。 本次k8s环境基于tke托管集群1.18进行测试，镜像仓库使用的是腾讯云的ccr仓库。 搭建gitlab部署gitla需要部署三个服务，分别是redis、postgresql、gitlab这三个服务，下面我们来讲解具体部署及部署yaml文件 我们先创建一个gitl">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-12-09-Implement-CICD-of-gitlab-on-Kubernetes/1.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-12-09-Implement-CICD-of-gitlab-on-Kubernetes/2.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-12-09-Implement-CICD-of-gitlab-on-Kubernetes/3.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-12-09-Implement-CICD-of-gitlab-on-Kubernetes/4.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-12-09-Implement-CICD-of-gitlab-on-Kubernetes/5.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-12-09-Implement-CICD-of-gitlab-on-Kubernetes/6.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-12-09-Implement-CICD-of-gitlab-on-Kubernetes/7.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-12-09-Implement-CICD-of-gitlab-on-Kubernetes/8.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-12-09-Implement-CICD-of-gitlab-on-Kubernetes/9.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-12-09-Implement-CICD-of-gitlab-on-Kubernetes/9.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-12-09-Implement-CICD-of-gitlab-on-Kubernetes/10.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-12-09-Implement-CICD-of-gitlab-on-Kubernetes/11.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-12-09-Implement-CICD-of-gitlab-on-Kubernetes/12.png">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-12-09-Implement-CICD-of-gitlab-on-Kubernetes/13.png">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-12-09-Implement-CICD-of-gitlab-on-Kubernetes/snail-bg.jpg">
 <meta property="article:published_time" content="2020-12-09T06:10:00.000Z">
 <meta property="article:modified_time" content="2020-12-09T06:10:00.000Z">
 <meta property="article:author" content="VashonNie">
@@ -44,7 +31,7 @@
 <meta property="article:tag" content="TKE">
 <meta property="article:tag" content="Devops">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://www.niewx.cn/img/2020-12-09-Implement-CICD-of-gitlab-on-Kubernetes/1.png">
+<meta name="twitter:image" content="https://www.niewx.cn/img/2020-12-09-Implement-CICD-of-gitlab-on-Kubernetes/snail-bg.jpg">
   
   
   <title>Kubernetes上实现gitlab的CICD - Hexo</title>
