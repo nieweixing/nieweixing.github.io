@@ -89,6 +89,8 @@
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <div class="animated-icon"><span></span><span></span><span></span></div>
     </button>
+	
+	<iframe width="400" height="60" frameborder="0" scrolling="no" hspace="0" src="https://i.tianqi.com/?c=code&a=getcode&id=35&site=34&icon=1"></iframe>
 
     <!-- Collapsible content -->
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -271,23 +273,23 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2020/12/04/2020-12-04-Kiali-network-visualization-of-istio-entry-series/" target="_self">
-          <img src="/img/2020-12-04-Kiali-network-visualization-of-istio-entry-series/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="istio入门系列之Kiali网络可视化">
+        <a href="/2020/12/04/2020-12-04-prometheus-and-grafana-of-istio-entry-series/" target="_blank">
+          <img src="/img/2020-12-04-prometheus-and-grafana-of-istio-entry-series/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="istio入门系列之prometheus和grafana">
         </a>
       </div>
     
     <article class="col-12 col-md-8 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2020/12/04/2020-12-04-Kiali-network-visualization-of-istio-entry-series/" target="_self">
-          istio入门系列之Kiali网络可视化
+        <a href="/2020/12/04/2020-12-04-prometheus-and-grafana-of-istio-entry-series/" target="_blank">
+          istio入门系列之prometheus和grafana
         </a>
       </h1>
 
-      <a class="index-excerpt" href="/2020/12/04/2020-12-04-Kiali-network-visualization-of-istio-entry-series/" target="_self">
+      <a class="index-excerpt" href="/2020/12/04/2020-12-04-prometheus-and-grafana-of-istio-entry-series/" target="_blank">
         <div>
           
-          Kiali组件，使用基于 Web 的图形用户界面来查看网格和 Istio 配置对象的服务图。 使用 Kiali Public API 返回的 JSON 数据生成图形数据。 Kiali拥有如下的功能   Kiali的架构如下   istio中的组件web界面命令行打开方式 12345678910111213141516171819[root@VM-0-13-centos treafik]# isti
+          通过demo方式部署istio，会默认部署promethes和grafana来作为指标的监控和展示，我们可以把promethes和grafana对应的service通过nodeport的方式来进行访问。 prometheus浏览器上输入 http:&#x2F;&#x2F;node_ip:nodeport&#x2F;graph，在查询框中输入istio_requests_total查看指标   其他查询：  请求 product
         </div>
       </a>
 
@@ -330,7 +332,9 @@
             
               <a href="/tags/Istio/">#Istio</a>
             
-              <a href="/tags/Kiali/">#Kiali</a>
+              <a href="/tags/Promnetheus/">#Promnetheus</a>
+            
+              <a href="/tags/Grafana/">#Grafana</a>
             
           </div>
         
@@ -342,7 +346,7 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2020/12/03/2020-12-03-Traffic-mirroring-of-istio-entry-series/" target="_self">
+        <a href="/2020/12/03/2020-12-03-Traffic-mirroring-of-istio-entry-series/" target="_blank">
           <img src="/img/2020-12-03-Traffic-mirroring-of-istio-entry-series/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="istio入门系列之流量镜像">
         </a>
       </div>
@@ -350,12 +354,12 @@
     <article class="col-12 col-md-8 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2020/12/03/2020-12-03-Traffic-mirroring-of-istio-entry-series/" target="_self">
+        <a href="/2020/12/03/2020-12-03-Traffic-mirroring-of-istio-entry-series/" target="_blank">
           istio入门系列之流量镜像
         </a>
       </h1>
 
-      <a class="index-excerpt" href="/2020/12/03/2020-12-03-Traffic-mirroring-of-istio-entry-series/" target="_self">
+      <a class="index-excerpt" href="/2020/12/03/2020-12-03-Traffic-mirroring-of-istio-entry-series/" target="_blank">
         <div>
           
           流量镜像，也称为影子流量，是一个以尽可能低的风险为生产带来变化的强大的功能。镜像会将实时流量的副本发送到镜像服务。镜像流量发生在主服务的关键请求路径之外。   我们会经常遇到一些这样的问题，就是在本地测试是正常的，一上线就出问题了，测试覆盖率很高，但是为什么，还是会出现问题，这是因为线上的访问环境和本地有很大差异，特别是流量和数据。这里我们可以用流量镜像来解决这个问题。 首先部署2个httpbin
@@ -411,7 +415,7 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2020/12/02/2020-12-02-Fault-injection-of-istio-entry-series/" target="_self">
+        <a href="/2020/12/02/2020-12-02-Fault-injection-of-istio-entry-series/" target="_blank">
           <img src="/img/2020-12-02-Fault-injection-of-istio-entry-series/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="istio入门系列之故障注入">
         </a>
       </div>
@@ -419,12 +423,12 @@
     <article class="col-12 col-md-8 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2020/12/02/2020-12-02-Fault-injection-of-istio-entry-series/" target="_self">
+        <a href="/2020/12/02/2020-12-02-Fault-injection-of-istio-entry-series/" target="_blank">
           istio入门系列之故障注入
         </a>
       </h1>
 
-      <a class="index-excerpt" href="/2020/12/02/2020-12-02-Fault-injection-of-istio-entry-series/" target="_self">
+      <a class="index-excerpt" href="/2020/12/02/2020-12-02-Fault-injection-of-istio-entry-series/" target="_blank">
         <div>
           
           本篇文章讲解了istio如何注入故障并测试应用程序的弹性。   延迟故障下面我们来进行故障注入的配置，我们给ratings的v2版本注入一个延迟，这里导致调用出现延迟故障。 1234567[root@VM-0-13-centos istio-1.5.1]# kubectl apply -f samples&#x2F;bookinfo&#x2F;networking&#x2F;virtual-service-all-v1.yam
@@ -480,7 +484,7 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2020/12/02/2020-12-02-Fuse-of-istio-entry-series/" target="_self">
+        <a href="/2020/12/02/2020-12-02-Fuse-of-istio-entry-series/" target="_blank">
           <img src="/img/2020-12-02-Fuse-of-istio-entry-series/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="istio入门系列之熔断">
         </a>
       </div>
@@ -488,12 +492,12 @@
     <article class="col-12 col-md-8 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2020/12/02/2020-12-02-Fuse-of-istio-entry-series/" target="_self">
+        <a href="/2020/12/02/2020-12-02-Fuse-of-istio-entry-series/" target="_blank">
           istio入门系列之熔断
         </a>
       </h1>
 
-      <a class="index-excerpt" href="/2020/12/02/2020-12-02-Fuse-of-istio-entry-series/" target="_self">
+      <a class="index-excerpt" href="/2020/12/02/2020-12-02-Fuse-of-istio-entry-series/" target="_blank">
         <div>
           
           熔断，是创建弹性微服务应用程序的重要模式。熔断能够使您的应用程序具备应对来自故障、潜在峰值和其他未知网络因素影响的能力。   下面我们给httpbin来配置一个熔断，首先配置一个httpbin服务 1# kubectl apply -f samples&#x2F;httpbin&#x2F;httpbin.yaml  接下来我们给httpbin配置一个熔断 1234567891011121314151617181920
@@ -549,7 +553,7 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2020/12/02/2020-12-02-Retry-after-timeout-of-istio-entry-series%E8%AF%95/" target="_self">
+        <a href="/2020/12/02/2020-12-02-Retry-after-timeout-of-istio-entry-series%E8%AF%95/" target="_blank">
           <img src="/img/2020-12-02-Retry-after-timeout-of-istio-entry-series%E8%AF%95/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="istio入门系列之超时重试">
         </a>
       </div>
@@ -557,12 +561,12 @@
     <article class="col-12 col-md-8 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2020/12/02/2020-12-02-Retry-after-timeout-of-istio-entry-series%E8%AF%95/" target="_self">
+        <a href="/2020/12/02/2020-12-02-Retry-after-timeout-of-istio-entry-series%E8%AF%95/" target="_blank">
           istio入门系列之超时重试
         </a>
       </h1>
 
-      <a class="index-excerpt" href="/2020/12/02/2020-12-02-Retry-after-timeout-of-istio-entry-series%E8%AF%95/" target="_self">
+      <a class="index-excerpt" href="/2020/12/02/2020-12-02-Retry-after-timeout-of-istio-entry-series%E8%AF%95/" target="_blank">
         <div>
           
           对于一个系统来说弹性能力很重要，比如出现了超时故障，系统如何去重试，下面我们来讲讲istio中的超时重试。   下面我们在VirtualService中添加超时和重试的配置项，我们将流量打到v2版本，并且给Ratings服务配置一个延迟。   首先我们将流量打到v2版本 1234567891011121314# kubectl apply -f - &lt;&lt; EOFapiVersion:
@@ -618,7 +622,7 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2020/12/01/2020-12-01-Traffic-shift-of-istio-entry-series/" target="_self">
+        <a href="/2020/12/01/2020-12-01-Traffic-shift-of-istio-entry-series/" target="_blank">
           <img src="/img/2020-12-01-Traffic-shift-of-istio-entry-series/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="istio入门系列之流量转移">
         </a>
       </div>
@@ -626,12 +630,12 @@
     <article class="col-12 col-md-8 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2020/12/01/2020-12-01-Traffic-shift-of-istio-entry-series/" target="_self">
+        <a href="/2020/12/01/2020-12-01-Traffic-shift-of-istio-entry-series/" target="_blank">
           istio入门系列之流量转移
         </a>
       </h1>
 
-      <a class="index-excerpt" href="/2020/12/01/2020-12-01-Traffic-shift-of-istio-entry-series/" target="_self">
+      <a class="index-excerpt" href="/2020/12/01/2020-12-01-Traffic-shift-of-istio-entry-series/" target="_blank">
         <div>
           
           一个常见的用例是将流量从一个版本的微服务逐渐迁移到另一个版本。在 Istio 中，您可以通过配置一系列规则来实现此目标， 这些规则将一定百分比的流量路由到一个或另一个服务。在本任务中，您将会把 50％ 的流量发送到 reviews:v1，另外 50％ 的流量发送到 reviews:v3。然后，再把 100％ 的流量发送到 reviews:v3 来完成迁移。 istio中的流量转移常用于蓝绿部署中
@@ -687,7 +691,7 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2020/11/30/2020-11-30-Gateway-gateway-of-istio-entry-series/" target="_self">
+        <a href="/2020/11/30/2020-11-30-Gateway-gateway-of-istio-entry-series/" target="_blank">
           <img src="/img/2020-11-30-Gateway-gateway-of-istio-entry-series/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="istio入门系列之Gateway网关">
         </a>
       </div>
@@ -695,12 +699,12 @@
     <article class="col-12 col-md-8 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2020/11/30/2020-11-30-Gateway-gateway-of-istio-entry-series/" target="_self">
+        <a href="/2020/11/30/2020-11-30-Gateway-gateway-of-istio-entry-series/" target="_blank">
           istio入门系列之Gateway网关
         </a>
       </h1>
 
-      <a class="index-excerpt" href="/2020/11/30/2020-11-30-Gateway-gateway-of-istio-entry-series/" target="_self">
+      <a class="index-excerpt" href="/2020/11/30/2020-11-30-Gateway-gateway-of-istio-entry-series/" target="_blank">
         <div>
           
           在Kubernetes环境中，使用Kubernetes Ingress资源来指定需要暴露到集群外的服务。 在 Istio 服务网格中，更好的选择（同样适用于 Kubernetes 及其他环境）是使用一种新的配置模型，名为 Istio Gateway。 Gateway 允许应用一些诸如监控和路由规则的 Istio 特性来管理进入集群的流量。   ingress网关ingress是一个入口网关，给服务
@@ -758,7 +762,7 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2020/11/30/2020-11-30-ServiceEntry-of-istio-entry-series/" target="_self">
+        <a href="/2020/11/30/2020-11-30-ServiceEntry-of-istio-entry-series/" target="_blank">
           <img src="/img/2020-11-30-ServiceEntry-of-istio-entry-series/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="istio入门系列之ServiceEntry">
         </a>
       </div>
@@ -766,12 +770,12 @@
     <article class="col-12 col-md-8 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2020/11/30/2020-11-30-ServiceEntry-of-istio-entry-series/" target="_self">
+        <a href="/2020/11/30/2020-11-30-ServiceEntry-of-istio-entry-series/" target="_blank">
           istio入门系列之ServiceEntry
         </a>
       </h1>
 
-      <a class="index-excerpt" href="/2020/11/30/2020-11-30-ServiceEntry-of-istio-entry-series/" target="_self">
+      <a class="index-excerpt" href="/2020/11/30/2020-11-30-ServiceEntry-of-istio-entry-series/" target="_blank">
         <div>
           
           ServiceEntry是用来将网络外部的服务纳入到网格内部进行管理，这个和ingress刚好相反，通过ServiceEntry我们可以通过网格来管理外部服务请求，管理外部服务的流量控制以及扩展我们得mesh网格。   下面我们来做学习一下ServiceEntry的配置。 首先我们配置一个sleep服务 1$ kubectl apply -f samples&#x2F;sleep&#x2F;sleep.yaml  我
@@ -829,7 +833,7 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2020/11/29/2020-11-29-VirtualService-and-DestinationRule-of-istio-entry-series/" target="_self">
+        <a href="/2020/11/29/2020-11-29-VirtualService-and-DestinationRule-of-istio-entry-series/" target="_blank">
           <img src="/img/2020-11-29-VirtualService-and-DestinationRule-of-istio-entry-series/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="istio入门系列之VirtualService和DestinationRule">
         </a>
       </div>
@@ -837,12 +841,12 @@
     <article class="col-12 col-md-8 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2020/11/29/2020-11-29-VirtualService-and-DestinationRule-of-istio-entry-series/" target="_self">
+        <a href="/2020/11/29/2020-11-29-VirtualService-and-DestinationRule-of-istio-entry-series/" target="_blank">
           istio入门系列之VirtualService和DestinationRule
         </a>
       </h1>
 
-      <a class="index-excerpt" href="/2020/11/29/2020-11-29-VirtualService-and-DestinationRule-of-istio-entry-series/" target="_self">
+      <a class="index-excerpt" href="/2020/11/29/2020-11-29-VirtualService-and-DestinationRule-of-istio-entry-series/" target="_blank">
         <div>
           
           本文我们讲解下如何通过用Virtual Service和 Destination Rule设置服务路由规则。 我们还是以之前部署的bookinfo示例进行操作，我们通过Virtual Service路由到reviews的v1版本。   bookinfo默认访问的情况是刷新页面会出现三种颜色星标，后续我们需要做的就是刷新页面让星标颜色不变。       下面我们直接创建对应的VirtualServi
@@ -902,7 +906,7 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2020/11/28/2020-11-28-Installation-and-deployment-of-istio-entry-series/" target="_self">
+        <a href="/2020/11/28/2020-11-28-Installation-and-deployment-of-istio-entry-series/" target="_blank">
           <img src="/img/2020-11-28-Installation-and-deployment-of-istio-entry-series/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="istio入门系列之安装部署篇">
         </a>
       </div>
@@ -910,12 +914,12 @@
     <article class="col-12 col-md-8 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2020/11/28/2020-11-28-Installation-and-deployment-of-istio-entry-series/" target="_self">
+        <a href="/2020/11/28/2020-11-28-Installation-and-deployment-of-istio-entry-series/" target="_blank">
           istio入门系列之安装部署篇
         </a>
       </h1>
 
-      <a class="index-excerpt" href="/2020/11/28/2020-11-28-Installation-and-deployment-of-istio-entry-series/" target="_self">
+      <a class="index-excerpt" href="/2020/11/28/2020-11-28-Installation-and-deployment-of-istio-entry-series/" target="_blank">
         <div>
           
           本篇我们讲一下如何部署istio到k8s集群，并且部署一个bookinfo样例来进行istio的访问测试。 部署istio这里我们部署的istio版本是1.5.1，对应的k8s集群版本是1.18.4。 12345678910# 获取安装脚本curl -L https:&#x2F;&#x2F;istio.io&#x2F;downloadIstio |ISTIO_VERSION&#x3D;1.5.1  sh -# 安装istio客户端exp

@@ -89,6 +89,8 @@
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <div class="animated-icon"><span></span><span></span><span></span></div>
     </button>
+	
+	<iframe width="400" height="60" frameborder="0" scrolling="no" hspace="0" src="https://i.tianqi.com/?c=code&a=getcode&id=35&site=34&icon=1"></iframe>
 
     <!-- Collapsible content -->
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -271,7 +273,7 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2020/08/18/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/" target="_self">
+        <a href="/2020/08/18/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/" target="_blank">
           <img src="/img/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="TKE上动态部署jenkins slaves">
         </a>
       </div>
@@ -279,12 +281,12 @@
     <article class="col-12 col-md-8 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2020/08/18/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/" target="_self">
+        <a href="/2020/08/18/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/" target="_blank">
           TKE上动态部署jenkins slaves
         </a>
       </h1>
 
-      <a class="index-excerpt" href="/2020/08/18/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/" target="_self">
+      <a class="index-excerpt" href="/2020/08/18/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/" target="_blank">
         <div>
           
           本章我们来讲一下如何在TKE上搭建jenkins这个CI&#x2F;CD工具，这边我们在进行构建的时候可以自动生成一个slave pod来进行走流水线，流水线跑完之后会自动销毁。 部署jenkins的rbac权限12345678910111213141516171819202122232425262728293031323334353637383940414243444546[root@VM_0_
@@ -356,7 +358,76 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2020/08/14/2020-08-14-TKE&#39;s-first-knowledge-of-container-detectors/" target="_self">
+        <a href="/2020/08/14/2020-08-14-Self-made-CA-certificate-set-ssl-certificate/" target="_blank">
+          <img src="/img/2020-08-14-Self-made-CA-certificate-set-ssl-certificate/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="自制CA证书设置ssl证书">
+        </a>
+      </div>
+    
+    <article class="col-12 col-md-8 mx-auto index-info">
+      <h1 class="index-header">
+        
+        <a href="/2020/08/14/2020-08-14-Self-made-CA-certificate-set-ssl-certificate/" target="_blank">
+          自制CA证书设置ssl证书
+        </a>
+      </h1>
+
+      <a class="index-excerpt" href="/2020/08/14/2020-08-14-Self-made-CA-certificate-set-ssl-certificate/" target="_blank">
+        <div>
+          
+          本章介绍了如何自制CA证书签发ssl证书来配置https服务 安装openssl工具123# yum install openssl# yum install openssl-devel# openssl version -a 生成ca证书生成 CA 私钥1# openssl genrsa -out ca.key 1024  生成请求文件1openssl req -new -key ca.key
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2020-08-14 14:10" pubdate>
+              2020-08-14
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/linux/" class="category-chain-item">linux</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/linux/">#linux</a>
+            
+              <a href="/tags/ssl/">#ssl</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+      <div class="col-12 col-md-4 m-auto index-img">
+        <a href="/2020/08/14/2020-08-14-TKE&#39;s-first-knowledge-of-container-detectors/" target="_blank">
           <img src="/img/2020-08-14-TKE&#39;s-first-knowledge-of-container-detectors/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="Kubernetes之初识容器探测器">
         </a>
       </div>
@@ -364,12 +435,12 @@
     <article class="col-12 col-md-8 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2020/08/14/2020-08-14-TKE&#39;s-first-knowledge-of-container-detectors/" target="_self">
+        <a href="/2020/08/14/2020-08-14-TKE&#39;s-first-knowledge-of-container-detectors/" target="_blank">
           Kubernetes之初识容器探测器
         </a>
       </h1>
 
-      <a class="index-excerpt" href="/2020/08/14/2020-08-14-TKE&#39;s-first-knowledge-of-container-detectors/" target="_self">
+      <a class="index-excerpt" href="/2020/08/14/2020-08-14-TKE&#39;s-first-knowledge-of-container-detectors/" target="_blank">
         <div>
           
           kubelet 使用存活探测器来知道什么时候要重启容器。例如，存活探测器可以捕捉到死锁（应用程序在运行，但是无法继续执行后面的步骤）。这样的情况下重启容器有助于让应用程序在有问题的情况下更可用。 kubelet 使用就绪探测器可以知道容器什么时候准备好了并可以开始接受请求流量， 当一个 Pod 内的所有容器都准备好了，才能把这个 Pod 看作就绪了。这种信号的一个用途就是控制哪个 Pod 作为 S
@@ -434,76 +505,7 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2020/08/14/2020-08-14-Self-made-CA-certificate-set-ssl-certificate/" target="_self">
-          <img src="/img/2020-08-14-Self-made-CA-certificate-set-ssl-certificate/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="自制CA证书设置ssl证书">
-        </a>
-      </div>
-    
-    <article class="col-12 col-md-8 mx-auto index-info">
-      <h1 class="index-header">
-        
-        <a href="/2020/08/14/2020-08-14-Self-made-CA-certificate-set-ssl-certificate/" target="_self">
-          自制CA证书设置ssl证书
-        </a>
-      </h1>
-
-      <a class="index-excerpt" href="/2020/08/14/2020-08-14-Self-made-CA-certificate-set-ssl-certificate/" target="_self">
-        <div>
-          
-          本章介绍了如何自制CA证书签发ssl证书来配置https服务 安装openssl工具123# yum install openssl# yum install openssl-devel# openssl version -a 生成ca证书生成 CA 私钥1# openssl genrsa -out ca.key 1024  生成请求文件1openssl req -new -key ca.key
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2020-08-14 14:10" pubdate>
-              2020-08-14
-            </time>
-          </div>
-        
-        
-          <div class="post-meta mr-3 d-flex align-items-center">
-            <i class="iconfont icon-category"></i>
-            
-
-<span class="category-chains">
-  
-  
-    
-      <span class="category-chain">
-        
-  <a href="/categories/linux/" class="category-chain-item">linux</a>
-  
-  
-
-      </span>
-    
-  
-</span>
-
-          </div>
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/tags/linux/">#linux</a>
-            
-              <a href="/tags/ssl/">#ssl</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-      <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2020/08/13/2020-08-13-Deploy-metrics_server-on-TKE/" target="_self">
+        <a href="/2020/08/13/2020-08-13-Deploy-metrics_server-on-TKE/" target="_blank">
           <img src="/img/2020-08-13-Deploy-metrics_server-on-TKE/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="TKE上部署metrics-server">
         </a>
       </div>
@@ -511,12 +513,12 @@
     <article class="col-12 col-md-8 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2020/08/13/2020-08-13-Deploy-metrics_server-on-TKE/" target="_self">
+        <a href="/2020/08/13/2020-08-13-Deploy-metrics_server-on-TKE/" target="_blank">
           TKE上部署metrics-server
         </a>
       </h1>
 
-      <a class="index-excerpt" href="/2020/08/13/2020-08-13-Deploy-metrics_server-on-TKE/" target="_self">
+      <a class="index-excerpt" href="/2020/08/13/2020-08-13-Deploy-metrics_server-on-TKE/" target="_blank">
         <div>
           
           kubectl top 是基础命令，但是需要部署配套的组件才能获取到监控值  1.8以下：部署 heapter  1.8以上：部署 metric-server   下面我们来在TKE上配置下1.8版本以上的metric-server 获取metric-server的部署yaml登录能执行kubectl命令的客户端机器，执行下面命令下载 12345678910# git clone https:&#x2F;&#x2F;
@@ -579,7 +581,7 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2020/08/07/2020-08-07-Mount-files-to-CFS-subdirectory-in-TKE/" target="_self">
+        <a href="/2020/08/07/2020-08-07-Mount-files-to-CFS-subdirectory-in-TKE/" target="_blank">
           <img src="/img/2020-08-07-Mount-files-to-CFS-subdirectory-in-TKE/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="TKE中挂载文件到CFS子目录">
         </a>
       </div>
@@ -587,12 +589,12 @@
     <article class="col-12 col-md-8 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2020/08/07/2020-08-07-Mount-files-to-CFS-subdirectory-in-TKE/" target="_self">
+        <a href="/2020/08/07/2020-08-07-Mount-files-to-CFS-subdirectory-in-TKE/" target="_blank">
           TKE中挂载文件到CFS子目录
         </a>
       </h1>
 
-      <a class="index-excerpt" href="/2020/08/07/2020-08-07-Mount-files-to-CFS-subdirectory-in-TKE/" target="_self">
+      <a class="index-excerpt" href="/2020/08/07/2020-08-07-Mount-files-to-CFS-subdirectory-in-TKE/" target="_blank">
         <div>
           
           本次我们来讲如何在TKE容器中多个pod挂载文件到文件服务器CFS不同的子目录 首先创建好CFS文件服务器登录CFS控制台，创建一个文件系统   创建CFS子目录如何创建CFS的子目录呢，这里我们找一个可以访问cfs内网ip的服务器，先将cfs的根目录下挂载到&#x2F;root&#x2F;cfs，然后在&#x2F;root&#x2F;nfs下创建2个子目录tke和tke-1，注意创建完目录后记得
@@ -657,7 +659,7 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2020/08/05/2020-08-05-How-to-set-the-permission-of-TKE-mount-COS-bucket-container-directory/" target="_self">
+        <a href="/2020/08/05/2020-08-05-How-to-set-the-permission-of-TKE-mount-COS-bucket-container-directory/" target="_blank">
           <img src="/img/2020-08-05-How-to-set-the-permission-of-TKE-mount-COS-bucket-container-directory/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="TKE挂载COS桶容器目录权限如何设置">
         </a>
       </div>
@@ -665,12 +667,12 @@
     <article class="col-12 col-md-8 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2020/08/05/2020-08-05-How-to-set-the-permission-of-TKE-mount-COS-bucket-container-directory/" target="_self">
+        <a href="/2020/08/05/2020-08-05-How-to-set-the-permission-of-TKE-mount-COS-bucket-container-directory/" target="_blank">
           TKE挂载COS桶容器目录权限如何设置
         </a>
       </h1>
 
-      <a class="index-excerpt" href="/2020/08/05/2020-08-05-How-to-set-the-permission-of-TKE-mount-COS-bucket-container-directory/" target="_self">
+      <a class="index-excerpt" href="/2020/08/05/2020-08-05-How-to-set-the-permission-of-TKE-mount-COS-bucket-container-directory/" target="_blank">
         <div>
           
           本篇文章介绍了在tke集群中挂载cos桶如何配置目录权限问题 问题背景用户在tke的集群中创建工作负载并把某一个对应的&#x2F;data目录挂载到cos桶的根目录，在镜像构建的时候有把&#x2F;data目录设置权限为755，但是运行容器后成功挂载&#x2F;data&#x2F;目录到cos桶的根目录，但是发现用非root账号确无法访问&#x2F;data下面的文件，这边镜像的启动用户是非roo
@@ -735,7 +737,7 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2020/07/31/2020-07-31-Obtain-container-resource-configuration-on-the-node-in-TKE/" target="_self">
+        <a href="/2020/07/31/2020-07-31-Obtain-container-resource-configuration-on-the-node-in-TKE/" target="_blank">
           <img src="/img/2020-07-31-Obtain-container-resource-configuration-on-the-node-in-TKE/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="TKE中在节点上获取容器资源配置">
         </a>
       </div>
@@ -743,12 +745,12 @@
     <article class="col-12 col-md-8 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2020/07/31/2020-07-31-Obtain-container-resource-configuration-on-the-node-in-TKE/" target="_self">
+        <a href="/2020/07/31/2020-07-31-Obtain-container-resource-configuration-on-the-node-in-TKE/" target="_blank">
           TKE中在节点上获取容器资源配置
         </a>
       </h1>
 
-      <a class="index-excerpt" href="/2020/07/31/2020-07-31-Obtain-container-resource-configuration-on-the-node-in-TKE/" target="_self">
+      <a class="index-excerpt" href="/2020/07/31/2020-07-31-Obtain-container-resource-configuration-on-the-node-in-TKE/" target="_blank">
         <div>
           
           本章讲述了如何获取容器的资源配置 容器的实现原理从本质上，容器其实就是一种沙盒技术。就好像把应用隔离在一个盒子内，使其运行。因为有了盒子边界的存在，应用于应用之间不会相互干扰。并且像集装箱一样，拿来就走，随处运行。其实这就是 PaaS 的理想状态。 实现容器的核心，就是要生成限制应用运行时的边界。我们知道，编译后的可执行代码加上数据，叫做程序。而把程序运行起来后，就变成了进程，也就是所谓的应用。如
@@ -811,7 +813,7 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2020/07/30/2020-07-30-Build-dashboard-on-TKE/" target="_self">
+        <a href="/2020/07/30/2020-07-30-Build-dashboard-on-TKE/" target="_blank">
           <img src="/img/2020-07-30-Build-dashboard-on-TKE/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="TKE上搭建集群Dashboard">
         </a>
       </div>
@@ -819,12 +821,12 @@
     <article class="col-12 col-md-8 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2020/07/30/2020-07-30-Build-dashboard-on-TKE/" target="_self">
+        <a href="/2020/07/30/2020-07-30-Build-dashboard-on-TKE/" target="_blank">
           TKE上搭建集群Dashboard
         </a>
       </h1>
 
-      <a class="index-excerpt" href="/2020/07/30/2020-07-30-Build-dashboard-on-TKE/" target="_self">
+      <a class="index-excerpt" href="/2020/07/30/2020-07-30-Build-dashboard-on-TKE/" target="_blank">
         <div>
           
           如果需要将TKE的信息展示给多个部门的人查看，但是又不想让他们通过控制台查看，这边可以搭建一个dashborad用来展示。 申请证书因为dashborad需要https的访问，这边需要提供下证书，这个证书可以是自建从，也可以从腾讯云上申请一个免费的1年证书    购买成功后，需要审核，审核通过可以下载对应的证书和rsa key   创建命名空间来部署dashboard1# kubectl  cre
@@ -889,7 +891,7 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2020/07/28/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/" target="_self">
+        <a href="/2020/07/28/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/" target="_blank">
           <img src="/img/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="TKE中使用lb直连获取客户端真实IP">
         </a>
       </div>
@@ -897,12 +899,12 @@
     <article class="col-12 col-md-8 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2020/07/28/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/" target="_self">
+        <a href="/2020/07/28/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/" target="_blank">
           TKE中使用lb直连获取客户端真实IP
         </a>
       </h1>
 
-      <a class="index-excerpt" href="/2020/07/28/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/" target="_self">
+      <a class="index-excerpt" href="/2020/07/28/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/" target="_blank">
         <div>
           
           我们在使用TKE的过程中会遇到一个这样的场景，就是我在服务端想获取到有哪些客户端在访问我，并且获取到客户端的真实ip。但是在k8s集群中经过多次的网络的转发，一般是无法获取到客户端真实ip。 为了满足这个常见TKE这边提供了lb直连pod的方式来获取客户端真实的ip，其实tke中能够实现这个方案的主要还是基于在vpc-cni的网络模式下实现的，因为vpc-cni模式可以使pod处于和node节点，
@@ -967,7 +969,7 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2020/07/27/2020-07-27-Deployment-in-the-TKE-cluster-uses-vpc-cni-mode/" target="_self">
+        <a href="/2020/07/27/2020-07-27-Deployment-in-the-TKE-cluster-uses-vpc-cni-mode/" target="_blank">
           <img src="/img/2020-07-27-Deployment-in-the-TKE-cluster-uses-vpc-cni-mode/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="TKE集群中deployment使用vpc-cni模式">
         </a>
       </div>
@@ -975,12 +977,12 @@
     <article class="col-12 col-md-8 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2020/07/27/2020-07-27-Deployment-in-the-TKE-cluster-uses-vpc-cni-mode/" target="_self">
+        <a href="/2020/07/27/2020-07-27-Deployment-in-the-TKE-cluster-uses-vpc-cni-mode/" target="_blank">
           TKE集群中deployment使用vpc-cni模式
         </a>
       </h1>
 
-      <a class="index-excerpt" href="/2020/07/27/2020-07-27-Deployment-in-the-TKE-cluster-uses-vpc-cni-mode/" target="_self">
+      <a class="index-excerpt" href="/2020/07/27/2020-07-27-Deployment-in-the-TKE-cluster-uses-vpc-cni-mode/" target="_blank">
         <div>
           
           TKE集群中的网络模式分为Global Router和vpc-cni这2种，有的集群是创建的时候使用Global Router的网络模式，但是后续开启了vpc-cni的网络模式，因为集群是可以同时兼容2种网络模式。 在使用vpc-cni的网络模式大家会有一个疑惑，就是为什么我开启了vpc-cni模式后，创建的工作负载中的pod ip没有在我配置的子网中，没有和vpc在一个网段。 其实并不是开启了v

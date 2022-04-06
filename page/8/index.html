@@ -89,6 +89,8 @@
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <div class="animated-icon"><span></span><span></span><span></span></div>
     </button>
+	
+	<iframe width="400" height="60" frameborder="0" scrolling="no" hspace="0" src="https://i.tianqi.com/?c=code&a=getcode&id=35&site=34&icon=1"></iframe>
 
     <!-- Collapsible content -->
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -271,7 +273,7 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2020/09/17/2020-09-17-TKE-uses-self-built-NFS-persistent-storage/" target="_self">
+        <a href="/2020/09/17/2020-09-17-TKE-uses-self-built-NFS-persistent-storage/" target="_blank">
           <img src="/img/2020-09-17-TKE-uses-self-built-NFS-persistent-storage/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="TKE使用自建NFS持久化存储">
         </a>
       </div>
@@ -279,12 +281,12 @@
     <article class="col-12 col-md-8 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2020/09/17/2020-09-17-TKE-uses-self-built-NFS-persistent-storage/" target="_self">
+        <a href="/2020/09/17/2020-09-17-TKE-uses-self-built-NFS-persistent-storage/" target="_blank">
           TKE使用自建NFS持久化存储
         </a>
       </h1>
 
-      <a class="index-excerpt" href="/2020/09/17/2020-09-17-TKE-uses-self-built-NFS-persistent-storage/" target="_self">
+      <a class="index-excerpt" href="/2020/09/17/2020-09-17-TKE-uses-self-built-NFS-persistent-storage/" target="_blank">
         <div>
           
           使用TKE的过程中，我们需要把pod一些文件持久化存储到外部，这边我们会用到nfs存储，其实在腾讯云上有CFS服务，可以用CFS作为文件存储服务器，TKE也支持将文件挂载到CFS上存储。但是如果你想自己管理nfs服务器，这边也可以通过自建nfs服务器来作为tke集群中pod存储。下面我们来说一下如何将pod的文件挂载到自建的nfs服务器来进行存储。 创建nfs服务器首先我们先在腾讯云上申请一台cv
@@ -349,7 +351,7 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2020/09/15/2020-09-15-kubeadm-deploy-k8s/" target="_self">
+        <a href="/2020/09/15/2020-09-15-kubeadm-deploy-k8s/" target="_blank">
           <img src="/img/2020-09-15-kubeadm-deploy-k8s/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="kubeadm部署k8s">
         </a>
       </div>
@@ -357,12 +359,12 @@
     <article class="col-12 col-md-8 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2020/09/15/2020-09-15-kubeadm-deploy-k8s/" target="_self">
+        <a href="/2020/09/15/2020-09-15-kubeadm-deploy-k8s/" target="_blank">
           kubeadm部署k8s
         </a>
       </h1>
 
-      <a class="index-excerpt" href="/2020/09/15/2020-09-15-kubeadm-deploy-k8s/" target="_self">
+      <a class="index-excerpt" href="/2020/09/15/2020-09-15-kubeadm-deploy-k8s/" target="_blank">
         <div>
           
           本文主要介绍了如何在centos上采用kubeadm搭建k8s集群。 环境准备服务器master01:192.168.1.110 （最少2核CPU）node01:192.168.1.100   规划services网络：10.96.0.0&#x2F;12pod网络：10.244.0.0&#x2F;16   配置hosts解析各主机12345vim &#x2F;etc&#x2F;hosts127.0.0.1   loc
@@ -425,7 +427,7 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2020/09/11/2020-09-11-Kubernetes-configures-hosts-to-resolve-domain-names-in-pod/" target="_self">
+        <a href="/2020/09/11/2020-09-11-Kubernetes-configures-hosts-to-resolve-domain-names-in-pod/" target="_blank">
           <img src="/img/2020-09-11-Kubernetes-configures-hosts-to-resolve-domain-names-in-pod/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="Kubernetes在pod中配置hosts解析域名">
         </a>
       </div>
@@ -433,12 +435,12 @@
     <article class="col-12 col-md-8 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2020/09/11/2020-09-11-Kubernetes-configures-hosts-to-resolve-domain-names-in-pod/" target="_self">
+        <a href="/2020/09/11/2020-09-11-Kubernetes-configures-hosts-to-resolve-domain-names-in-pod/" target="_blank">
           Kubernetes在pod中配置hosts解析域名
         </a>
       </h1>
 
-      <a class="index-excerpt" href="/2020/09/11/2020-09-11-Kubernetes-configures-hosts-to-resolve-domain-names-in-pod/" target="_self">
+      <a class="index-excerpt" href="/2020/09/11/2020-09-11-Kubernetes-configures-hosts-to-resolve-domain-names-in-pod/" target="_blank">
         <div>
           
           本篇文章介绍了如何给pod配置host域名解析 当 DNS 配置以及其它选项不合理的时候，通过向 Pod 的 &#x2F;etc&#x2F;hosts 文件中添加条目，可以在 Pod 级别覆盖对主机名的解析。在 1.7 版本后，用户可以通过 PodSpec 的 HostAliases 字段来添加这些自定义的条目。 建议通过使用 HostAliases 来进行修改，因为该文件由 Kubelet 管理
@@ -492,7 +494,7 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2020/09/11/2020-09-11-Kubernetes&#39;-helm-deployment-and-use/" target="_self">
+        <a href="/2020/09/11/2020-09-11-Kubernetes&#39;-helm-deployment-and-use/" target="_blank">
           <img src="/img/2020-09-11-Kubernetes&#39;-helm-deployment-and-use/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="Kubernetes之helm部署使用">
         </a>
       </div>
@@ -500,12 +502,12 @@
     <article class="col-12 col-md-8 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2020/09/11/2020-09-11-Kubernetes&#39;-helm-deployment-and-use/" target="_self">
+        <a href="/2020/09/11/2020-09-11-Kubernetes&#39;-helm-deployment-and-use/" target="_blank">
           Kubernetes之helm部署使用
         </a>
       </h1>
 
-      <a class="index-excerpt" href="/2020/09/11/2020-09-11-Kubernetes&#39;-helm-deployment-and-use/" target="_self">
+      <a class="index-excerpt" href="/2020/09/11/2020-09-11-Kubernetes&#39;-helm-deployment-and-use/" target="_blank">
         <div>
           
           本篇文章主要介绍了如何通过helm部署应用到k8s集群中 Helm的介绍Helm就相当于kubernetes环境下的yum包管理工具。 用途做为 Kubernetes 的一个包管理工具，Helm具有如下功能：  创建新的 chart chart 打包成 tgz 格式 上传 chart 到 chart 仓库或从仓库中下载 chart 在Kubernetes集群中安装或卸载 chart 管理用Helm
@@ -566,7 +568,7 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2020/09/10/2020-09-10-About-kubernetes-garbage-collection/" target="_self">
+        <a href="/2020/09/10/2020-09-10-About-kubernetes-garbage-collection/" target="_blank">
           <img src="/img/2020-09-10-About-kubernetes-garbage-collection/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="关于kubernetes垃圾回收那点事">
         </a>
       </div>
@@ -574,12 +576,12 @@
     <article class="col-12 col-md-8 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2020/09/10/2020-09-10-About-kubernetes-garbage-collection/" target="_self">
+        <a href="/2020/09/10/2020-09-10-About-kubernetes-garbage-collection/" target="_blank">
           关于kubernetes垃圾回收那点事
         </a>
       </h1>
 
-      <a class="index-excerpt" href="/2020/09/10/2020-09-10-About-kubernetes-garbage-collection/" target="_self">
+      <a class="index-excerpt" href="/2020/09/10/2020-09-10-About-kubernetes-garbage-collection/" target="_blank">
         <div>
           
           本篇文章介绍了在kubernetes中kubelet如何对镜像和容器进行垃圾回收。 kubelet垃圾回收介绍及源码分析使用kubernetes的过程中，为了保持磁盘的空间在一个合理的使用率，kubele提供了垃圾回收机制，kubelet的垃圾回收机制分为镜像的回收和container的回收。 Kubelet 垃圾回收（Garbage Collection）是一个非常有用的功能，它负责自动清理节点
@@ -633,7 +635,7 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2020/08/28/2020-08-28-Ip-masq-agent-of-Kubernetes-plug-in/" target="_self">
+        <a href="/2020/08/28/2020-08-28-Ip-masq-agent-of-Kubernetes-plug-in/" target="_blank">
           <img src="/img/2020-08-28-Ip-masq-agent-of-Kubernetes-plug-in/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="Kubernetes插件之ip-masq-agent">
         </a>
       </div>
@@ -641,12 +643,12 @@
     <article class="col-12 col-md-8 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2020/08/28/2020-08-28-Ip-masq-agent-of-Kubernetes-plug-in/" target="_self">
+        <a href="/2020/08/28/2020-08-28-Ip-masq-agent-of-Kubernetes-plug-in/" target="_blank">
           Kubernetes插件之ip-masq-agent
         </a>
       </h1>
 
-      <a class="index-excerpt" href="/2020/08/28/2020-08-28-Ip-masq-agent-of-Kubernetes-plug-in/" target="_self">
+      <a class="index-excerpt" href="/2020/08/28/2020-08-28-Ip-masq-agent-of-Kubernetes-plug-in/" target="_blank">
         <div>
           
           本章主要介绍了ip-masq-agent在k8s集群中的部署和使用 ip-masq-agent简介ip-masq-agent 配置 iptables 规则以隐藏位于集群节点 IP 地址后面的 pod 的 IP 地址。 这通常在将流量发送到集群的 podCIDR范围之外的目的地时使用。什么是snat 源地址转换是内网地址向外访问时，发起访问的内网ip地址转换为指定的ip地址（可指定具体的服务以及相应
@@ -702,7 +704,7 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2020/08/28/2020-08-28-Common-commands-for-linux-positioning-problems/" target="_self">
+        <a href="/2020/08/28/2020-08-28-Common-commands-for-linux-positioning-problems/" target="_blank">
           <img src="/img/2020-08-28-Common-commands-for-linux-positioning-problems/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="linux定位问题常用命令">
         </a>
       </div>
@@ -710,12 +712,12 @@
     <article class="col-12 col-md-8 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2020/08/28/2020-08-28-Common-commands-for-linux-positioning-problems/" target="_self">
+        <a href="/2020/08/28/2020-08-28-Common-commands-for-linux-positioning-problems/" target="_blank">
           linux定位问题常用命令
         </a>
       </h1>
 
-      <a class="index-excerpt" href="/2020/08/28/2020-08-28-Common-commands-for-linux-positioning-problems/" target="_self">
+      <a class="index-excerpt" href="/2020/08/28/2020-08-28-Common-commands-for-linux-positioning-problems/" target="_blank">
         <div>
           
           本篇文章主要介绍了在使用linux过程中常见的一些定位问题的命令。 ifconfig(查看网卡)12345678910111213141516171819$ ifconfigenp1s0    Link encap:Ethernet  HWaddr 28:d2:44:eb:bd:98            inet addr:192.168.0.103  Bcast:192.168.0.255
@@ -769,7 +771,7 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2020/08/27/2020-08-27-Use-of-Kubectl-command-line-jsonpath/" target="_self">
+        <a href="/2020/08/27/2020-08-27-Use-of-Kubectl-command-line-jsonpath/" target="_blank">
           <img src="/img/2020-08-27-Use-of-Kubectl-command-line-jsonpath/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="Kubectl命令行jsonpath的使用">
         </a>
       </div>
@@ -777,12 +779,12 @@
     <article class="col-12 col-md-8 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2020/08/27/2020-08-27-Use-of-Kubectl-command-line-jsonpath/" target="_self">
+        <a href="/2020/08/27/2020-08-27-Use-of-Kubectl-command-line-jsonpath/" target="_blank">
           Kubectl命令行jsonpath的使用
         </a>
       </h1>
 
-      <a class="index-excerpt" href="/2020/08/27/2020-08-27-Use-of-Kubectl-command-line-jsonpath/" target="_self">
+      <a class="index-excerpt" href="/2020/08/27/2020-08-27-Use-of-Kubectl-command-line-jsonpath/" target="_blank">
         <div>
           
           本篇文章主要介绍了jsonpath的语法和使用。 jsonpath的语法介绍Kubectl 支持 JSONPath 模板。 JSONPath 模板由 {} 包起来的 JSONPath 表达式组成。Kubectl 使用 JSONPath 表达式来过滤 JSON 对象中的特定字段并格式化输出。除了原始的 JSONPath 模板语法，以下函数和语法也是有效的:  使用双引号将 JSONPath 表达式内
@@ -838,7 +840,7 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2020/08/26/2020-08-26-Kubernetes-scheduling/" target="_self">
+        <a href="/2020/08/26/2020-08-26-Kubernetes-scheduling/" target="_blank">
           <img src="/img/2020-08-26-Kubernetes-scheduling/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="Kubernetes之调度篇">
         </a>
       </div>
@@ -846,12 +848,12 @@
     <article class="col-12 col-md-8 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2020/08/26/2020-08-26-Kubernetes-scheduling/" target="_self">
+        <a href="/2020/08/26/2020-08-26-Kubernetes-scheduling/" target="_blank">
           Kubernetes之调度篇
         </a>
       </h1>
 
-      <a class="index-excerpt" href="/2020/08/26/2020-08-26-Kubernetes-scheduling/" target="_self">
+      <a class="index-excerpt" href="/2020/08/26/2020-08-26-Kubernetes-scheduling/" target="_blank">
         <div>
           
           我们在日常使用k8s的过程中总会存在一些特殊的调度情景：  让master节点上不部署业务的pod 让mysql调度到高IO的节点上 让coredns的服务均匀的散布在每个节点 让内服服务调度在一个节点上，减少访问延迟  这边肯定会有其他场景也会有对pod的调度有特殊要求，这边只是列举了其中几个情况，对于上述遇到的情况我们需要怎么处理，其实k8s给我们提供了丰富的调度策略来满足我们的需求。下面我们
@@ -905,7 +907,7 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2020/08/23/2020-08-23-RBAC-permission-management-of-Kubernetes/" target="_self">
+        <a href="/2020/08/23/2020-08-23-RBAC-permission-management-of-Kubernetes/" target="_blank">
           <img src="/img/2020-08-23-RBAC-permission-management-of-Kubernetes/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="Kubernetes之RBAC权限管理">
         </a>
       </div>
@@ -913,12 +915,12 @@
     <article class="col-12 col-md-8 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2020/08/23/2020-08-23-RBAC-permission-management-of-Kubernetes/" target="_self">
+        <a href="/2020/08/23/2020-08-23-RBAC-permission-management-of-Kubernetes/" target="_blank">
           Kubernetes之RBAC权限管理
         </a>
       </h1>
 
-      <a class="index-excerpt" href="/2020/08/23/2020-08-23-RBAC-permission-management-of-Kubernetes/" target="_self">
+      <a class="index-excerpt" href="/2020/08/23/2020-08-23-RBAC-permission-management-of-Kubernetes/" target="_blank">
         <div>
           
           本篇文章主要介绍了Kubernetes中RBAC权限控制使用。 RBAC简介   RBAC（Role-Based Access Control）  基于角色的权限控制。通过角色关联用户、角色关联权限的方式间接赋予用户权限。在 Kubernetes 中，RBAC 是通过 rbac.authorization.k8s.io API Group 实现的，即允许集群管理员通过 Kubernetes API
