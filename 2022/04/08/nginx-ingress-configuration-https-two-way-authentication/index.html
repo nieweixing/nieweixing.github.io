@@ -16,25 +16,23 @@
   <meta name="author" content="VashonNie">
   <meta name="keywords" content="">
   
-    <meta name="description" content="我们在使用TKE的过程中会遇到一个这样的场景，就是我在服务端想获取到有哪些客户端在访问我，并且获取到客户端的真实ip。但是在k8s集群中经过多次的网络的转发，一般是无法获取到客户端真实ip。 为了满足这个常见TKE这边提供了lb直连pod的方式来获取客户端真实的ip，其实tke中能够实现这个方案的主要还是基于在vpc-cni的网络模式下实现的，因为vpc-cni模式可以使pod处于和node节点，">
+    <meta name="description" content="我们一些特定的业务场景需要用到https的双向认证，下面我们说说如何在nginx-ingress配置下https的双向认证。 创建自签名ca证书12345# openssl req -x509 -sha256 -newkey rsa:4096 -keyout ca.key -out ca.crt -days 356 -nodes -subj &amp;#x27;&#x2F;CN&#x3D;Fern Cert Authorit">
 <meta property="og:type" content="article">
-<meta property="og:title" content="TKE中使用lb直连获取客户端真实IP">
-<meta property="og:url" content="https://www.niewx.cn/2020/07/28/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/index.html">
+<meta property="og:title" content="nginx-ingress配置https双向认证">
+<meta property="og:url" content="https://www.niewx.cn/2022/04/08/nginx-ingress-configuration-https-two-way-authentication/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="我们在使用TKE的过程中会遇到一个这样的场景，就是我在服务端想获取到有哪些客户端在访问我，并且获取到客户端的真实ip。但是在k8s集群中经过多次的网络的转发，一般是无法获取到客户端真实ip。 为了满足这个常见TKE这边提供了lb直连pod的方式来获取客户端真实的ip，其实tke中能够实现这个方案的主要还是基于在vpc-cni的网络模式下实现的，因为vpc-cni模式可以使pod处于和node节点，">
+<meta property="og:description" content="我们一些特定的业务场景需要用到https的双向认证，下面我们说说如何在nginx-ingress配置下https的双向认证。 创建自签名ca证书12345# openssl req -x509 -sha256 -newkey rsa:4096 -keyout ca.key -out ca.crt -days 356 -nodes -subj &amp;#x27;&#x2F;CN&#x3D;Fern Cert Authorit">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://www.niewx.cn/img/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/snail-bg.jpg">
-<meta property="article:published_time" content="2020-07-28T06:10:00.000Z">
-<meta property="article:modified_time" content="2020-07-28T06:10:00.000Z">
+<meta property="og:image" content="https://www.niewx.cn/img/nginx-ingress-configuration-https-two-way-authentication/bg.jpg">
+<meta property="article:published_time" content="2022-04-08T04:10:30.000Z">
+<meta property="article:modified_time" content="2022-04-08T08:25:55.273Z">
 <meta property="article:author" content="VashonNie">
-<meta property="article:tag" content="Kubernetes">
-<meta property="article:tag" content="TKE">
-<meta property="article:tag" content="Service">
+<meta property="article:tag" content="nginx-ingress">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://www.niewx.cn/img/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/snail-bg.jpg">
+<meta name="twitter:image" content="https://www.niewx.cn/img/nginx-ingress-configuration-https-two-way-authentication/bg.jpg">
   
   
-  <title>TKE中使用lb直连获取客户端真实IP - Hexo</title>
+  <title>nginx-ingress配置https双向认证 - Hexo</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -251,7 +249,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="TKE中使用lb直连获取客户端真实IP"></span>
+            <span id="subtitle" data-typed-text="nginx-ingress配置https双向认证"></span>
           
         </div>
 
@@ -267,8 +265,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2020-07-28 14:10" pubdate>
-          2020年7月28日 下午
+        <time datetime="2022-04-08 12:10" pubdate>
+          2022年4月8日 中午
         </time>
       </span>
     
@@ -280,7 +278,7 @@
         <i class="iconfont icon-chart"></i>
         
           <!-- compatible with older versions-->
-          906 字
+          4.5k 字
         
       </span>
     
@@ -292,7 +290,7 @@
         
         
           <!-- compatible with older versions-->
-          8 分钟
+          38 分钟
         
       </span>
     
@@ -338,40 +336,45 @@
         <div id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">TKE中使用lb直连获取客户端真实IP</h1>
+            <h1 style="display: none">nginx-ingress配置https双向认证</h1>
             
             <div class="markdown-body">
               
-              <p>我们在使用TKE的过程中会遇到一个这样的场景，就是我在服务端想获取到有哪些客户端在访问我，并且获取到客户端的真实ip。但是在k8s集群中经过多次的网络的转发，一般是无法获取到客户端真实ip。</p>
-<p>为了满足这个常见TKE这边提供了lb直连pod的方式来获取客户端真实的ip，其实tke中能够实现这个方案的主要还是基于在vpc-cni的网络模式下实现的，因为vpc-cni模式可以使pod处于和node节点，vpc同一个网络下，而lb也是在vpc的网络中，因此这边lb就可以直接将请求转发到pod上，下面我们来说一下如何在tke中使用这种模式。</p>
-<p>这边还是分为2种类型的工作负载来进行实践操作。</p>
-<h1 id="Deployment使用lb直连"><a href="#Deployment使用lb直连" class="headerlink" title="Deployment使用lb直连"></a>Deployment使用lb直连</h1><p>一般我们创建deploy类型的pod，关联创建svc的时候是无法选择直连lb的类型的，因为这边直连需要pod选择vpc-cni网络模式才可以，我们这边先手动创建一个正常的deployement，再去手动修改svc和pod的网络模式即可</p>
-<p>我们这里在控制台创建了一个pod</p>
-<p><img src="/img/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/1.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p>
-<p>我们可以测试一下非直连的pod，通过10.168.1.5这个机器上发起访问，发现pod日志并没有对应的客户端ip信息</p>
-<p><img src="/img/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/2.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
-<p><img src="/img/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/3.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
-<p>下面修改对应的svc类型为直连模式，勾选这个采用负载均衡直连pod的模式</p>
-<p><img src="/img/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/4.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
-<p>修改下对应的pod为vpc-cni网络模式，在pod中加上参数</p>
-<figure class="highlight nestedtext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs nestedtext"><span class="hljs-attribute">annotations</span><span class="hljs-punctuation">:</span><br>        <span class="hljs-attribute">tke.cloud.tencent.com/networks</span><span class="hljs-punctuation">:</span> <span class="hljs-string">tke-route-eni</span><br></code></pre></td></tr></table></figure>
+              <p>我们一些特定的业务场景需要用到https的双向认证，下面我们说说如何在nginx-ingress配置下https的双向认证。</p>
+<h1 id="创建自签名ca证书"><a href="#创建自签名ca证书" class="headerlink" title="创建自签名ca证书"></a>创建自签名ca证书</h1><figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs vim"># openssl req -x509 -<span class="hljs-built_in">sha256</span> -newkey rs<span class="hljs-variable">a:4096</span> -keyout <span class="hljs-keyword">ca</span>.key -out <span class="hljs-keyword">ca</span>.crt -days <span class="hljs-number">356</span> -nodes -subj <span class="hljs-string">&#x27;/CN=Fern Cert Authority&#x27;</span><br><br>Generating <span class="hljs-keyword">a</span> <span class="hljs-number">4096</span> bit RSA private key<br>..................................................................................................................................................................................................................++<br>.....................................................................................................................................................................................................................................................................................................................................................................++<br></code></pre></td></tr></table></figure>
 
-<p><img src="/img/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/5.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
-<p><img src="/img/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/6.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
-<p>现在pod的网络模式已经是vpc-cni了，并且svc也是直连了，下面我们来访问下，看日志能否看到client的ip</p>
-<p><img src="/img/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/7.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
-<p><img src="/img/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/8.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
-<p>经过测试是可以获取到客户端的ip的。</p>
-<h1 id="StatefulSet使用lb直连"><a href="#StatefulSet使用lb直连" class="headerlink" title="StatefulSet使用lb直连"></a>StatefulSet使用lb直连</h1><p>StatefulSet因为支持在界面创建vpc-cni的网路模式，所以我们只需要在控制台配置就行。</p>
-<p>我们不选择vpc-cni模式是没有lb直连选项的</p>
-<p><img src="/img/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/9.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
-<p>勾选了vpc-cni模式才会出现lb直连选项，所以我们需要在创建的时候选择vpc-cni，并选择lb直连</p>
-<p><img src="/img/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/10.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
-<p>下面我们来测试下创建好的sts的直连nginx服务</p>
-<p><img src="/img/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/11.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
-<p><img src="/img/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/12.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
-<p><img src="/img/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/13.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p>
-<p>经过测试，这这边创建好的sts类型的nginx的pod也可以获取到客户端的真实ip</p>
+<h1 id="创建server端证书"><a href="#创建server端证书" class="headerlink" title="创建server端证书"></a>创建server端证书</h1><p>生成请求文件</p>
+<figure class="highlight asciidoc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs asciidoc"># openssl req -new -newkey rsa:4096 -keyout server.key -out server.csr -nodes -subj <span class="hljs-emphasis">&#x27;/CN=test.ingress.com&#x27;</span><br>Generating a 4096 bit RSA private key<br>...................................................++<br>...............................................................................................................................................++<br><span class="hljs-section">writing new private key to &#x27;server.key&#x27;</span><br><span class="hljs-section">-----</span><br></code></pre></td></tr></table></figure>
+
+<p>利用生成的请求文件生成server端证书</p>
+<figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs stata"># openssl x509 -req -sha256 -days 365 -<span class="hljs-keyword">in</span> server.csr -<span class="hljs-keyword">CA</span> <span class="hljs-keyword">ca</span>.crt -CAkey <span class="hljs-keyword">ca</span>.key -set_serial 01 -<span class="hljs-keyword">out</span> server.crt<br>Signature ok<br>subject=/CN=<span class="hljs-keyword">test</span>.ingress.com<br>Getting <span class="hljs-keyword">CA</span> Private Key<br></code></pre></td></tr></table></figure>
+
+<h1 id="创建客户端证书"><a href="#创建客户端证书" class="headerlink" title="创建客户端证书"></a>创建客户端证书</h1><p>首先生成客户端请求文件</p>
+<figure class="highlight asciidoc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs asciidoc"># openssl req -new -newkey rsa:4096 -keyout client.key -out client.csr -nodes -subj <span class="hljs-emphasis">&#x27;/CN=Fern&#x27;</span><br>Generating a 4096 bit RSA private key<br>...................................................++<br>...............................................................++<br><span class="hljs-section">writing new private key to &#x27;client.key&#x27;</span><br><span class="hljs-section">-----</span><br><br></code></pre></td></tr></table></figure>
+
+<p>利用生成的客户端请求文件生成客户端证书</p>
+<figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs stata">#  openssl x509 -req -sha256 -days 365 -<span class="hljs-keyword">in</span> client.csr -<span class="hljs-keyword">CA</span> <span class="hljs-keyword">ca</span>.crt -CAkey <span class="hljs-keyword">ca</span>.key -set_serial 02 -<span class="hljs-keyword">out</span> client.crt<br>Signature ok<br>subject=/CN=Fern<br>Getting <span class="hljs-keyword">CA</span> Private Key<br></code></pre></td></tr></table></figure>
+
+<h1 id="检查证书文件"><a href="#检查证书文件" class="headerlink" title="检查证书文件"></a>检查证书文件</h1><p>执行完上面命令，会生成如下证书文件</p>
+<figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs tap">[niewx@VM-0-4-centos ingress-https-two]$ ll<br>total 36<br>-rw-rw-r--<span class="hljs-number"> 1 </span>niewx niewx<span class="hljs-number"> 1814 </span>Apr <span class="hljs-number"> 8 </span>13:42 ca.crt<br>-rw-rw-r--<span class="hljs-number"> 1 </span>niewx niewx<span class="hljs-number"> 3268 </span>Apr <span class="hljs-number"> 8 </span>13:42 ca.key<br>-rw-rw-r--<span class="hljs-number"> 1 </span>niewx niewx<span class="hljs-number"> 1667 </span>Apr <span class="hljs-number"> 8 </span>13:43 client.crt<br>-rw-rw-r--<span class="hljs-number"> 1 </span>niewx niewx<span class="hljs-number"> 1578 </span>Apr <span class="hljs-number"> 8 </span>13:43 client.csr<br>-rw-rw-r--<span class="hljs-number"> 1 </span>niewx niewx<span class="hljs-number"> 3272 </span>Apr <span class="hljs-number"> 8 </span>13:43 client.key<br>-rw-rw-r--<span class="hljs-number"> 1 </span>niewx niewx<span class="hljs-number"> 1684 </span>Apr <span class="hljs-number"> 8 </span>13:43 server.crt<br>-rw-rw-r--<span class="hljs-number"> 1 </span>niewx niewx<span class="hljs-number"> 1594 </span>Apr <span class="hljs-number"> 8 </span>13:43 server.csr<br>-rw-rw-r--<span class="hljs-number"> 1 </span>niewx niewx<span class="hljs-number"> 3272 </span>Apr <span class="hljs-number"> 8 </span>13:43 server.key<br></code></pre></td></tr></table></figure>
+
+<h1 id="secret挂载ca证书"><a href="#secret挂载ca证书" class="headerlink" title="secret挂载ca证书"></a>secret挂载ca证书</h1><p>k8s的资源，我都是部署在weixnie这个命名空间下，所以加上对应的namespace</p>
+<figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs stata"># kubectl create secret generic <span class="hljs-keyword">ca</span>-secret --from-<span class="hljs-keyword">file</span>=<span class="hljs-keyword">ca</span>.crt=<span class="hljs-keyword">ca</span>.crt -<span class="hljs-keyword">n</span> weixnie<br></code></pre></td></tr></table></figure>
+
+<h1 id="secret挂载服务端证书"><a href="#secret挂载服务端证书" class="headerlink" title="secret挂载服务端证书"></a>secret挂载服务端证书</h1><figure class="highlight sas"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sas"># kubectl <span class="hljs-keyword">create</span> secret generic tls-secret --<span class="hljs-keyword">from</span>-<span class="hljs-keyword">file</span>=tls.crt=server.crt --<span class="hljs-keyword">from</span>-<span class="hljs-keyword">file</span>=tls.<span class="hljs-keyword">key</span>=server.<span class="hljs-keyword">key</span> -n weixnie<br></code></pre></td></tr></table></figure>
+
+<h1 id="创建ingress"><a href="#创建ingress" class="headerlink" title="创建ingress"></a>创建ingress</h1><figure class="highlight nestedtext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs nestedtext"><span class="hljs-attribute">apiVersion</span><span class="hljs-punctuation">:</span> <span class="hljs-string">networking.k8s.io/v1beta1</span><br><span class="hljs-attribute">kind</span><span class="hljs-punctuation">:</span> <span class="hljs-string">Ingress</span><br><span class="hljs-attribute">metadata</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-attribute">annotations</span><span class="hljs-punctuation">:</span><br>    <span class="hljs-attribute">nginx.ingress.kubernetes.io/auth-tls-verify-client</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;on&quot;</span><br>    <span class="hljs-attribute">nginx.ingress.kubernetes.io/auth-tls-secret</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;weixnie/ca-secret&quot;</span><br>    <span class="hljs-attribute">nginx.ingress.kubernetes.io/auth-tls-verify-depth</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;1&quot;</span><br>    <span class="hljs-attribute">nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;true&quot;</span><br>    <span class="hljs-attribute">kubernetes.io/ingress.class</span><span class="hljs-punctuation">:</span> <span class="hljs-string">nginx-intranet</span><br>  <span class="hljs-attribute">name</span><span class="hljs-punctuation">:</span> <span class="hljs-string">nginx-test-https</span><br>  <span class="hljs-attribute">namespace</span><span class="hljs-punctuation">:</span> <span class="hljs-string">weixnie</span><br><span class="hljs-attribute">spec</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-attribute">rules</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-string">host: test.ingress.com</span><br>    <span class="hljs-attribute">http</span><span class="hljs-punctuation">:</span><br>      <span class="hljs-attribute">paths</span><span class="hljs-punctuation">:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">backend:</span><br>          <span class="hljs-attribute">serviceName</span><span class="hljs-punctuation">:</span> <span class="hljs-string">nginx</span><br>          <span class="hljs-attribute">servicePort</span><span class="hljs-punctuation">:</span> <span class="hljs-string">80</span><br>        <span class="hljs-attribute">path</span><span class="hljs-punctuation">:</span> <span class="hljs-string">/</span><br>  <span class="hljs-attribute">tls</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-string">hosts:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-string">foo.bar.com</span><br>    <span class="hljs-attribute">secretName</span><span class="hljs-punctuation">:</span> <span class="hljs-string">tls-secret</span><br></code></pre></td></tr></table></figure>
+
+<h1 id="测试访问"><a href="#测试访问" class="headerlink" title="测试访问"></a>测试访问</h1><p>因为域名是随便写的，这里测试需要先配置下hosts</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">sudo <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;172.16.0.14  test.ingress.com&quot;</span> &gt;&gt; /etc/hosts</span><br></code></pre></td></tr></table></figure>
+
+<p>接下来我们用域名访问下服务看看，首先不带客户端证书访问</p>
+<figure class="highlight gherkin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs gherkin"><span class="hljs-comment">#  curl -k --cacert ./ca.crt  https://test.ingress.com</span><br><span class="hljs-variable">&lt;html&gt;</span><br><span class="hljs-variable">&lt;head&gt;</span><span class="hljs-variable">&lt;title&gt;</span>400 No required SSL certificate was sent<span class="hljs-variable">&lt;/title&gt;</span><span class="hljs-variable">&lt;/head&gt;</span><br><span class="hljs-variable">&lt;body&gt;</span><br><span class="hljs-variable">&lt;center&gt;</span><span class="hljs-variable">&lt;h1&gt;</span>400 Bad Request<span class="hljs-variable">&lt;/h1&gt;</span><span class="hljs-variable">&lt;/center&gt;</span><br><span class="hljs-variable">&lt;center&gt;</span>No required SSL certificate was sent<span class="hljs-variable">&lt;/center&gt;</span><br><span class="hljs-variable">&lt;hr&gt;</span><span class="hljs-variable">&lt;center&gt;</span>nginx<span class="hljs-variable">&lt;/center&gt;</span><br><span class="hljs-variable">&lt;/body&gt;</span><br><span class="hljs-variable">&lt;/html&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>不带客户端证书访问会报错400，接下来我们测试配置客户端证书来访问看看</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs xml"># curl -k --cacert ./ca.crt --cert ./client.crt --key ./client.key https://test.ingress.com<br><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-keyword">html</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">html</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>Welcome to nginx!<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">style</span>&gt;</span><span class="language-css"></span><br><span class="language-css"><span class="hljs-selector-tag">html</span> &#123; <span class="hljs-attribute">color</span>-scheme: light dark; &#125;</span><br><span class="language-css"><span class="hljs-selector-tag">body</span> &#123; <span class="hljs-attribute">width</span>: <span class="hljs-number">35em</span>; <span class="hljs-attribute">margin</span>: <span class="hljs-number">0</span> auto;</span><br><span class="language-css"><span class="hljs-attribute">font-family</span>: Tahoma, Verdana, Arial, sans-serif; &#125;</span><br><span class="language-css"></span><span class="hljs-tag">&lt;/<span class="hljs-name">style</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>Welcome to nginx!<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>If you see this page, the nginx web server is successfully installed and<br>working. Further configuration is required.<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span><br><br><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>For online documentation and support please refer to<br><span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;http://nginx.org/&quot;</span>&gt;</span>nginx.org<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>.<span class="hljs-tag">&lt;<span class="hljs-name">br</span>/&gt;</span><br>Commercial support is available at<br><span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;http://nginx.com/&quot;</span>&gt;</span>nginx.com<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>.<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span><br><br><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">em</span>&gt;</span>Thank you for using nginx.<span class="hljs-tag">&lt;/<span class="hljs-name">em</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>携带客户端证书访问后正常，这里说明我们的双向认证配置成功了。</p>
 
               
             </div>
@@ -389,15 +392,8 @@
     
       <span class="category-chain">
         
-  <a href="/categories/TKE/" class="category-chain-item">TKE</a>
+  <a href="/categories/Ingress/" class="category-chain-item">Ingress</a>
   
-  
-    <span>></span>
-    
-  <a href="/categories/TKE/Kubernetes/" class="category-chain-item">Kubernetes</a>
-  
-  
-
   
 
       </span>
@@ -411,11 +407,7 @@
     <div class="post-meta">
       <i class="iconfont icon-tags"></i>
       
-        <a href="/tags/Kubernetes/">#Kubernetes</a>
-      
-        <a href="/tags/TKE/">#TKE</a>
-      
-        <a href="/tags/Service/">#Service</a>
+        <a href="/tags/nginx-ingress/">#nginx-ingress</a>
       
     </div>
   
@@ -427,8 +419,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>TKE中使用lb直连获取客户端真实IP</div>
-      <div>https://www.niewx.cn/2020/07/28/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/</div>
+      <div>nginx-ingress配置https双向认证</div>
+      <div>https://www.niewx.cn/2022/04/08/nginx-ingress-configuration-https-two-way-authentication/</div>
     </div>
     <div class="license-meta">
       
@@ -440,7 +432,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2020年7月28日</div>
+          <div>2022年4月8日</div>
         </div>
       
       
@@ -476,18 +468,12 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2020/07/30/2020-07-30-Build-dashboard-on-TKE/" title="TKE上搭建集群Dashboard">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">TKE上搭建集群Dashboard</span>
-                        <span class="visible-mobile">上一篇</span>
-                      </a>
-                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2020/07/27/2020-07-27-Deployment-in-the-TKE-cluster-uses-vpc-cni-mode/" title="TKE集群中deployment使用vpc-cni模式">
-                        <span class="hidden-mobile">TKE集群中deployment使用vpc-cni模式</span>
+                      <a href="/2022/04/04/2022-04-04-calico-network-mode-of-k8s/" title="k8s之calico网络模式">
+                        <span class="hidden-mobile">k8s之calico网络模式</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
