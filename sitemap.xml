@@ -1034,13 +1034,6 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/tags/Treafik2/</loc>
-    <lastmod>2022-04-08</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
     <loc>https://www.niewx.cn/tags/Coredns/</loc>
     <lastmod>2022-04-08</lastmod>
     <changefreq>weekly</changefreq>
@@ -1055,7 +1048,7 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/tags/configMap/</loc>
+    <loc>https://www.niewx.cn/tags/Treafik2/</loc>
     <lastmod>2022-04-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -1069,7 +1062,21 @@
   </url>
   
   <url>
+    <loc>https://www.niewx.cn/tags/Service/</loc>
+    <lastmod>2022-04-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
     <loc>https://www.niewx.cn/tags/Dashboard/</loc>
+    <lastmod>2022-04-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://www.niewx.cn/tags/NFS/</loc>
     <lastmod>2022-04-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -1083,7 +1090,7 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/tags/NFS/</loc>
+    <loc>https://www.niewx.cn/tags/configMap/</loc>
     <lastmod>2022-04-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -1126,13 +1133,6 @@
   
   <url>
     <loc>https://www.niewx.cn/tags/ip-masq-agent/</loc>
-    <lastmod>2022-04-08</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://www.niewx.cn/tags/Service/</loc>
     <lastmod>2022-04-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -1307,14 +1307,14 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/tags/python/</loc>
+    <loc>https://www.niewx.cn/tags/Elasticsearch/</loc>
     <lastmod>2022-04-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/tags/Elasticsearch/</loc>
+    <loc>https://www.niewx.cn/tags/python/</loc>
     <lastmod>2022-04-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -1329,13 +1329,6 @@
   
   <url>
     <loc>https://www.niewx.cn/tags/cert-manager/</loc>
-    <lastmod>2022-04-08</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://www.niewx.cn/tags/ingress/</loc>
     <lastmod>2022-04-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -1357,6 +1350,13 @@
   
   <url>
     <loc>https://www.niewx.cn/tags/PrometheusAlert/</loc>
+    <lastmod>2022-04-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://www.niewx.cn/tags/ingress/</loc>
     <lastmod>2022-04-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -1526,14 +1526,14 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/categories/Template/Markdown/Kubernetes/</loc>
+    <loc>https://www.niewx.cn/categories/Harbor/</loc>
     <lastmod>2022-04-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/categories/Harbor/</loc>
+    <loc>https://www.niewx.cn/categories/Template/Markdown/Kubernetes/</loc>
     <lastmod>2022-04-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -1638,14 +1638,14 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/categories/python/</loc>
+    <loc>https://www.niewx.cn/categories/elasticsearch/</loc>
     <lastmod>2022-04-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/categories/elasticsearch/</loc>
+    <loc>https://www.niewx.cn/categories/python/</loc>
     <lastmod>2022-04-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -1666,14 +1666,14 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/categories/eks/</loc>
+    <loc>https://www.niewx.cn/categories/Monitor/</loc>
     <lastmod>2022-04-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/categories/Monitor/</loc>
+    <loc>https://www.niewx.cn/categories/eks/</loc>
     <lastmod>2022-04-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
