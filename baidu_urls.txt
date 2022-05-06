@@ -90,8 +90,8 @@ https://www.niewx.cn/2020/07/30/2020-07-30-Build-dashboard-on-TKE/
 https://www.niewx.cn/2020/07/28/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/
 https://www.niewx.cn/2020/07/27/2020-07-27-Deployment-in-the-TKE-cluster-uses-vpc-cni-mode/
 https://www.niewx.cn/2020/07/15/2020-07-15-Use-of-configMap-in-TKE/
-https://www.niewx.cn/2020/07/12/2020-07-12-Harbor-builds-enterprise-docker-private-mirror-repository/
 https://www.niewx.cn/2020/07/12/2020-07-12-Deployment-and-use-of-Traefik1.7.17/
+https://www.niewx.cn/2020/07/12/2020-07-12-Harbor-builds-enterprise-docker-private-mirror-repository/
 https://www.niewx.cn/2020/07/03/2020-07-03-Vpc_cni-of-TKE-network-mode/
 https://www.niewx.cn/2020/06/28/2020-06-28-DNS-resolution-of-k8s/
 https://www.niewx.cn/2020/06/11/2020-06-11-Deploy-treafik2-on-TKE/

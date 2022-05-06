@@ -857,7 +857,7 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2020/07/12/2020-07-12-Harbor-builds-enterprise-docker-private-mirror-repository/</loc>
+    <loc>https://www.niewx.cn/2020/07/12/2020-07-12-Deployment-and-use-of-Traefik1.7.17/</loc>
     
     <lastmod>2020-07-12</lastmod>
     
@@ -866,7 +866,7 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2020/07/12/2020-07-12-Deployment-and-use-of-Traefik1.7.17/</loc>
+    <loc>https://www.niewx.cn/2020/07/12/2020-07-12-Harbor-builds-enterprise-docker-private-mirror-repository/</loc>
     
     <lastmod>2020-07-12</lastmod>
     
@@ -1048,7 +1048,7 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/tags/Harbor/</loc>
+    <loc>https://www.niewx.cn/tags/Treafik1-7/</loc>
     <lastmod>2022-05-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -1062,14 +1062,7 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/tags/Treafik1-7/</loc>
-    <lastmod>2022-05-06</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://www.niewx.cn/tags/Dashboard/</loc>
+    <loc>https://www.niewx.cn/tags/Harbor/</loc>
     <lastmod>2022-05-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -1083,7 +1076,7 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/tags/COS/</loc>
+    <loc>https://www.niewx.cn/tags/Dashboard/</loc>
     <lastmod>2022-05-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -1091,6 +1084,13 @@
   
   <url>
     <loc>https://www.niewx.cn/tags/NFS/</loc>
+    <lastmod>2022-05-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://www.niewx.cn/tags/COS/</loc>
     <lastmod>2022-05-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -1237,14 +1237,14 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/tags/Jaeger/</loc>
+    <loc>https://www.niewx.cn/tags/Envoy/</loc>
     <lastmod>2022-05-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/tags/Envoy/</loc>
+    <loc>https://www.niewx.cn/tags/Jaeger/</loc>
     <lastmod>2022-05-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -1519,7 +1519,7 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/categories/Harbor/</loc>
+    <loc>https://www.niewx.cn/categories/Kubernetes/Docker/</loc>
     <lastmod>2022-05-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -1533,7 +1533,7 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/categories/Kubernetes/Docker/</loc>
+    <loc>https://www.niewx.cn/categories/Harbor/</loc>
     <lastmod>2022-05-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
