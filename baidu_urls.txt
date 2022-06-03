@@ -1,3 +1,4 @@
+https://www.niewx.cn/2022/06/03/Multi-cluster-access-through-istio/
 https://www.niewx.cn/2022/04/08/nginx-ingress-configuration-https-two-way-authentication/
 https://www.niewx.cn/2022/04/04/2022-04-04-calico-network-mode-of-k8s/
 https://www.niewx.cn/2022/04/01/2022-04-01-ephemeral-storage-of-k8s/
@@ -42,16 +43,16 @@ https://www.niewx.cn/2020/12/04/2020-12-04-Kiali-network-visualization-of-istio-
 https://www.niewx.cn/2020/12/04/2020-12-04-prometheus-and-grafana-of-istio-entry-series/
 https://www.niewx.cn/2020/12/03/2020-12-03-Traffic-mirroring-of-istio-entry-series/
 https://www.niewx.cn/2020/12/02/2020-12-02-Fault-injection-of-istio-entry-series/
-https://www.niewx.cn/2020/12/02/2020-12-02-Retry-after-timeout-of-istio-entry-series%E8%AF%95/
 https://www.niewx.cn/2020/12/02/2020-12-02-Fuse-of-istio-entry-series/
+https://www.niewx.cn/2020/12/02/2020-12-02-Retry-after-timeout-of-istio-entry-series%E8%AF%95/
 https://www.niewx.cn/2020/12/01/2020-12-01-Traffic-shift-of-istio-entry-series/
 https://www.niewx.cn/2020/11/30/2020-11-30-Gateway-gateway-of-istio-entry-series/
 https://www.niewx.cn/2020/11/30/2020-11-30-ServiceEntry-of-istio-entry-series/
 https://www.niewx.cn/2020/11/29/2020-11-29-VirtualService-and-DestinationRule-of-istio-entry-series/
 https://www.niewx.cn/2020/11/28/2020-11-28-Installation-and-deployment-of-istio-entry-series/
 https://www.niewx.cn/2020/11/28/2020-11-28-Product-introduction-of-istio-entry-series/
-https://www.niewx.cn/2020/11/26/2020-11-26-fluent_bit-collects-different-business-logs/
 https://www.niewx.cn/2020/11/26/2020-11-26-The-externaltrafficpolicy-of-k8s-retains-the-client-source-ip/
+https://www.niewx.cn/2020/11/26/2020-11-26-fluent_bit-collects-different-business-logs/
 https://www.niewx.cn/2020/11/25/2020-11-25-kubectl-access-to-many-clusters/
 https://www.niewx.cn/2020/11/19/2020-11-19-Etcd-database-of-Kubernetes/
 https://www.niewx.cn/2020/11/17/2020-11-17-Pod-creation-process-in-Kubernetes/
@@ -96,5 +97,4 @@ https://www.niewx.cn/2020/07/03/2020-07-03-Vpc_cni-of-TKE-network-mode/
 https://www.niewx.cn/2020/06/28/2020-06-28-DNS-resolution-of-k8s/
 https://www.niewx.cn/2020/06/11/2020-06-11-Deploy-treafik2-on-TKE/
 https://www.niewx.cn/2020/06/10/2020-06-10-Build-EFK-log-collection-system-on-TKE/
-https://www.niewx.cn/2020/06/10/2020-06-10-TKE-upgrade-node-version/
 https://www.niewx.cn/2020/06/10/2020-06-10-Build-prometheus-on-TKE/
