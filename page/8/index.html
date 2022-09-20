@@ -325,23 +325,23 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2020/09/22/2020-10-11-Docker-commonly-used-commands/" target="_blank">
-          <img src="/img/2020-10-11-Docker-commonly-used-commands/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="Docker常用命令及知识">
+        <a href="/2020/09/22/2020-09-22-About-the-use-of-postStart-and-preStop-on-TKE/" target="_blank">
+          <img src="/img/2020-09-22-About-the-use-of-postStart-and-preStop-on-TKE/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="TKE上关于postStart和preStop使用">
         </a>
       </div>
     
     <article class="col-12 col-md-8 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2020/09/22/2020-10-11-Docker-commonly-used-commands/" target="_blank">
-          Docker常用命令及知识
+        <a href="/2020/09/22/2020-09-22-About-the-use-of-postStart-and-preStop-on-TKE/" target="_blank">
+          TKE上关于postStart和preStop使用
         </a>
       </h1>
 
-      <a class="index-excerpt" href="/2020/09/22/2020-10-11-Docker-commonly-used-commands/" target="_blank">
+      <a class="index-excerpt" href="/2020/09/22/2020-09-22-About-the-use-of-postStart-and-preStop-on-TKE/" target="_blank">
         <div>
           
-          本文介绍了日常运维中用的一些docker命令和知识。 docker容器访问其他容器服务docker run -d –network host -p 8081:8081 xxxxxxxx:v3 docker-compose基于docker-compose.yml,通常启动的时候是一个服务，这个服务通常由多个container共同组成，并且端口，配置等由docker-compose定义好。 启动doc
+          Kubernetes 支持 postStart 和 preStop 事件。 当一个容器启动后，Kubernetes 将立即发送 postStart 事件；在容器被终结之前， Kubernetes 将发送一个 preStop 事件。 使用限制Kubernetes 在容器创建后立即发送 postStart 事件。 然而，postStart 处理函数的调用不保证早于容器的入口点（entrypoint）
         </div>
       </a>
 
@@ -365,8 +365,15 @@
     
       <span class="category-chain">
         
-  <a href="/categories/Docker/" class="category-chain-item">Docker</a>
+  <a href="/categories/Kubernetes/" class="category-chain-item">Kubernetes</a>
   
+  
+    <span>></span>
+    
+  <a href="/categories/Kubernetes/TKE/" class="category-chain-item">TKE</a>
+  
+  
+
   
 
       </span>
@@ -380,7 +387,9 @@
           <div class="post-meta">
             <i class="iconfont icon-tags"></i>
             
-              <a href="/tags/Docker/">#Docker</a>
+              <a href="/tags/Kubernetes/">#Kubernetes</a>
+            
+              <a href="/tags/TKE/">#TKE</a>
             
           </div>
         
@@ -830,73 +839,6 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2020/08/28/2020-08-28-Common-commands-for-linux-positioning-problems/" target="_blank">
-          <img src="/img/2020-08-28-Common-commands-for-linux-positioning-problems/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="linux定位问题常用命令">
-        </a>
-      </div>
-    
-    <article class="col-12 col-md-8 mx-auto index-info">
-      <h1 class="index-header">
-        
-        <a href="/2020/08/28/2020-08-28-Common-commands-for-linux-positioning-problems/" target="_blank">
-          linux定位问题常用命令
-        </a>
-      </h1>
-
-      <a class="index-excerpt" href="/2020/08/28/2020-08-28-Common-commands-for-linux-positioning-problems/" target="_blank">
-        <div>
-          
-          本篇文章主要介绍了在使用linux过程中常见的一些定位问题的命令。 ifconfig(查看网卡)12345678910111213141516171819$ ifconfigenp1s0    Link encap:Ethernet  HWaddr 28:d2:44:eb:bd:98            inet addr:192.168.0.103  Bcast:192.168.0.255
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2020-08-28 14:10" pubdate>
-              2020-08-28
-            </time>
-          </div>
-        
-        
-          <div class="post-meta mr-3 d-flex align-items-center">
-            <i class="iconfont icon-category"></i>
-            
-
-<span class="category-chains">
-  
-  
-    
-      <span class="category-chain">
-        
-  <a href="/categories/linux/" class="category-chain-item">linux</a>
-  
-  
-
-      </span>
-    
-  
-</span>
-
-          </div>
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/tags/linux/">#linux</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-      <div class="col-12 col-md-4 m-auto index-img">
         <a href="/2020/08/28/2020-08-28-Ip-masq-agent-of-Kubernetes-plug-in/" target="_blank">
           <img src="/img/2020-08-28-Ip-masq-agent-of-Kubernetes-plug-in/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="Kubernetes插件之ip-masq-agent">
         </a>
@@ -955,6 +897,73 @@
               <a href="/tags/Kubernetes/">#Kubernetes</a>
             
               <a href="/tags/ip-masq-agent/">#ip-masq-agent</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+      <div class="col-12 col-md-4 m-auto index-img">
+        <a href="/2020/08/28/2020-08-28-Common-commands-for-linux-positioning-problems/" target="_blank">
+          <img src="/img/2020-08-28-Common-commands-for-linux-positioning-problems/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="linux定位问题常用命令">
+        </a>
+      </div>
+    
+    <article class="col-12 col-md-8 mx-auto index-info">
+      <h1 class="index-header">
+        
+        <a href="/2020/08/28/2020-08-28-Common-commands-for-linux-positioning-problems/" target="_blank">
+          linux定位问题常用命令
+        </a>
+      </h1>
+
+      <a class="index-excerpt" href="/2020/08/28/2020-08-28-Common-commands-for-linux-positioning-problems/" target="_blank">
+        <div>
+          
+          本篇文章主要介绍了在使用linux过程中常见的一些定位问题的命令。 ifconfig(查看网卡)12345678910111213141516171819$ ifconfigenp1s0    Link encap:Ethernet  HWaddr 28:d2:44:eb:bd:98            inet addr:192.168.0.103  Bcast:192.168.0.255
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2020-08-28 14:10" pubdate>
+              2020-08-28
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/linux/" class="category-chain-item">linux</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/linux/">#linux</a>
             
           </div>
         
