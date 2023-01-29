@@ -1,3 +1,4 @@
+https://www.niewx.cn/2023/01/29/How-to-print-the-container-log-file-to-stdout-in-k8s/
 https://www.niewx.cn/2022/06/03/Multi-cluster-access-through-istio/
 https://www.niewx.cn/2022/04/08/nginx-ingress-configuration-https-two-way-authentication/
 https://www.niewx.cn/2022/04/04/2022-04-04-calico-network-mode-of-k8s/
@@ -81,8 +82,8 @@ https://www.niewx.cn/2020/08/27/2020-08-27-Use-of-Kubectl-command-line-jsonpath/
 https://www.niewx.cn/2020/08/26/2020-08-26-Kubernetes-scheduling/
 https://www.niewx.cn/2020/08/23/2020-08-23-RBAC-permission-management-of-Kubernetes/
 https://www.niewx.cn/2020/08/18/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/
-https://www.niewx.cn/2020/08/14/2020-08-14-TKE's-first-knowledge-of-container-detectors/
 https://www.niewx.cn/2020/08/14/2020-08-14-Self-made-CA-certificate-set-ssl-certificate/
+https://www.niewx.cn/2020/08/14/2020-08-14-TKE's-first-knowledge-of-container-detectors/
 https://www.niewx.cn/2020/08/13/2020-08-13-Deploy-metrics_server-on-TKE/
 https://www.niewx.cn/2020/08/07/2020-08-07-Mount-files-to-CFS-subdirectory-in-TKE/
 https://www.niewx.cn/2020/08/05/2020-08-05-How-to-set-the-permission-of-TKE-mount-COS-bucket-container-directory/
@@ -91,10 +92,9 @@ https://www.niewx.cn/2020/07/30/2020-07-30-Build-dashboard-on-TKE/
 https://www.niewx.cn/2020/07/28/2020-07-28-Use-lb-direct-connection-in-TKE-to-get-the-real-IP-of-the-client/
 https://www.niewx.cn/2020/07/27/2020-07-27-Deployment-in-the-TKE-cluster-uses-vpc-cni-mode/
 https://www.niewx.cn/2020/07/15/2020-07-15-Use-of-configMap-in-TKE/
-https://www.niewx.cn/2020/07/12/2020-07-12-Deployment-and-use-of-Traefik1.7.17/
 https://www.niewx.cn/2020/07/12/2020-07-12-Harbor-builds-enterprise-docker-private-mirror-repository/
+https://www.niewx.cn/2020/07/12/2020-07-12-Deployment-and-use-of-Traefik1.7.17/
 https://www.niewx.cn/2020/07/03/2020-07-03-Vpc_cni-of-TKE-network-mode/
 https://www.niewx.cn/2020/06/28/2020-06-28-DNS-resolution-of-k8s/
 https://www.niewx.cn/2020/06/11/2020-06-11-Deploy-treafik2-on-TKE/
 https://www.niewx.cn/2020/06/10/2020-06-10-Build-EFK-log-collection-system-on-TKE/
-https://www.niewx.cn/2020/06/10/2020-06-10-TKE-upgrade-node-version/
