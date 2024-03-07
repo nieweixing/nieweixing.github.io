@@ -313,23 +313,23 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2020/06/10/2020-06-10-Build-EFK-log-collection-system-on-TKE/" target="_blank">
-          <img src="/img/2020-06-10-Build-EFK-log-collection-system-on-TKE/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="TKE上搭建EFK日志采集系统">
+        <a href="/2020/06/10/2020-06-10-TKE-upgrade-node-version/" target="_blank">
+          <img src="/img/2020-06-10-TKE-upgrade-node-version/snail-bg.jpg" srcset="/img/loading.gif" lazyload alt="TKE升级node节点版本">
         </a>
       </div>
     
     <article class="col-12 col-md-8 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2020/06/10/2020-06-10-Build-EFK-log-collection-system-on-TKE/" target="_blank">
-          TKE上搭建EFK日志采集系统
+        <a href="/2020/06/10/2020-06-10-TKE-upgrade-node-version/" target="_blank">
+          TKE升级node节点版本
         </a>
       </h1>
 
-      <a class="index-excerpt" href="/2020/06/10/2020-06-10-Build-EFK-log-collection-system-on-TKE/" target="_blank">
+      <a class="index-excerpt" href="/2020/06/10/2020-06-10-TKE-upgrade-node-version/" target="_blank">
         <div>
           
-          本篇文章介绍了如何在TKE集群中搭建EFK日志采集系统来采集集群日志。 创建新的namespace创建一个新的namespace为logging，该命名空间来部署EFK   创建ES的svc12345678910111213141516kind: ServiceapiVersion: v1metadata:  name: elasticsearch  namespace: logging  lab
+          该文章介绍了在TKE中如何给集群节点升级版本。 TKE节点升级方式驱逐节点pod升级节点方式  找到对应的节点，点击驱逐，驱逐完毕后，点击集群信息升级         信息配置完成后点击完成，等待10分钟即可升级完成。 将节点对应的pod副本设置大于1   先将对应节点上的pod副本都设置大于2，因为升级时候会销毁pod，可以会导致服务不可用，设置pod副本为多个，可以保证服务不会中断。设置完之后
         </div>
       </a>
 
@@ -356,20 +356,6 @@
   <a href="/categories/TKE/" class="category-chain-item">TKE</a>
   
   
-    <span>></span>
-    
-  <a href="/categories/TKE/Kubernetes/" class="category-chain-item">Kubernetes</a>
-  
-  
-    <span>></span>
-    
-  <a href="/categories/TKE/Kubernetes/Log/" class="category-chain-item">Log</a>
-  
-  
-
-  
-
-  
 
       </span>
     
@@ -387,8 +373,6 @@
               <a href="/tags/Docker/">#Docker</a>
             
               <a href="/tags/TKE/">#TKE</a>
-            
-              <a href="/tags/EFK/">#EFK</a>
             
           </div>
         
@@ -1041,11 +1025,6 @@
   <footer>
     <div class="footer-inner">
    <div id="music_div" style="position: fixed; bottom: 0px; left: 30px;">
-    <iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=110 
-    	src="//music.163.com/outchain/player?type=0&id=919444742&auto=1&height=90">
-    </iframe>
-    <script src="https://cdn.staticfile.org/jquery/3.3.1/jquery.min.js"></script>
-    <script src="/js/musicshow.js"></script>
 </div>
 
   
