@@ -1,1 +1,942 @@
-<!DOCTYPE html><html lang="zh-CN" data-default-color-scheme="auto"><head><meta charset="UTF-8"><link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png"><link rel="icon" href="/img/fluid.png"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,shrink-to-fit=no"><meta http-equiv="x-ua-compatible" content="ie=edge"><meta name="theme-color" content="#2f4154"><meta name="author" content="VashonNie"><meta name="keywords" content=""><meta name="description" content="使用k8s的过程中，我们的服务都会打印大量的日志，为了方便查看排查定位问题，大部分时候会将日志打印在标准输出，但是有的时候为了方便日志的切割和收集，会将日志写到容器内的某个目录下日志文件。如果我们的日志会占用大量的磁盘空间，有可能还会外挂存储来将日志持久化。 容器内的业务日志有多种输出方式，其实不同日志输出方式，最终都是存在了pod所在的宿主机上，不同的方式对应了宿主机不同的目录，下面我们来详细说"><meta property="og:type" content="article"><meta property="og:title" content="k8s中pod的容器日志存储说明"><meta property="og:url" content="https://www.niewx.cn/2021/10/29/2021-10-29-Container-log-storage-description-of-pod-in-k8s/index.html"><meta property="og:site_name" content="Hexo"><meta property="og:description" content="使用k8s的过程中，我们的服务都会打印大量的日志，为了方便查看排查定位问题，大部分时候会将日志打印在标准输出，但是有的时候为了方便日志的切割和收集，会将日志写到容器内的某个目录下日志文件。如果我们的日志会占用大量的磁盘空间，有可能还会外挂存储来将日志持久化。 容器内的业务日志有多种输出方式，其实不同日志输出方式，最终都是存在了pod所在的宿主机上，不同的方式对应了宿主机不同的目录，下面我们来详细说"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://www.niewx.cn/img/2021-10-29-Container-log-storage-description-of-pod-in-k8s/bg.jpg"><meta property="article:published_time" content="2021-10-29T05:47:39.000Z"><meta property="article:modified_time" content="2022-04-06T03:47:45.000Z"><meta property="article:author" content="VashonNie"><meta property="article:tag" content="Kubernetes"><meta property="article:tag" content="containers"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://www.niewx.cn/img/2021-10-29-Container-log-storage-description-of-pod-in-k8s/bg.jpg"><title>k8s中pod的容器日志存储说明 - Hexo</title><link rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css"><link rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css"><link rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css"><link rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css"><link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css"><link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css"><link rel="stylesheet" href="/css/main.css"><link id="highlight-css" rel="stylesheet" href="/css/highlight.css"><link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/shubiao.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/scroll.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/gradient.css"><script id="fluid-configs">var Fluid=window.Fluid||{},CONFIG={hostname:"www.niewx.cn",root:"/",version:"1.8.14",typing:{enable:!0,typeSpeed:70,cursorChar:"_",loop:!1,scope:[]},anchorjs:{enable:!0,element:"h1,h2,h3,h4,h5,h6",placement:"left",visible:"hover",icon:""},progressbar:{enable:!0,height_px:3,color:"#29d",options:{showSpinner:!1,trickleSpeed:100}},code_language:{enable:!0,default:"TEXT"},copy_btn:!0,image_caption:{enable:!0},image_zoom:{enable:!0,img_url_replace:["",""]},toc:{enable:!0,placement:"right",headingSelector:"h1,h2,h3,h4,h5,h6",collapseDepth:0},lazyload:{enable:!0,loading_img:"/img/loading.gif",onlypost:!1,offset_factor:2},web_analytics:{enable:!0,baidu:"bfe4709ccd8c5c9e559c89f4fd0866f3",google:null,gtag:null,tencent:{sid:null,cid:null},woyaola:null,cnzz:null,leancloud:{app_id:"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz",app_key:"TuwIbmst7Q1N12V1EgEfVgDm",server_url:null,path:"window.location.pathname",ignore_local:!1}},search_path:"/local-search.xml"}</script><script src="/js/utils.js"></script><script src="/js/color-schema.js"></script><meta name="generator" content="Hexo 6.1.0"></head><body><header><div class="header-inner" style="height:70vh"><nav id="navbar" class="navbar fixed-top navbar-expand-lg navbar-dark scrolling-navbar"><div class="container"><a class="navbar-brand" href="/"><strong>聂伟星</strong> </a><button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><div class="animated-icon"><span></span><span></span><span></span></div></button><iframe width="350" scrolling="no" height="20" frameborder="0" allowtransparency="true" src="https://i.tianqi.com?c=code&id=40&color=%23FFFFFF&icon=1&site=12"></iframe><div class="collapse navbar-collapse" id="navbarSupportedContent"><ul class="navbar-nav ml-auto text-center"><li class="nav-item"><a class="nav-link" href="/"><i class="iconfont icon-home-fill"></i> 首页</a></li><li class="nav-item"><a class="nav-link" href="/archives/"><i class="iconfont icon-archive-fill"></i> 归档</a></li><li class="nav-item"><a class="nav-link" href="/categories/"><i class="iconfont icon-category-fill"></i> 分类</a></li><li class="nav-item"><a class="nav-link" href="/tags/"><i class="iconfont icon-tags-fill"></i> 标签</a></li><li class="nav-item"><a class="nav-link" href="/about/"><i class="iconfont icon-user-fill"></i> 关于</a></li><li class="nav-item"><a class="nav-link" href="/links/"><i class="iconfont icon-link-fill"></i> 友链</a></li><li class="nav-item dropdown"><a class="nav-link dropdown-toggle" target="_self" href="javascript:;" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="iconfont icon-books"></i> 文档</a><div class="dropdown-menu" aria-labelledby="navbarDropdown"><a class="dropdown-item" href="https://www.niewx.cn/mybook/"><i class="iconfont icon-notebook"></i> 运维笔记 </a><a class="dropdown-item" target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/column/87421"><i class="iconfont icon-addrbook"></i> 云+社区文档 </a><a class="dropdown-item" href="https://www.niewx.cn/question/"><i class="iconfont icon-notebook"></i> 运维问题集锦</a></div></li><li class="nav-item"><a class="nav-link" href="/playlist/"><i class="iconfont icon-music"></i> 音乐</a></li><li class="nav-item dropdown"><a class="nav-link dropdown-toggle" target="_self" href="javascript:;" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="iconfont icon-douban-fill"></i> 豆瓣</a><div class="dropdown-menu" aria-labelledby="navbarDropdown"><a class="dropdown-item" href="/books"><i class="iconfont icon-book"></i> 书籍 </a><a class="dropdown-item" href="/movies"><i class="iconfont icon-youtube-fill"></i> 电影 </a><a class="dropdown-item" href="/games"><i class="iconfont icon-switch-fill"></i> 游戏</a></div></li><li class="nav-item" id="search-btn"><a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">&nbsp;<i class="iconfont icon-search"></i>&nbsp;</a></li><li class="nav-item" id="color-toggle-btn"><a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a></li></ul></div></div></nav><div id="banner" class="banner" parallax="true" style="background:url(/img/default.png) no-repeat center center;background-size:cover"><div class="full-bg-img"><div class="mask flex-center" style="background-color:rgba(0,0,0,.3)"><div class="banner-text text-center fade-in-up"><div class="h2"><span id="subtitle" data-typed-text="k8s中pod的容器日志存储说明"></span></div><div class="mt-3"><span class="post-meta mr-2"><i class="iconfont icon-author" aria-hidden="true"></i> VashonNie </span><span class="post-meta"><i class="iconfont icon-date-fill" aria-hidden="true"></i> <time datetime="2021-10-29 13:47" pubdate>2021年10月29日 下午</time></span></div><div class="mt-1"><span class="post-meta mr-2"><i class="iconfont icon-chart"></i>16k 字 </span><span class="post-meta mr-2"><i class="iconfont icon-clock-fill"></i>136 分钟 </span><span id="leancloud-page-views-container" class="post-meta" style="display:none"><i class="iconfont icon-eye" aria-hidden="true"></i> <span id="leancloud-page-views"></span> 次</span></div></div></div></div></div></div></header><main><div class="container-fluid nopadding-x"><div class="row nomargin-x"><div class="side-col d-none d-lg-block col-lg-2"></div><div class="col-lg-8 nopadding-x-md"><div class="container nopadding-x-md" id="board-ctn"><div id="board"><article class="post-content mx-auto"><h1 style="display:none">k8s中pod的容器日志存储说明</h1><div class="markdown-body"><p>使用k8s的过程中，我们的服务都会打印大量的日志，为了方便查看排查定位问题，大部分时候会将日志打印在标准输出，但是有的时候为了方便日志的切割和收集，会将日志写到容器内的某个目录下日志文件。如果我们的日志会占用大量的磁盘空间，有可能还会外挂存储来将日志持久化。</p><p>容器内的业务日志有多种输出方式，其实不同日志输出方式，最终都是存在了pod所在的宿主机上，不同的方式对应了宿主机不同的目录，下面我们来详细说明下docker和containerd这2中运行时不同日志输出所在的宿主机目录。</p><p>当你了解了日志输出方式和宿主机目录的一一对应，那么后续遇到节点上磁盘空间被占满的问题，你就可以快速清理对应的日志文件来释放磁盘空间。</p><p>这里具体说明都是没有对docker或者containerd的存储目录进行数据盘挂载，如果有进行数据盘挂载，则根据实际挂载目录查找即可。</p><h1 id="docker日志存储目录说明"><a href="#docker日志存储目录说明" class="headerlink" title="docker日志存储目录说明"></a>docker日志存储目录说明</h1><p>这里举例说明docker和kubelet的默认存储目录是&#x2F;var&#x2F;lib&#x2F;docker和&#x2F;var&#x2F;lib&#x2F;kubelet</p><h2 id="日志标准输出"><a href="#日志标准输出" class="headerlink" title="日志标准输出"></a>日志标准输出</h2><p>容器的标准输出日志默认是在&#x2F;var&#x2F;lib&#x2F;docker&#x2F;containers&#x2F;[container_id]&#x2F;，标准输出日志默认会自动切割轮转，日志切割配置可以查看&#x2F;etc&#x2F;docker&#x2F;daemon.json文件的log-opts配置</p><figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs tap">[root@VM-0-3-centos 6035c5820cf52c7684057d70b4f0f206deb82bad8b931a2e63473ca0f4206384]<span class="hljs-comment"># docker ps | grep 6035c5820cf5</span><br>6035c5820cf5        quay.io/prometheus/prometheus                                  &quot;/bin/prometheus --w…&quot;   <span class="hljs-number"> 5 </span>days ago          Up<span class="hljs-number"> 5 </span>days                               k8s_prometheus_prometheus-tke-cls-b3mg1p92-0_prom-rl9st2ym_87269735-b041-41e9-b85f-aef897ac6200_1<br>[root@VM-0-3-centos 6035c5820cf52c7684057d70b4f0f206deb82bad8b931a2e63473ca0f4206384]<span class="hljs-comment"># cd /var/lib/docker/containers/6035c5820cf52c7684057d70b4f0f206deb82bad8b931a2e63473ca0f4206384/</span><br>[root@VM-0-3-centos 6035c5820cf52c7684057d70b4f0f206deb82bad8b931a2e63473ca0f4206384]<span class="hljs-comment"># ll</span><br>total 141544<br>-rw-r-----<span class="hljs-number"> 1 </span>root root <span class="hljs-number"> 44903243 </span>Oct<span class="hljs-number"> 29 </span>14:33 6035c5820cf52c7684057d70b4f0f206deb82bad8b931a2e63473ca0f4206384-json.log<br>-rw-r-----<span class="hljs-number"> 1 </span>root root<span class="hljs-number"> 100000151 </span>Oct<span class="hljs-number"> 27 </span>19:49 6035c5820cf52c7684057d70b4f0f206deb82bad8b931a2e63473ca0f4206384-json.log.1<br>drwx------<span class="hljs-number"> 2 </span>root root     <span class="hljs-number"> 4096 </span>Oct<span class="hljs-number"> 23 </span>21:00 checkpoints<br>-rw-------<span class="hljs-number"> 1 </span>root root     <span class="hljs-number"> 8224 </span>Oct<span class="hljs-number"> 23 </span>21:00 config.v2.json<br>-rw-r--r--<span class="hljs-number"> 1 </span>root root     <span class="hljs-number"> 2625 </span>Oct<span class="hljs-number"> 23 </span>21:00 hostconfig.json<br>drwx------<span class="hljs-number"> 2 </span>root root     <span class="hljs-number"> 4096 </span>Oct<span class="hljs-number"> 23 </span>21:00 mounts<br></code></pre></td></tr></table></figure><h2 id="日志写入容器内日志文件"><a href="#日志写入容器内日志文件" class="headerlink" title="日志写入容器内日志文件"></a>日志写入容器内日志文件</h2><p>如果日志写到容器日志文件，但是没有进行持久化挂载，则会存在&#x2F;var&#x2F;lib&#x2F;docker&#x2F;overlay2&#x2F;[merge_id]&#x2F;merged&#x2F;[log_path]，具体merge_id，我们可以inspect容器id查找到，而log_path则是你业务日志在容器内的存储路径，下面我们查找下nginx的日志。</p><figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs tap">[root@node1 ~]<span class="hljs-comment"># docker inspect ba62275eab393f88a01c57573a3672e220254eeb693d7f2176a8cd9577b58850 | grep merged</span><br>                &quot;MergedDir&quot;: &quot;/var/lib/docker/overlay2/136d009b75834ed0867f8e27107c4a945f6c921a629b929ebdecaf11a13629c0/merged&quot;,<br>[root@node1 ~]<span class="hljs-comment"># cd /var/lib/docker/overlay2/136d009b75834ed0867f8e27107c4a945f6c921a629b929ebdecaf11a13629c0/merged</span><br>[root@node1 merged]<span class="hljs-comment">#</span><br>[root@node1 merged]<span class="hljs-comment"># cd var/log/nginx/</span><br>[root@node1 nginx]<span class="hljs-comment"># ll</span><br>total 2597864<br>lrwxrwxrwx<span class="hljs-number"> 1 </span>101<span class="hljs-number"> 101 </span>       <span class="hljs-number"> 11 </span>Nov <span class="hljs-number"> 3 </span><span class="hljs-number"> 2020 </span>access.log -&gt; /dev/stdout<br>lrwxrwxrwx<span class="hljs-number"> 1 </span>101<span class="hljs-number"> 101 </span>       <span class="hljs-number"> 11 </span>Nov <span class="hljs-number"> 3 </span><span class="hljs-number"> 2020 </span>error.log -&gt; /dev/stderr<br>-rw-r--r--<span class="hljs-number"> 1 </span>101<span class="hljs-number"> 101 </span>2660179942 Oct<span class="hljs-number"> 29 </span>15:01 nginx_access.log<br>-rw-r--r--<span class="hljs-number"> 1 </span>101<span class="hljs-number"> 101 </span>        <span class="hljs-number"> 0 </span>Oct<span class="hljs-number"> 10 </span>19:58 nginx_error.log<br></code></pre></td></tr></table></figure><p>有的时候我们只能发现&#x2F;var&#x2F;lib&#x2F;docker&#x2F;overlay2目录占用了大量的磁盘空间，那么我们怎么找到是哪个容器占用了呢？首先查找&#x2F;var&#x2F;lib&#x2F;docker&#x2F;overlay2目录下的大文件</p><figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs gradle">[root@node1 ~]# <span class="hljs-keyword">find</span> <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2 -<span class="hljs-keyword">size</span> +<span class="hljs-number">1</span>G -exec du -sm &#123;&#125; \; | <span class="hljs-keyword">sort</span> -nr<br><span class="hljs-number">2538</span>    <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/136d009b75834ed0867f8e27107c4a945f6c921a629b929ebdecaf11a13629c0/m</span>erged<span class="hljs-regexp">/var/</span>log<span class="hljs-regexp">/nginx/</span>nginx_access.log<br><span class="hljs-number">2538</span>    <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/136d009b75834ed0867f8e27107c4a945f6c921a629b929ebdecaf11a13629c0/</span>diff<span class="hljs-regexp">/var/</span>log<span class="hljs-regexp">/nginx/</span>nginx_access.log<br></code></pre></td></tr></table></figure><p>找到对应的merge_id后，我们在查找到对应的容器id，采用下面命令，当能查看到多行信息，则对应的id是容器id，这里容器id是ba62275eab39</p><figure class="highlight autoit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs autoit">[root<span class="hljs-symbol">@node1</span> ~]<span class="hljs-meta"># docker ps | awk <span class="hljs-string">&#x27;&#123;print $1&#125;&#x27;</span> | xargs -n 1 -I &#123;&#125; -- sh -c <span class="hljs-string">&quot;echo &#123;&#125; &amp;&amp; docker inspect &#123;&#125; |grep 136d009b75834ed0867f8e27107c4a945f6c921a629b929ebdecaf11a13629c0 -C 1&quot;</span></span><br>CONTAINER<br>faf1856fda4e<br><span class="hljs-number">1</span>fe6f4025507<br>ba62275eab39<br>            <span class="hljs-string">&quot;Data&quot;</span>: &#123;<br>                <span class="hljs-string">&quot;LowerDir&quot;</span>: <span class="hljs-string">&quot;/var/lib/docker/overlay2/136d009b75834ed0867f8e27107c4a945f6c921a629b929ebdecaf11a13629c0-init/diff:/var/lib/docker/overlay2/a4cdd5dc7a462904471de2d056570ed838b2317e4b59fd5613992196df9ef17f/diff:/var/lib/docker/overlay2/d514eb8d6219065c3a7332c6a0438e0ca041569da38de6fa7a14b84c3b1e5e4e/diff:/var/lib/docker/overlay2/1e0e34d059ac42479185c87e1ad5922cd77d78ab6a53bdd14b45636570146577/diff:/var/lib/docker/overlay2/aa4d53898ff012bfdcbdb453fcea67a9946cb403b27905b586eaf12977f29384/diff:/var/lib/docker/overlay2/dace2fb0d20cf856aa8d9ae16211d7f0e15ad7e0ad4ac87b278c0a14b134f432/diff:/var/lib/docker/overlay2/c1d91f716865e4367007d3d9fe3d19719f70a7befff1a629a074e79b835052f0/diff:/var/lib/docker/overlay2/fbbfb23d2eccb88bb79657a94f06dbde76249256097cf7bdc231df667c8ab6c9/diff:/var/lib/docker/overlay2/07e7cbb11f955c3edbcc5ac66cf966ef3da16d4c336a2022652c1468177934fb/diff:/var/lib/docker/overlay2/a2858bf53ea2c668ccd89bd9a87217513f8c5ef2c1e70ed35885400b883d7e1f/diff:/var/lib/docker/overlay2/ddea490967639aaaabd3bbaa7872be77d642b4e34203672bbc585d76d074d3dd/diff:/var/lib/docker/overlay2/f4e7cae5b5e70b89da96684df655f8f5a830dc751b68f638c2890b44cc6da891/diff:/var/lib/docker/overlay2/891e829575951f1e7a52fea41a138beea7684ca9e723244b84f87f82954f49ca/diff:/var/lib/docker/overlay2/1a2310107ffb59198ed6ff553f320f08f69d11bd7f7bb384f57761eb88852d9b/diff:/var/lib/docker/overlay2/1a75669e46cf247de83f5e74a1205cd1ecaaa13fb14cc6ef0fe7216f06b66786/diff:/var/lib/docker/overlay2/36fff493df92c24d07d46a50ab63d0132c9c18ab22d48b33ed2a1a85fcd05fd6/diff&quot;</span>,<br>                <span class="hljs-string">&quot;MergedDir&quot;</span>: <span class="hljs-string">&quot;/var/lib/docker/overlay2/136d009b75834ed0867f8e27107c4a945f6c921a629b929ebdecaf11a13629c0/merged&quot;</span>,<br>                <span class="hljs-string">&quot;UpperDir&quot;</span>: <span class="hljs-string">&quot;/var/lib/docker/overlay2/136d009b75834ed0867f8e27107c4a945f6c921a629b929ebdecaf11a13629c0/diff&quot;</span>,<br>                <span class="hljs-string">&quot;WorkDir&quot;</span>: <span class="hljs-string">&quot;/var/lib/docker/overlay2/136d009b75834ed0867f8e27107c4a945f6c921a629b929ebdecaf11a13629c0/work&quot;</span><br>            &#125;,<br></code></pre></td></tr></table></figure><p>找到容器id后，进入容器的var&#x2F;log&#x2F;nginx&#x2F;目录清理日志即可。</p><p>上面的方法是查找容器存储下的大文件，然后根据大文件所在目录找到对应的容器，但是有的时候不一定是有单个文件大，而是文件夹比较大，里面文件数量比较多，导致占用了大量的磁盘空间，这个时候该怎么查找呢？这个时候我们就只能一层层找到这个大文件夹，下面我们来说明下。</p><figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br></pre></td><td class="code"><pre><code class="hljs gradle">[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">10</span>-centos ~]# du -hm --max-depth=<span class="hljs-number">1</span> <span class="hljs-regexp">/var/</span>lib/docker  | <span class="hljs-keyword">sort</span> -rn | head -<span class="hljs-number">10</span><br><span class="hljs-number">44790</span>   <span class="hljs-regexp">/var/</span>lib/docker<br><span class="hljs-number">39315</span>   <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<br><span class="hljs-number">5420</span>    <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>containers<br><span class="hljs-number">55</span>      <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/im</span>age<br><span class="hljs-number">1</span>       <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>volumes<br><span class="hljs-number">1</span>       <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>trust<br><span class="hljs-number">1</span>       <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>tmp<br><span class="hljs-number">1</span>       <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>swarm<br><span class="hljs-number">1</span>       <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>runtimes<br><span class="hljs-number">1</span>       <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>plugins<br>[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">10</span>-centos ~]# du -hm --max-depth=<span class="hljs-number">1</span> <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2  | <span class="hljs-keyword">sort</span> -rn | head -<span class="hljs-number">10</span><br><span class="hljs-number">39315</span>   <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<br><span class="hljs-number">2659</span>    <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2/<span class="hljs-number">611</span>ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639<br><span class="hljs-number">1499</span>    <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2/<span class="hljs-number">5</span>ca45180744594cd01643aada607b351dc9a1f011d2807752d2f55f470892a9b<br><span class="hljs-number">1314</span>    <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2/bbc80fd995e6b0aa97bc1326a72a4f4049bae33407a0c34c39561d31f8c17598<br><span class="hljs-number">1253</span>    <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2/c84ef307e9147365d7a73d160ce898cc70ef93cf1f69be94d7598dd0dc456ae5<br><span class="hljs-number">1191</span>    <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2/d5409735e53b1efc9902b72a3b170d4a523c233b807f2f4954ca3cca1cc42e49<br><span class="hljs-number">1046</span>    <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2/<span class="hljs-number">9</span>ec2b9732d5b64a9a03223d870b4aec520af2b6845ab3c391c2fa95f1e45fe2e<br><span class="hljs-number">1046</span>    <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2/<span class="hljs-number">69975</span>a1ecf6f7345acf6e97c946966468c69ae850ebd2a63b63ed8f0cd598412<br><span class="hljs-number">1009</span>    <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2/<span class="hljs-number">693</span>ad529427a4d135b064e2e428c6b269ac3017e1ce0f61faaa49de9cc7a0d81<br><span class="hljs-number">733</span>     <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2/cd41e5558d7f317da34280b64e3f446f225139a0c82f59e047af9be8610a1009<br>[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">10</span>-centos ~]# du -hm --max-depth=<span class="hljs-number">1</span> <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2/<span class="hljs-number">611</span>ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639  | <span class="hljs-keyword">sort</span> -rn | head -<span class="hljs-number">10</span><br><span class="hljs-number">2659</span>    <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2/<span class="hljs-number">611</span>ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639<br><span class="hljs-number">1408</span>    <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged<br><span class="hljs-number">1251</span>    <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/</span>diff<br><span class="hljs-number">1</span>       <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/</span>work<br>[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">10</span>-centos ~]# du -hm --max-depth=<span class="hljs-number">1</span> <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged/  | <span class="hljs-keyword">sort</span> -rn | head -<span class="hljs-number">10</span><br><span class="hljs-number">1408</span>    <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged/<br><span class="hljs-number">1249</span>    <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged/tmp<br><span class="hljs-number">141</span>     <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged/usr<br><span class="hljs-number">13</span>      <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged/home<br><span class="hljs-number">4</span>       <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged/var<br><span class="hljs-number">3</span>       <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged/etc<br><span class="hljs-number">1</span>       <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged/sys<br><span class="hljs-number">1</span>       <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged/run<br><span class="hljs-number">1</span>       <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged/root<br><span class="hljs-number">1</span>       <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged/proc<br>[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">10</span>-centos ~]# du -hm --max-depth=<span class="hljs-number">1</span> <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged<span class="hljs-regexp">/tmp/</span>  | <span class="hljs-keyword">sort</span> -rn | head -<span class="hljs-number">10</span><br><span class="hljs-number">1249</span>    <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged<span class="hljs-regexp">/tmp/</span><br><span class="hljs-number">861</span>     <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged<span class="hljs-regexp">/tmp/</span>nvd-data835905766<br><span class="hljs-number">388</span>     <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged<span class="hljs-regexp">/tmp/u</span>buntu-cve-tracker540878348<br><span class="hljs-number">2</span>       <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged<span class="hljs-regexp">/tmp/</span>alpine-secdbUpdater788692628<br>[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">10</span>-centos ~]# du -hm --max-depth=<span class="hljs-number">1</span> <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged<span class="hljs-regexp">/tmp/</span>nvd-data835905766/  | <span class="hljs-keyword">sort</span> -rn | head -<span class="hljs-number">10</span><br><span class="hljs-number">861</span>     <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged<span class="hljs-regexp">/tmp/</span>nvd-data835905766/<br>[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">10</span>-centos ~]# cd <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged<span class="hljs-regexp">/tmp/</span>nvd-data835905766/<br>[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">10</span>-centos <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged<span class="hljs-regexp">/tmp/</span>nvd-data835905766]# ls  -alhS<br>total <span class="hljs-number">861</span>M<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span> <span class="hljs-number">104</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">11</span> <span class="hljs-number">2020</span>.json<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span>  <span class="hljs-number">82</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">11</span> <span class="hljs-number">2019</span>.json<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span>  <span class="hljs-number">81</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">11</span> <span class="hljs-number">2021</span>.json<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span>  <span class="hljs-number">74</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">11</span> <span class="hljs-number">2018</span>.json<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span>  <span class="hljs-number">70</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">11</span> <span class="hljs-number">2017</span>.json<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span>  <span class="hljs-number">50</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">11</span> <span class="hljs-number">2016</span>.json<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span>  <span class="hljs-number">44</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">10</span> <span class="hljs-number">2013</span>.json<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span>  <span class="hljs-number">39</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">10</span> <span class="hljs-number">2014</span>.json<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span>  <span class="hljs-number">39</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">10</span> <span class="hljs-number">2012</span>.json<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span>  <span class="hljs-number">39</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">11</span> <span class="hljs-number">2015</span>.json<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span>  <span class="hljs-number">34</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">10</span> <span class="hljs-number">2011</span>.json<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span>  <span class="hljs-number">34</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">10</span> <span class="hljs-number">2010</span>.json<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span>  <span class="hljs-number">32</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">10</span> <span class="hljs-number">2008</span>.json<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span>  <span class="hljs-number">32</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">10</span> <span class="hljs-number">2009</span>.json<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span>  <span class="hljs-number">30</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">10</span> <span class="hljs-number">2006</span>.json<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span>  <span class="hljs-number">28</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">10</span> <span class="hljs-number">2007</span>.json<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span>  <span class="hljs-number">21</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">10</span> <span class="hljs-number">2002</span>.json<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span>  <span class="hljs-number">20</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">10</span> <span class="hljs-number">2005</span>.json<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span>  <span class="hljs-number">13</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">10</span> <span class="hljs-number">2004</span>.json<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span> <span class="hljs-number">5.8</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">10</span> <span class="hljs-number">2003</span>.json<br>drwx------ <span class="hljs-number">2</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span> <span class="hljs-number">4.0</span>K Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">11</span> .<br>drwxrwxrwt <span class="hljs-number">1</span> root  root  <span class="hljs-number">4.0</span>K Dec <span class="hljs-number">29</span> <span class="hljs-number">00</span>:<span class="hljs-number">20</span> ..<br>[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">10</span>-centos ~]# docker ps | awk <span class="hljs-string">&#x27;&#123;print $1&#125;&#x27;</span> | xargs -n <span class="hljs-number">1</span> -I &#123;&#125; -- sh -c <span class="hljs-string">&quot;echo &#123;&#125; &amp;&amp; docker inspect &#123;&#125; |grep 611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639 -C 1&quot;</span><br>CONTAINER<br>Error: No such object: CONTAINER<br><span class="hljs-number">9</span>d2cd497b1cb<br>e99ce9b11191<br><span class="hljs-number">6</span>bdca3204a62<br>b6dfe23c31e9<br>            <span class="hljs-string">&quot;Data&quot;</span>: &#123;<br>                <span class="hljs-string">&quot;LowerDir&quot;</span>: <span class="hljs-string">&quot;/var/lib/docker/overlay2/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639-init/diff:/var/lib/docker/overlay2/180f09778c2e17d1ffd73aa5be45244ee414f4423bcc2f81e460c52b9a3ca90b/diff:/var/lib/docker/overlay2/bd60ea9822fbf0169cc9ed116e7c82a9d25268995508c37c012b2940eb7fa014/diff:/var/lib/docker/overlay2/cadc2d6308ef60788eb40b05ad5417f3ea89fb96aaa0028b80ccfe80202da748/diff:/var/lib/docker/overlay2/2dc66700322a704c5fce138e66d27ee38ee324eaa2c0c837e2fad842751cf645/diff:/var/lib/docker/overlay2/f0200441bebd98aaa57af2d9ddbbc4c7e8d9c8b982c14f50226e8841ea143380/diff:/var/lib/docker/overlay2/a9b06a4f8b8e8828ac142f9cf10c5c61d3771474ef0fe083fde2caeb2380d3df/diff:/var/lib/docker/overlay2/265bcad9bbbf55480038501a18dd7e03fda4848268dce29203302672fbecd5b3/diff&quot;</span>,<br>                <span class="hljs-string">&quot;MergedDir&quot;</span>: <span class="hljs-string">&quot;/var/lib/docker/overlay2/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/merged&quot;</span>,<br>                <span class="hljs-string">&quot;UpperDir&quot;</span>: <span class="hljs-string">&quot;/var/lib/docker/overlay2/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/diff&quot;</span>,<br>                <span class="hljs-string">&quot;WorkDir&quot;</span>: <span class="hljs-string">&quot;/var/lib/docker/overlay2/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/work&quot;</span><br>            &#125;,<br>......<br>[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">10</span>-centos <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged<span class="hljs-regexp">/tmp/</span>nvd-data835905766]# docker ps | <span class="hljs-keyword">grep</span> b6dfe23c31e9<br>b6dfe23c31e9        goharbor<span class="hljs-regexp">/clair-photon                                          &quot;./</span>docker-entrypoint…<span class="hljs-string">&quot;    9 days ago          Up 9 days                               k8s_clair_harbor-1611818628-harbor-clair-7d89b99d5f-bcpgr_harbor_2f758cf3-e945-44c3-8a5b-700bf2187100_0</span><br></code></pre></td></tr></table></figure><p>通过上面步骤，我们就找到占用了大量磁盘空间的目录和对应的容器是哪个，后面我们可以进入到对应的容器，自行清理不需要的文件即可</p><h2 id="日志写入容器内日志文件并挂载"><a href="#日志写入容器内日志文件并挂载" class="headerlink" title="日志写入容器内日志文件并挂载"></a>日志写入容器内日志文件并挂载</h2><p>有的时候，我们会将日志写到日志文件并且进行挂载</p><h3 id="挂载到emptyDir"><a href="#挂载到emptyDir" class="headerlink" title="挂载到emptyDir"></a>挂载到emptyDir</h3><p>根据容器id，inspect查找empty目录，如果你是将容器目录挂载到emptyDir，对应的宿主机目录是在&#x2F;var&#x2F;lib&#x2F;kubelet&#x2F;pods下，一般这个目录不会外挂数据盘，如果你的日志占用磁盘空间比较大，不建议挂载emptyDir，因为会将&#x2F;var&#x2F;lib&#x2F;kubelet&#x2F;pods所在磁盘空间占满，一般是系统盘，从而触发kubelet的驱逐。</p><figure class="highlight subunit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs subunit">[root@VM<span class="hljs-string">-0</span><span class="hljs-string">-29</span>-centos ~]# docker inspect 9d75f541f36db3a00514aff399e4455dee8dacbf912fa3b72afa675f505255fc | grep empty<br>                &quot;/var/lib/kubelet/pods/24fe94a1<span class="hljs-string">-295</span>b<span class="hljs-string">-4979</span><span class="hljs-string">-8</span>d3f<span class="hljs-string">-735671782172</span>/volumes/kubernetes.io~empty-dir/vol:/data&quot;,<br>                &quot;Source&quot;: &quot;/var/lib/kubelet/pods/24fe94a1<span class="hljs-string">-295</span>b<span class="hljs-string">-4979</span><span class="hljs-string">-8</span>d3f<span class="hljs-string">-735671782172</span>/volumes/kubernetes.io~empty-dir/vol&quot;,<br><br></code></pre></td></tr></table></figure><h3 id="挂载到pvc"><a href="#挂载到pvc" class="headerlink" title="挂载到pvc"></a>挂载到pvc</h3><p>如果容器内文件挂载的是pvc，pvc包含cbs，nfs，或者云上的对象存储，这里最终就是将对应的目录挂载到cbs，cfs，对象存储。这里根据cfs的服务端ip，cbs_id，cos实例名称用df查找目录即可。</p><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs awk">[root@node1 ~]<span class="hljs-comment"># df -h | grep disk</span><br><span class="hljs-regexp">/dev/</span>vdb         <span class="hljs-number">20</span>G  <span class="hljs-number">9.7</span>G  <span class="hljs-number">9.9</span>G  <span class="hljs-number">50</span>% <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/kubelet/</span>plugins<span class="hljs-regexp">/kubernetes.io/</span>qcloud-cbs<span class="hljs-regexp">/mounts/</span>disk-xxxxx<br><span class="hljs-regexp">/dev/</span>vdg        <span class="hljs-number">9.8</span>G   <span class="hljs-number">37</span>M  <span class="hljs-number">9.7</span>G   <span class="hljs-number">1</span>% <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/kubelet/</span>plugins<span class="hljs-regexp">/kubernetes.io/</span>qcloud-cbs<span class="hljs-regexp">/mounts/</span>disk-xxxxx<br><br>[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">29</span>-centos ~]<span class="hljs-comment"># df -h | grep nwx-test-1</span><br>cosfs           <span class="hljs-number">256</span>T     <span class="hljs-number">0</span>  <span class="hljs-number">256</span>T   <span class="hljs-number">0</span>% <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/kubelet/</span>pods<span class="hljs-regexp">/99e9e539-28c2-4da0-9571-37e6dc57dcf4/</span>volumes<span class="hljs-regexp">/kubernetes.io~csi/</span>nwx-test-<span class="hljs-number">1</span>/mount<br><br>[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">2</span>-centos ~]<span class="hljs-comment"># df -h | grep 10.0.0.11</span><br><span class="hljs-number">10.0</span>.<span class="hljs-number">0.11</span>:<span class="hljs-regexp">/      10G   32M   10G   1% /</span>var<span class="hljs-regexp">/lib/</span>kubelet<span class="hljs-regexp">/pods/</span>d5298dfa-<span class="hljs-number">0</span>b52-<span class="hljs-number">4</span>d11-a34e-e68c7aa8a29e<span class="hljs-regexp">/volumes/</span>kubernetes.io~nfs/vol<br><br></code></pre></td></tr></table></figure><h1 id="containerd日志存储目录说明"><a href="#containerd日志存储目录说明" class="headerlink" title="containerd日志存储目录说明"></a>containerd日志存储目录说明</h1><p>这里举例说明containerd和kubelet的默认存储目录是&#x2F;run&#x2F;containerd和&#x2F;var&#x2F;lib&#x2F;kubelet</p><h2 id="日志标准输出-1"><a href="#日志标准输出-1" class="headerlink" title="日志标准输出"></a>日志标准输出</h2><p>首先根据容器id用inspect查找具体的logPath，然后对应的目录就是容器标准输出在宿主机存储目录，containerd标准输出的宿主机路径是&#x2F;var&#x2F;log&#x2F;pods&#x2F;下，因此用elk采集containerd的标准输出日志需要采集宿主机的&#x2F;var&#x2F;log&#x2F;pods&#x2F;路径。</p><figure class="highlight subunit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs subunit">[root@VM<span class="hljs-string">-17</span><span class="hljs-string">-16</span>-centos ~]# crictl inspect 0375c0e679d57 | grep logPath<br>    &quot;logPath&quot;: &quot;/var/log/pods/kube-system_tke-log-agent-k82vc_fd92c0e4-e08d<span class="hljs-string">-46</span>d5<span class="hljs-string">-9</span>a52-e6e1c4f29f3d/loglistener/0.log&quot;<br>[root@VM<span class="hljs-string">-17</span><span class="hljs-string">-16</span>-centos ~]# cd /var/log/pods/kube-system_tke-log-agent-k82vc_fd92c0e4-e08d<span class="hljs-string">-46</span>d5<span class="hljs-string">-9</span>a52-e6e1c4f29f3d/loglistener<br>[root@VM<span class="hljs-string">-17</span><span class="hljs-string">-16</span>-centos loglistener]# ls<br>0.log<br></code></pre></td></tr></table></figure><h2 id="日志写入容器内日志文件-1"><a href="#日志写入容器内日志文件-1" class="headerlink" title="日志写入容器内日志文件"></a>日志写入容器内日志文件</h2><p>查找容器id，然后根据容器id，用df查找到容器的rootfs目录，再进入对应的目录即可。</p><figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs gradle">[root@VM-<span class="hljs-number">17</span>-<span class="hljs-number">16</span>-centos vol]# crictl ps | <span class="hljs-keyword">grep</span> go-test<br><span class="hljs-number">2380</span>b4524eebf       <span class="hljs-number">57</span>b1777ee4b87       About a minute ago   Running             go-test             <span class="hljs-number">0</span>                   <span class="hljs-number">10389</span>f95f91b6<br>[root@VM-<span class="hljs-number">17</span>-<span class="hljs-number">16</span>-centos vol]# df -h | <span class="hljs-keyword">grep</span> <span class="hljs-number">2380</span>b4524eebf<br>overlay          <span class="hljs-number">50</span>G   <span class="hljs-number">14</span>G   <span class="hljs-number">34</span>G  <span class="hljs-number">30</span>% <span class="hljs-regexp">/run/</span>containerd<span class="hljs-regexp">/io.containerd.runtime.v2.task/</span>k8s.io<span class="hljs-regexp">/2380b4524eebf3455a79442204bf68efb0325f466429238bc4338a8eccea28c8/</span>rootfs<br>[root@VM-<span class="hljs-number">17</span>-<span class="hljs-number">16</span>-centos vol]# cd <span class="hljs-regexp">/run/</span>containerd<span class="hljs-regexp">/io.containerd.runtime.v2.task/</span>k8s.io<span class="hljs-regexp">/2380b4524eebf3455a79442204bf68efb0325f466429238bc4338a8eccea28c8/</span>rootfs<br>[root@VM-<span class="hljs-number">17</span>-<span class="hljs-number">16</span>-centos rootfs]# cd data/<br>[root@VM-<span class="hljs-number">17</span>-<span class="hljs-number">16</span>-centos data]# ls<br>go.log<br></code></pre></td></tr></table></figure><h2 id="日志写入容器内日志文件并挂载-1"><a href="#日志写入容器内日志文件并挂载-1" class="headerlink" title="日志写入容器内日志文件并挂载"></a>日志写入容器内日志文件并挂载</h2><h3 id="挂载到emptyDir-1"><a href="#挂载到emptyDir-1" class="headerlink" title="挂载到emptyDir"></a>挂载到emptyDir</h3><p>根据容器id，inspect查找empty目录，如果你是将容器目录挂载到emptyDir，对应的宿主机目录是在&#x2F;var&#x2F;lib&#x2F;kubelet下，一般这个目录不会外挂数据盘，如果你的日志占用磁盘空间比较大，不建议挂载emptyDir，因为会将&#x2F;var&#x2F;lib&#x2F;kubelet所在磁盘空间占满，一般是系统盘，从而触发kubelet的驱逐。</p><figure class="highlight subunit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs subunit">[root@VM<span class="hljs-string">-17</span><span class="hljs-string">-16</span>-centos loglistener]# crictl ps | grep go-test<br>43fd8249aba3b       57b1777ee4b87       2 hours ago         Running             go-test             0                   b4eccdc968348<br>[root@VM<span class="hljs-string">-17</span><span class="hljs-string">-16</span>-centos data]# crictl inspect 43fd8249aba3b | grep empty<br>        &quot;hostPath&quot;: &quot;/var/lib/kubelet/pods/7d32e2e6<span class="hljs-string">-169</span>a<span class="hljs-string">-40</span>c3-b36e<span class="hljs-string">-4</span>ce22e248776/volumes/kubernetes.io~empty-dir/vol&quot;,<br>          &quot;host_path&quot;: &quot;/var/lib/kubelet/pods/7d32e2e6<span class="hljs-string">-169</span>a<span class="hljs-string">-40</span>c3-b36e<span class="hljs-string">-4</span>ce22e248776/volumes/kubernetes.io~empty-dir/vol&quot;<br>          &quot;source&quot;: &quot;/var/lib/kubelet/pods/7d32e2e6<span class="hljs-string">-169</span>a<span class="hljs-string">-40</span>c3-b36e<span class="hljs-string">-4</span>ce22e248776/volumes/kubernetes.io~empty-dir/vol&quot;,<br>[root@VM<span class="hljs-string">-17</span><span class="hljs-string">-16</span>-centos data]# cd /var/lib/kubelet/pods/7d32e2e6<span class="hljs-string">-169</span>a<span class="hljs-string">-40</span>c3-b36e<span class="hljs-string">-4</span>ce22e248776/volumes/kubernetes.io~empty-dir/vol<br>[root@VM<span class="hljs-string">-17</span><span class="hljs-string">-16</span>-centos vol]# ls<br>go.log<br></code></pre></td></tr></table></figure><h3 id="挂载到pvc-1"><a href="#挂载到pvc-1" class="headerlink" title="挂载到pvc"></a>挂载到pvc</h3><p>如果容器内文件挂载的是pvc，pvc包含cbs，nfs，或者云上的对象存储，这里最终就是将对应的目录挂载到cbs，cfs，对象存储。这里根据cfs的服务端ip，cbs_id，cos实例名称用df查找目录即可。和docker的方式是一致的。</p></div><hr><div><div class="post-metas my-3"><div class="post-meta mr-3 d-flex align-items-center"><i class="iconfont icon-category"></i> <span class="category-chains"><span class="category-chain"><a href="/categories/Kubernetes/" class="category-chain-item">Kubernetes</a></span></span></div><div class="post-meta"><i class="iconfont icon-tags"></i> <a href="/tags/Kubernetes/">#Kubernetes</a> <a href="/tags/containers/">#containers</a></div></div><div class="license-box my-3"><div class="license-title"><div>k8s中pod的容器日志存储说明</div><div>https://www.niewx.cn/2021/10/29/2021-10-29-Container-log-storage-description-of-pod-in-k8s/</div></div><div class="license-meta"><div class="license-meta-item"><div>作者</div><div>VashonNie</div></div><div class="license-meta-item license-meta-date"><div>发布于</div><div>2021年10月29日</div></div><div class="license-meta-item"><div>许可协议</div><div><a target="_blank" href="https://creativecommons.org/licenses/by-nc/4.0/"><span class="hint--top hint--rounded" aria-label="BY - 署名"><i class="iconfont icon-by"></i> </span></a><a target="_blank" href="https://creativecommons.org/licenses/by-nc/4.0/"><span class="hint--top hint--rounded" aria-label="NC - 非商业性使用"><i class="iconfont icon-nc"></i></span></a></div></div></div><div class="license-icon iconfont"></div></div><div class="post-prevnext my-3"><article class="post-prev col-6"><a href="/2021/11/01/2021-11-01-How-to-get-an-alert-through-PrometheusAlert/" title="如何通过PrometheusAlert发生告警"><i class="iconfont icon-arrowleft"></i> <span class="hidden-mobile">如何通过PrometheusAlert发生告警</span> <span class="visible-mobile">上一篇</span></a></article><article class="post-next col-6"><a href="/2021/09/14/2021-09-14-The-elastic-cluster-collects-nginx-ingress-controller-access-logs/" title="弹性集群收集nginx-ingress controller访问日志"><span class="hidden-mobile">弹性集群收集nginx-ingress controller访问日志</span> <span class="visible-mobile">下一篇</span> <i class="iconfont icon-arrowright"></i></a></article></div></div><article id="comments" lazyload><div id="valine"></div><script type="text/javascript">Fluid.utils.loadComments("#valine",(function(){Fluid.utils.createScript("https://lib.baomitu.com/valine/1.4.16/Valine.min.js",(function(){var i=Object.assign({appId:"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz",appKey:"TuwIbmst7Q1N12V1EgEfVgDm",path:"window.location.pathname",placeholder:null,avatar:"retro",meta:["nick","mail","link"],requiredFields:[],pageSize:10,lang:"zh-CN",highlight:!1,recordIP:!1,serverURLs:"",emojiCDN:null,emojiMaps:null,enableQQ:!1},{el:"#valine",path:window.location.pathname});new Valine(i),Fluid.utils.waitElementVisible("#valine .vcontent",()=>{var i="#valine .vcontent img:not(.vemoji)";Fluid.plugins.imageCaption(i),Fluid.plugins.fancyBox(i)})}))}))</script><noscript>Please enable JavaScript to view the comments</noscript></article></article></div></div></div><div class="side-col d-none d-lg-block col-lg-2"><aside class="sidebar" style="margin-left:-1rem"><div id="toc"><p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p><div class="toc-body" id="toc-body"></div></div></aside></div></div></div><a id="scroll-top-button" aria-label="TOP" href="#" role="button"><i class="iconfont icon-arrowup" aria-hidden="true"></i></a><div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable modal-lg" role="document"><div class="modal-content"><div class="modal-header text-center"><h4 class="modal-title w-100 font-weight-bold">搜索</h4><button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button></div><div class="modal-body mx-3"><div class="md-form mb-5"><input type="text" id="local-search-input" class="form-control validate"> <label data-error="x" data-success="v" for="local-search-input">关键词</label></div><div class="list-group" id="local-search-result"></div></div></div></div></div></main><footer><div class="footer-inner"><div id="music_div" style="position:fixed;bottom:0;left:30px"><iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width="330" height="110" src="//music.163.com/outchain/player?type=0&id=919444742&auto=1&height=90"></iframe><script src="https://cdn.staticfile.org/jquery/3.3.1/jquery.min.js"></script><script src="/js/musicshow.js"></script></div><div class="footer-content"><a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a><div><span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span><script src="/js/duration.js"></script></div></div><div class="statistics"><span id="leancloud-site-pv-container" style="display:none">总访问量 <span id="leancloud-site-pv"></span> 次 </span><span id="leancloud-site-uv-container" style="display:none">总访客数 <span id="leancloud-site-uv"></span> 人</span></div></div></footer><script src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js"></script><link rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css"><script>NProgress.configure({showSpinner:!1,trickleSpeed:100}),NProgress.start(),window.addEventListener("load",(function(){NProgress.done()}))</script><script src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js"></script><script src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js"></script><script src="/js/events.js"></script><script src="/js/plugins.js"></script><script src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js"></script><script>!function(t,e){var i=Fluid.plugins.typing,n=e.getElementById("subtitle");n&&i&&i(n.getAttribute("data-typed-text"))}(window,document)</script><script defer>var _hmt=_hmt||[];!function(){var e=document.createElement("script");e.src="https://hm.baidu.com/hm.js?bfe4709ccd8c5c9e559c89f4fd0866f3";var t=document.getElementsByTagName("script")[0];t.parentNode.insertBefore(e,t)}()</script><script src="/js/img-lazyload.js"></script><script>Fluid.utils.createScript("https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js",(function(){var t=jQuery("#toc");if(0!==t.length&&window.tocbot){var o=jQuery("#board-ctn").offset().top;window.tocbot.init({tocSelector:"#toc-body",contentSelector:".markdown-body",headingSelector:CONFIG.toc.headingSelector||"h1,h2,h3,h4,h5,h6",linkClass:"tocbot-link",activeLinkClass:"tocbot-active-link",listClass:"tocbot-list",isCollapsedClass:"tocbot-is-collapsed",collapsibleClass:"tocbot-is-collapsible",collapseDepth:CONFIG.toc.collapseDepth||0,scrollSmooth:!0,headingsOffset:-o}),t.find(".toc-list-item").length>0&&t.css("visibility","visible")}}))</script><script>!function(){var e=CONFIG.code_language.enable&&CONFIG.code_language.default,a=CONFIG.copy_btn;if(e||a){var i="";i+='<div class="code-widget">',i+="LANG",i+="</div>",jQuery(".markdown-body pre").each((function(){var n=jQuery(this);if(!(n.find("code.mermaid").length>0||n.find("span.line").length>0)){var t,c="";e&&(c=CONFIG.code_language.default,n[0].children.length>0&&n[0].children[0].classList.length>=2&&n.children().hasClass("hljs")?c=n[0].children[0].classList[1]:n[0].getAttribute("data-language")?c=n[0].getAttribute("data-language"):n.parent().hasClass("sourceCode")&&n[0].children.length>0&&n[0].children[0].classList.length>=2?(c=n[0].children[0].classList[1],n.parent().addClass("code-wrapper")):n.parent().hasClass("markdown-body")&&0===n[0].classList.length&&n.wrap('<div class="code-wrapper"></div>'),c=c.toUpperCase().replace("NONE",CONFIG.code_language.default)),n.append(i.replace("LANG",c).replace('code-widget">',(t=n[0],(Fluid.utils.getBackgroundLightness(t)>=0?"code-widget-light":"code-widget-dark")+(a?' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>':' code-widget">')))),a&&Fluid.utils.createScript("https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js",(function(){new window.ClipboardJS(".copy-btn",{target:function(e){for(var a=e.parentNode.childNodes,i=0;i<a.length;i++)if("CODE"===a[i].tagName)return a[i]}}).on("success",(function(e){e.clearSelection(),e.trigger.innerHTML=e.trigger.innerHTML.replace("icon-copy","icon-success"),setTimeout((function(){e.trigger.innerHTML=e.trigger.innerHTML.replace("icon-success","icon-copy")}),2e3)}))}))}}))}}()</script><script>Fluid.utils.createScript("https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js",(function(){window.anchors.options={placement:CONFIG.anchorjs.placement,visible:CONFIG.anchorjs.visible},CONFIG.anchorjs.icon&&(window.anchors.options.icon=CONFIG.anchorjs.icon);var o=(CONFIG.anchorjs.element||"h1,h2,h3,h4,h5,h6").split(","),n=[];for(var i of o)n.push(".markdown-body > "+i.trim());"left"===CONFIG.anchorjs.placement&&(window.anchors.options.class="anchorjs-link-left"),window.anchors.add(n.join(", "))}))</script><script>Fluid.utils.createScript("https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js",(function(){Fluid.plugins.fancyBox()}))</script><script>Fluid.plugins.imageCaption()</script><script src="/js/local-search.js"></script><script defer src="/js/leancloud.js"></script><script src="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/DynamicRibbon.min.js"></script><script src="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/runtime.min.js"></script><script src="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/love.min.js"></script><script src="/js/boot.js"></script><noscript><div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div></noscript><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/z16.model.json"},"display":{"position":"right","width":180,"height":360},"mobile":{"show":true},"react":{"opacity":0.7},"log":false});</script></body></html>
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="VashonNie">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="使用k8s的过程中，我们的服务都会打印大量的日志，为了方便查看排查定位问题，大部分时候会将日志打印在标准输出，但是有的时候为了方便日志的切割和收集，会将日志写到容器内的某个目录下日志文件。如果我们的日志会占用大量的磁盘空间，有可能还会外挂存储来将日志持久化。 容器内的业务日志有多种输出方式，其实不同日志输出方式，最终都是存在了pod所在的宿主机上，不同的方式对应了宿主机不同的目录，下面我们来详细说">
+<meta property="og:type" content="article">
+<meta property="og:title" content="k8s中pod的容器日志存储说明">
+<meta property="og:url" content="https://www.niewx.cn/2021/10/29/2021-10-29-Container-log-storage-description-of-pod-in-k8s/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="使用k8s的过程中，我们的服务都会打印大量的日志，为了方便查看排查定位问题，大部分时候会将日志打印在标准输出，但是有的时候为了方便日志的切割和收集，会将日志写到容器内的某个目录下日志文件。如果我们的日志会占用大量的磁盘空间，有可能还会外挂存储来将日志持久化。 容器内的业务日志有多种输出方式，其实不同日志输出方式，最终都是存在了pod所在的宿主机上，不同的方式对应了宿主机不同的目录，下面我们来详细说">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.niewx.cn/img/2021-10-29-Container-log-storage-description-of-pod-in-k8s/bg.jpg">
+<meta property="article:published_time" content="2021-10-29T05:47:39.000Z">
+<meta property="article:modified_time" content="2022-04-06T03:47:45.000Z">
+<meta property="article:author" content="VashonNie">
+<meta property="article:tag" content="Kubernetes">
+<meta property="article:tag" content="containers">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.niewx.cn/img/2021-10-29-Container-log-storage-description-of-pod-in-k8s/bg.jpg">
+  
+  
+  <title>k8s中pod的容器日志存储说明 - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/shubiao.css">
+<link rel="stylesheet" href="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/scroll.css">
+<link rel="stylesheet" href="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/gradient.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"www.niewx.cn","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>聂伟星</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+	
+	<iframe width="350" scrolling="no" height="20" frameborder="0" allowtransparency="true" src="https://i.tianqi.com?c=code&id=40&color=%23FFFFFF&icon=1&site=12"></iframe>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" target="_self" href="javascript:;" role="button"
+                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="iconfont icon-books"></i>
+                文档
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="https://www.niewx.cn/mybook/">
+                    <i class="iconfont icon-notebook"></i>
+                    运维笔记
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/column/87421">
+                    <i class="iconfont icon-addrbook"></i>
+                    云+社区文档
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="https://www.niewx.cn/question/">
+                    <i class="iconfont icon-notebook"></i>
+                    运维问题集锦
+                  </a>
+                
+              </div>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/playlist/">
+                <i class="iconfont icon-music"></i>
+                音乐
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" target="_self" href="javascript:;" role="button"
+                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="iconfont icon-douban-fill"></i>
+                豆瓣
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="/books">
+                    <i class="iconfont icon-book"></i>
+                    书籍
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="/movies">
+                    <i class="iconfont icon-youtube-fill"></i>
+                    电影
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="/games">
+                    <i class="iconfont icon-switch-fill"></i>
+                    游戏
+                  </a>
+                
+              </div>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="k8s中pod的容器日志存储说明"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-author" aria-hidden="true"></i>
+        VashonNie
+      </span>
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2021-10-29 13:47" pubdate>
+          2021年10月29日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          16k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          136 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="leancloud-page-views-container" class="post-meta" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="leancloud-page-views"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">k8s中pod的容器日志存储说明</h1>
+            
+            <div class="markdown-body">
+              
+              <p>使用k8s的过程中，我们的服务都会打印大量的日志，为了方便查看排查定位问题，大部分时候会将日志打印在标准输出，但是有的时候为了方便日志的切割和收集，会将日志写到容器内的某个目录下日志文件。如果我们的日志会占用大量的磁盘空间，有可能还会外挂存储来将日志持久化。</p>
+<p>容器内的业务日志有多种输出方式，其实不同日志输出方式，最终都是存在了pod所在的宿主机上，不同的方式对应了宿主机不同的目录，下面我们来详细说明下docker和containerd这2中运行时不同日志输出所在的宿主机目录。</p>
+<p>当你了解了日志输出方式和宿主机目录的一一对应，那么后续遇到节点上磁盘空间被占满的问题，你就可以快速清理对应的日志文件来释放磁盘空间。</p>
+<p>这里具体说明都是没有对docker或者containerd的存储目录进行数据盘挂载，如果有进行数据盘挂载，则根据实际挂载目录查找即可。</p>
+<h1 id="docker日志存储目录说明"><a href="#docker日志存储目录说明" class="headerlink" title="docker日志存储目录说明"></a>docker日志存储目录说明</h1><p>这里举例说明docker和kubelet的默认存储目录是&#x2F;var&#x2F;lib&#x2F;docker和&#x2F;var&#x2F;lib&#x2F;kubelet</p>
+<h2 id="日志标准输出"><a href="#日志标准输出" class="headerlink" title="日志标准输出"></a>日志标准输出</h2><p>容器的标准输出日志默认是在&#x2F;var&#x2F;lib&#x2F;docker&#x2F;containers&#x2F;[container_id]&#x2F;，标准输出日志默认会自动切割轮转，日志切割配置可以查看&#x2F;etc&#x2F;docker&#x2F;daemon.json文件的log-opts配置</p>
+<figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs tap">[root@VM-0-3-centos 6035c5820cf52c7684057d70b4f0f206deb82bad8b931a2e63473ca0f4206384]<span class="hljs-comment"># docker ps | grep 6035c5820cf5</span><br>6035c5820cf5        quay.io/prometheus/prometheus                                  &quot;/bin/prometheus --w…&quot;   <span class="hljs-number"> 5 </span>days ago          Up<span class="hljs-number"> 5 </span>days                               k8s_prometheus_prometheus-tke-cls-b3mg1p92-0_prom-rl9st2ym_87269735-b041-41e9-b85f-aef897ac6200_1<br>[root@VM-0-3-centos 6035c5820cf52c7684057d70b4f0f206deb82bad8b931a2e63473ca0f4206384]<span class="hljs-comment"># cd /var/lib/docker/containers/6035c5820cf52c7684057d70b4f0f206deb82bad8b931a2e63473ca0f4206384/</span><br>[root@VM-0-3-centos 6035c5820cf52c7684057d70b4f0f206deb82bad8b931a2e63473ca0f4206384]<span class="hljs-comment"># ll</span><br>total 141544<br>-rw-r-----<span class="hljs-number"> 1 </span>root root <span class="hljs-number"> 44903243 </span>Oct<span class="hljs-number"> 29 </span>14:33 6035c5820cf52c7684057d70b4f0f206deb82bad8b931a2e63473ca0f4206384-json.log<br>-rw-r-----<span class="hljs-number"> 1 </span>root root<span class="hljs-number"> 100000151 </span>Oct<span class="hljs-number"> 27 </span>19:49 6035c5820cf52c7684057d70b4f0f206deb82bad8b931a2e63473ca0f4206384-json.log.1<br>drwx------<span class="hljs-number"> 2 </span>root root     <span class="hljs-number"> 4096 </span>Oct<span class="hljs-number"> 23 </span>21:00 checkpoints<br>-rw-------<span class="hljs-number"> 1 </span>root root     <span class="hljs-number"> 8224 </span>Oct<span class="hljs-number"> 23 </span>21:00 config.v2.json<br>-rw-r--r--<span class="hljs-number"> 1 </span>root root     <span class="hljs-number"> 2625 </span>Oct<span class="hljs-number"> 23 </span>21:00 hostconfig.json<br>drwx------<span class="hljs-number"> 2 </span>root root     <span class="hljs-number"> 4096 </span>Oct<span class="hljs-number"> 23 </span>21:00 mounts<br></code></pre></td></tr></table></figure>
+
+<h2 id="日志写入容器内日志文件"><a href="#日志写入容器内日志文件" class="headerlink" title="日志写入容器内日志文件"></a>日志写入容器内日志文件</h2><p>如果日志写到容器日志文件，但是没有进行持久化挂载，则会存在&#x2F;var&#x2F;lib&#x2F;docker&#x2F;overlay2&#x2F;[merge_id]&#x2F;merged&#x2F;[log_path]，具体merge_id，我们可以inspect容器id查找到，而log_path则是你业务日志在容器内的存储路径，下面我们查找下nginx的日志。</p>
+<figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs tap">[root@node1 ~]<span class="hljs-comment"># docker inspect ba62275eab393f88a01c57573a3672e220254eeb693d7f2176a8cd9577b58850 | grep merged</span><br>                &quot;MergedDir&quot;: &quot;/var/lib/docker/overlay2/136d009b75834ed0867f8e27107c4a945f6c921a629b929ebdecaf11a13629c0/merged&quot;,<br>[root@node1 ~]<span class="hljs-comment"># cd /var/lib/docker/overlay2/136d009b75834ed0867f8e27107c4a945f6c921a629b929ebdecaf11a13629c0/merged</span><br>[root@node1 merged]<span class="hljs-comment">#</span><br>[root@node1 merged]<span class="hljs-comment"># cd var/log/nginx/</span><br>[root@node1 nginx]<span class="hljs-comment"># ll</span><br>total 2597864<br>lrwxrwxrwx<span class="hljs-number"> 1 </span>101<span class="hljs-number"> 101 </span>       <span class="hljs-number"> 11 </span>Nov <span class="hljs-number"> 3 </span><span class="hljs-number"> 2020 </span>access.log -&gt; /dev/stdout<br>lrwxrwxrwx<span class="hljs-number"> 1 </span>101<span class="hljs-number"> 101 </span>       <span class="hljs-number"> 11 </span>Nov <span class="hljs-number"> 3 </span><span class="hljs-number"> 2020 </span>error.log -&gt; /dev/stderr<br>-rw-r--r--<span class="hljs-number"> 1 </span>101<span class="hljs-number"> 101 </span>2660179942 Oct<span class="hljs-number"> 29 </span>15:01 nginx_access.log<br>-rw-r--r--<span class="hljs-number"> 1 </span>101<span class="hljs-number"> 101 </span>        <span class="hljs-number"> 0 </span>Oct<span class="hljs-number"> 10 </span>19:58 nginx_error.log<br></code></pre></td></tr></table></figure>
+
+<p>有的时候我们只能发现&#x2F;var&#x2F;lib&#x2F;docker&#x2F;overlay2目录占用了大量的磁盘空间，那么我们怎么找到是哪个容器占用了呢？首先查找&#x2F;var&#x2F;lib&#x2F;docker&#x2F;overlay2目录下的大文件</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs gradle">[root@node1 ~]# <span class="hljs-keyword">find</span> <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2 -<span class="hljs-keyword">size</span> +<span class="hljs-number">1</span>G -exec du -sm &#123;&#125; \; | <span class="hljs-keyword">sort</span> -nr<br><span class="hljs-number">2538</span>    <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/136d009b75834ed0867f8e27107c4a945f6c921a629b929ebdecaf11a13629c0/m</span>erged<span class="hljs-regexp">/var/</span>log<span class="hljs-regexp">/nginx/</span>nginx_access.log<br><span class="hljs-number">2538</span>    <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/136d009b75834ed0867f8e27107c4a945f6c921a629b929ebdecaf11a13629c0/</span>diff<span class="hljs-regexp">/var/</span>log<span class="hljs-regexp">/nginx/</span>nginx_access.log<br></code></pre></td></tr></table></figure>
+
+<p>找到对应的merge_id后，我们在查找到对应的容器id，采用下面命令，当能查看到多行信息，则对应的id是容器id，这里容器id是ba62275eab39</p>
+<figure class="highlight autoit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs autoit">[root<span class="hljs-symbol">@node1</span> ~]<span class="hljs-meta"># docker ps | awk <span class="hljs-string">&#x27;&#123;print $1&#125;&#x27;</span> | xargs -n 1 -I &#123;&#125; -- sh -c <span class="hljs-string">&quot;echo &#123;&#125; &amp;&amp; docker inspect &#123;&#125; |grep 136d009b75834ed0867f8e27107c4a945f6c921a629b929ebdecaf11a13629c0 -C 1&quot;</span></span><br>CONTAINER<br>faf1856fda4e<br><span class="hljs-number">1</span>fe6f4025507<br>ba62275eab39<br>            <span class="hljs-string">&quot;Data&quot;</span>: &#123;<br>                <span class="hljs-string">&quot;LowerDir&quot;</span>: <span class="hljs-string">&quot;/var/lib/docker/overlay2/136d009b75834ed0867f8e27107c4a945f6c921a629b929ebdecaf11a13629c0-init/diff:/var/lib/docker/overlay2/a4cdd5dc7a462904471de2d056570ed838b2317e4b59fd5613992196df9ef17f/diff:/var/lib/docker/overlay2/d514eb8d6219065c3a7332c6a0438e0ca041569da38de6fa7a14b84c3b1e5e4e/diff:/var/lib/docker/overlay2/1e0e34d059ac42479185c87e1ad5922cd77d78ab6a53bdd14b45636570146577/diff:/var/lib/docker/overlay2/aa4d53898ff012bfdcbdb453fcea67a9946cb403b27905b586eaf12977f29384/diff:/var/lib/docker/overlay2/dace2fb0d20cf856aa8d9ae16211d7f0e15ad7e0ad4ac87b278c0a14b134f432/diff:/var/lib/docker/overlay2/c1d91f716865e4367007d3d9fe3d19719f70a7befff1a629a074e79b835052f0/diff:/var/lib/docker/overlay2/fbbfb23d2eccb88bb79657a94f06dbde76249256097cf7bdc231df667c8ab6c9/diff:/var/lib/docker/overlay2/07e7cbb11f955c3edbcc5ac66cf966ef3da16d4c336a2022652c1468177934fb/diff:/var/lib/docker/overlay2/a2858bf53ea2c668ccd89bd9a87217513f8c5ef2c1e70ed35885400b883d7e1f/diff:/var/lib/docker/overlay2/ddea490967639aaaabd3bbaa7872be77d642b4e34203672bbc585d76d074d3dd/diff:/var/lib/docker/overlay2/f4e7cae5b5e70b89da96684df655f8f5a830dc751b68f638c2890b44cc6da891/diff:/var/lib/docker/overlay2/891e829575951f1e7a52fea41a138beea7684ca9e723244b84f87f82954f49ca/diff:/var/lib/docker/overlay2/1a2310107ffb59198ed6ff553f320f08f69d11bd7f7bb384f57761eb88852d9b/diff:/var/lib/docker/overlay2/1a75669e46cf247de83f5e74a1205cd1ecaaa13fb14cc6ef0fe7216f06b66786/diff:/var/lib/docker/overlay2/36fff493df92c24d07d46a50ab63d0132c9c18ab22d48b33ed2a1a85fcd05fd6/diff&quot;</span>,<br>                <span class="hljs-string">&quot;MergedDir&quot;</span>: <span class="hljs-string">&quot;/var/lib/docker/overlay2/136d009b75834ed0867f8e27107c4a945f6c921a629b929ebdecaf11a13629c0/merged&quot;</span>,<br>                <span class="hljs-string">&quot;UpperDir&quot;</span>: <span class="hljs-string">&quot;/var/lib/docker/overlay2/136d009b75834ed0867f8e27107c4a945f6c921a629b929ebdecaf11a13629c0/diff&quot;</span>,<br>                <span class="hljs-string">&quot;WorkDir&quot;</span>: <span class="hljs-string">&quot;/var/lib/docker/overlay2/136d009b75834ed0867f8e27107c4a945f6c921a629b929ebdecaf11a13629c0/work&quot;</span><br>            &#125;,<br></code></pre></td></tr></table></figure>
+
+<p>找到容器id后，进入容器的var&#x2F;log&#x2F;nginx&#x2F;目录清理日志即可。</p>
+<p>上面的方法是查找容器存储下的大文件，然后根据大文件所在目录找到对应的容器，但是有的时候不一定是有单个文件大，而是文件夹比较大，里面文件数量比较多，导致占用了大量的磁盘空间，这个时候该怎么查找呢？这个时候我们就只能一层层找到这个大文件夹，下面我们来说明下。</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br></pre></td><td class="code"><pre><code class="hljs gradle">[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">10</span>-centos ~]# du -hm --max-depth=<span class="hljs-number">1</span> <span class="hljs-regexp">/var/</span>lib/docker  | <span class="hljs-keyword">sort</span> -rn | head -<span class="hljs-number">10</span><br><span class="hljs-number">44790</span>   <span class="hljs-regexp">/var/</span>lib/docker<br><span class="hljs-number">39315</span>   <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<br><span class="hljs-number">5420</span>    <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>containers<br><span class="hljs-number">55</span>      <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/im</span>age<br><span class="hljs-number">1</span>       <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>volumes<br><span class="hljs-number">1</span>       <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>trust<br><span class="hljs-number">1</span>       <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>tmp<br><span class="hljs-number">1</span>       <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>swarm<br><span class="hljs-number">1</span>       <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>runtimes<br><span class="hljs-number">1</span>       <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>plugins<br>[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">10</span>-centos ~]# du -hm --max-depth=<span class="hljs-number">1</span> <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2  | <span class="hljs-keyword">sort</span> -rn | head -<span class="hljs-number">10</span><br><span class="hljs-number">39315</span>   <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<br><span class="hljs-number">2659</span>    <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2/<span class="hljs-number">611</span>ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639<br><span class="hljs-number">1499</span>    <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2/<span class="hljs-number">5</span>ca45180744594cd01643aada607b351dc9a1f011d2807752d2f55f470892a9b<br><span class="hljs-number">1314</span>    <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2/bbc80fd995e6b0aa97bc1326a72a4f4049bae33407a0c34c39561d31f8c17598<br><span class="hljs-number">1253</span>    <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2/c84ef307e9147365d7a73d160ce898cc70ef93cf1f69be94d7598dd0dc456ae5<br><span class="hljs-number">1191</span>    <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2/d5409735e53b1efc9902b72a3b170d4a523c233b807f2f4954ca3cca1cc42e49<br><span class="hljs-number">1046</span>    <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2/<span class="hljs-number">9</span>ec2b9732d5b64a9a03223d870b4aec520af2b6845ab3c391c2fa95f1e45fe2e<br><span class="hljs-number">1046</span>    <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2/<span class="hljs-number">69975</span>a1ecf6f7345acf6e97c946966468c69ae850ebd2a63b63ed8f0cd598412<br><span class="hljs-number">1009</span>    <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2/<span class="hljs-number">693</span>ad529427a4d135b064e2e428c6b269ac3017e1ce0f61faaa49de9cc7a0d81<br><span class="hljs-number">733</span>     <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2/cd41e5558d7f317da34280b64e3f446f225139a0c82f59e047af9be8610a1009<br>[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">10</span>-centos ~]# du -hm --max-depth=<span class="hljs-number">1</span> <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2/<span class="hljs-number">611</span>ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639  | <span class="hljs-keyword">sort</span> -rn | head -<span class="hljs-number">10</span><br><span class="hljs-number">2659</span>    <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2/<span class="hljs-number">611</span>ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639<br><span class="hljs-number">1408</span>    <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged<br><span class="hljs-number">1251</span>    <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/</span>diff<br><span class="hljs-number">1</span>       <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/</span>work<br>[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">10</span>-centos ~]# du -hm --max-depth=<span class="hljs-number">1</span> <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged/  | <span class="hljs-keyword">sort</span> -rn | head -<span class="hljs-number">10</span><br><span class="hljs-number">1408</span>    <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged/<br><span class="hljs-number">1249</span>    <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged/tmp<br><span class="hljs-number">141</span>     <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged/usr<br><span class="hljs-number">13</span>      <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged/home<br><span class="hljs-number">4</span>       <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged/var<br><span class="hljs-number">3</span>       <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged/etc<br><span class="hljs-number">1</span>       <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged/sys<br><span class="hljs-number">1</span>       <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged/run<br><span class="hljs-number">1</span>       <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged/root<br><span class="hljs-number">1</span>       <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged/proc<br>[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">10</span>-centos ~]# du -hm --max-depth=<span class="hljs-number">1</span> <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged<span class="hljs-regexp">/tmp/</span>  | <span class="hljs-keyword">sort</span> -rn | head -<span class="hljs-number">10</span><br><span class="hljs-number">1249</span>    <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged<span class="hljs-regexp">/tmp/</span><br><span class="hljs-number">861</span>     <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged<span class="hljs-regexp">/tmp/</span>nvd-data835905766<br><span class="hljs-number">388</span>     <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged<span class="hljs-regexp">/tmp/u</span>buntu-cve-tracker540878348<br><span class="hljs-number">2</span>       <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged<span class="hljs-regexp">/tmp/</span>alpine-secdbUpdater788692628<br>[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">10</span>-centos ~]# du -hm --max-depth=<span class="hljs-number">1</span> <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged<span class="hljs-regexp">/tmp/</span>nvd-data835905766/  | <span class="hljs-keyword">sort</span> -rn | head -<span class="hljs-number">10</span><br><span class="hljs-number">861</span>     <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged<span class="hljs-regexp">/tmp/</span>nvd-data835905766/<br>[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">10</span>-centos ~]# cd <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged<span class="hljs-regexp">/tmp/</span>nvd-data835905766/<br>[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">10</span>-centos <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged<span class="hljs-regexp">/tmp/</span>nvd-data835905766]# ls  -alhS<br>total <span class="hljs-number">861</span>M<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span> <span class="hljs-number">104</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">11</span> <span class="hljs-number">2020</span>.json<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span>  <span class="hljs-number">82</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">11</span> <span class="hljs-number">2019</span>.json<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span>  <span class="hljs-number">81</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">11</span> <span class="hljs-number">2021</span>.json<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span>  <span class="hljs-number">74</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">11</span> <span class="hljs-number">2018</span>.json<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span>  <span class="hljs-number">70</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">11</span> <span class="hljs-number">2017</span>.json<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span>  <span class="hljs-number">50</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">11</span> <span class="hljs-number">2016</span>.json<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span>  <span class="hljs-number">44</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">10</span> <span class="hljs-number">2013</span>.json<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span>  <span class="hljs-number">39</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">10</span> <span class="hljs-number">2014</span>.json<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span>  <span class="hljs-number">39</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">10</span> <span class="hljs-number">2012</span>.json<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span>  <span class="hljs-number">39</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">11</span> <span class="hljs-number">2015</span>.json<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span>  <span class="hljs-number">34</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">10</span> <span class="hljs-number">2011</span>.json<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span>  <span class="hljs-number">34</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">10</span> <span class="hljs-number">2010</span>.json<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span>  <span class="hljs-number">32</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">10</span> <span class="hljs-number">2008</span>.json<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span>  <span class="hljs-number">32</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">10</span> <span class="hljs-number">2009</span>.json<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span>  <span class="hljs-number">30</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">10</span> <span class="hljs-number">2006</span>.json<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span>  <span class="hljs-number">28</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">10</span> <span class="hljs-number">2007</span>.json<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span>  <span class="hljs-number">21</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">10</span> <span class="hljs-number">2002</span>.json<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span>  <span class="hljs-number">20</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">10</span> <span class="hljs-number">2005</span>.json<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span>  <span class="hljs-number">13</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">10</span> <span class="hljs-number">2004</span>.json<br>-rw-r--r-- <span class="hljs-number">1</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span> <span class="hljs-number">5.8</span>M Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">10</span> <span class="hljs-number">2003</span>.json<br>drwx------ <span class="hljs-number">2</span> <span class="hljs-number">10000</span> <span class="hljs-number">10000</span> <span class="hljs-number">4.0</span>K Dec <span class="hljs-number">21</span> <span class="hljs-number">16</span>:<span class="hljs-number">11</span> .<br>drwxrwxrwt <span class="hljs-number">1</span> root  root  <span class="hljs-number">4.0</span>K Dec <span class="hljs-number">29</span> <span class="hljs-number">00</span>:<span class="hljs-number">20</span> ..<br>[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">10</span>-centos ~]# docker ps | awk <span class="hljs-string">&#x27;&#123;print $1&#125;&#x27;</span> | xargs -n <span class="hljs-number">1</span> -I &#123;&#125; -- sh -c <span class="hljs-string">&quot;echo &#123;&#125; &amp;&amp; docker inspect &#123;&#125; |grep 611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639 -C 1&quot;</span><br>CONTAINER<br>Error: No such object: CONTAINER<br><span class="hljs-number">9</span>d2cd497b1cb<br>e99ce9b11191<br><span class="hljs-number">6</span>bdca3204a62<br>b6dfe23c31e9<br>            <span class="hljs-string">&quot;Data&quot;</span>: &#123;<br>                <span class="hljs-string">&quot;LowerDir&quot;</span>: <span class="hljs-string">&quot;/var/lib/docker/overlay2/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639-init/diff:/var/lib/docker/overlay2/180f09778c2e17d1ffd73aa5be45244ee414f4423bcc2f81e460c52b9a3ca90b/diff:/var/lib/docker/overlay2/bd60ea9822fbf0169cc9ed116e7c82a9d25268995508c37c012b2940eb7fa014/diff:/var/lib/docker/overlay2/cadc2d6308ef60788eb40b05ad5417f3ea89fb96aaa0028b80ccfe80202da748/diff:/var/lib/docker/overlay2/2dc66700322a704c5fce138e66d27ee38ee324eaa2c0c837e2fad842751cf645/diff:/var/lib/docker/overlay2/f0200441bebd98aaa57af2d9ddbbc4c7e8d9c8b982c14f50226e8841ea143380/diff:/var/lib/docker/overlay2/a9b06a4f8b8e8828ac142f9cf10c5c61d3771474ef0fe083fde2caeb2380d3df/diff:/var/lib/docker/overlay2/265bcad9bbbf55480038501a18dd7e03fda4848268dce29203302672fbecd5b3/diff&quot;</span>,<br>                <span class="hljs-string">&quot;MergedDir&quot;</span>: <span class="hljs-string">&quot;/var/lib/docker/overlay2/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/merged&quot;</span>,<br>                <span class="hljs-string">&quot;UpperDir&quot;</span>: <span class="hljs-string">&quot;/var/lib/docker/overlay2/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/diff&quot;</span>,<br>                <span class="hljs-string">&quot;WorkDir&quot;</span>: <span class="hljs-string">&quot;/var/lib/docker/overlay2/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/work&quot;</span><br>            &#125;,<br>......<br>[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">10</span>-centos <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>overlay2<span class="hljs-regexp">/611ff12eef289600cb685a8c995b24c42c387e99a6e0f0d7b73d29596a1db639/m</span>erged<span class="hljs-regexp">/tmp/</span>nvd-data835905766]# docker ps | <span class="hljs-keyword">grep</span> b6dfe23c31e9<br>b6dfe23c31e9        goharbor<span class="hljs-regexp">/clair-photon                                          &quot;./</span>docker-entrypoint…<span class="hljs-string">&quot;    9 days ago          Up 9 days                               k8s_clair_harbor-1611818628-harbor-clair-7d89b99d5f-bcpgr_harbor_2f758cf3-e945-44c3-8a5b-700bf2187100_0</span><br></code></pre></td></tr></table></figure>
+
+<p>通过上面步骤，我们就找到占用了大量磁盘空间的目录和对应的容器是哪个，后面我们可以进入到对应的容器，自行清理不需要的文件即可</p>
+<h2 id="日志写入容器内日志文件并挂载"><a href="#日志写入容器内日志文件并挂载" class="headerlink" title="日志写入容器内日志文件并挂载"></a>日志写入容器内日志文件并挂载</h2><p>有的时候，我们会将日志写到日志文件并且进行挂载</p>
+<h3 id="挂载到emptyDir"><a href="#挂载到emptyDir" class="headerlink" title="挂载到emptyDir"></a>挂载到emptyDir</h3><p>根据容器id，inspect查找empty目录，如果你是将容器目录挂载到emptyDir，对应的宿主机目录是在&#x2F;var&#x2F;lib&#x2F;kubelet&#x2F;pods下，一般这个目录不会外挂数据盘，如果你的日志占用磁盘空间比较大，不建议挂载emptyDir，因为会将&#x2F;var&#x2F;lib&#x2F;kubelet&#x2F;pods所在磁盘空间占满，一般是系统盘，从而触发kubelet的驱逐。</p>
+<figure class="highlight subunit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs subunit">[root@VM<span class="hljs-string">-0</span><span class="hljs-string">-29</span>-centos ~]# docker inspect 9d75f541f36db3a00514aff399e4455dee8dacbf912fa3b72afa675f505255fc | grep empty<br>                &quot;/var/lib/kubelet/pods/24fe94a1<span class="hljs-string">-295</span>b<span class="hljs-string">-4979</span><span class="hljs-string">-8</span>d3f<span class="hljs-string">-735671782172</span>/volumes/kubernetes.io~empty-dir/vol:/data&quot;,<br>                &quot;Source&quot;: &quot;/var/lib/kubelet/pods/24fe94a1<span class="hljs-string">-295</span>b<span class="hljs-string">-4979</span><span class="hljs-string">-8</span>d3f<span class="hljs-string">-735671782172</span>/volumes/kubernetes.io~empty-dir/vol&quot;,<br><br></code></pre></td></tr></table></figure>
+
+<h3 id="挂载到pvc"><a href="#挂载到pvc" class="headerlink" title="挂载到pvc"></a>挂载到pvc</h3><p>如果容器内文件挂载的是pvc，pvc包含cbs，nfs，或者云上的对象存储，这里最终就是将对应的目录挂载到cbs，cfs，对象存储。这里根据cfs的服务端ip，cbs_id，cos实例名称用df查找目录即可。</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs awk">[root@node1 ~]<span class="hljs-comment"># df -h | grep disk</span><br><span class="hljs-regexp">/dev/</span>vdb         <span class="hljs-number">20</span>G  <span class="hljs-number">9.7</span>G  <span class="hljs-number">9.9</span>G  <span class="hljs-number">50</span>% <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/kubelet/</span>plugins<span class="hljs-regexp">/kubernetes.io/</span>qcloud-cbs<span class="hljs-regexp">/mounts/</span>disk-xxxxx<br><span class="hljs-regexp">/dev/</span>vdg        <span class="hljs-number">9.8</span>G   <span class="hljs-number">37</span>M  <span class="hljs-number">9.7</span>G   <span class="hljs-number">1</span>% <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/kubelet/</span>plugins<span class="hljs-regexp">/kubernetes.io/</span>qcloud-cbs<span class="hljs-regexp">/mounts/</span>disk-xxxxx<br><br>[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">29</span>-centos ~]<span class="hljs-comment"># df -h | grep nwx-test-1</span><br>cosfs           <span class="hljs-number">256</span>T     <span class="hljs-number">0</span>  <span class="hljs-number">256</span>T   <span class="hljs-number">0</span>% <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/kubelet/</span>pods<span class="hljs-regexp">/99e9e539-28c2-4da0-9571-37e6dc57dcf4/</span>volumes<span class="hljs-regexp">/kubernetes.io~csi/</span>nwx-test-<span class="hljs-number">1</span>/mount<br><br>[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">2</span>-centos ~]<span class="hljs-comment"># df -h | grep 10.0.0.11</span><br><span class="hljs-number">10.0</span>.<span class="hljs-number">0.11</span>:<span class="hljs-regexp">/      10G   32M   10G   1% /</span>var<span class="hljs-regexp">/lib/</span>kubelet<span class="hljs-regexp">/pods/</span>d5298dfa-<span class="hljs-number">0</span>b52-<span class="hljs-number">4</span>d11-a34e-e68c7aa8a29e<span class="hljs-regexp">/volumes/</span>kubernetes.io~nfs/vol<br><br></code></pre></td></tr></table></figure>
+
+<h1 id="containerd日志存储目录说明"><a href="#containerd日志存储目录说明" class="headerlink" title="containerd日志存储目录说明"></a>containerd日志存储目录说明</h1><p>这里举例说明containerd和kubelet的默认存储目录是&#x2F;run&#x2F;containerd和&#x2F;var&#x2F;lib&#x2F;kubelet</p>
+<h2 id="日志标准输出-1"><a href="#日志标准输出-1" class="headerlink" title="日志标准输出"></a>日志标准输出</h2><p>首先根据容器id用inspect查找具体的logPath，然后对应的目录就是容器标准输出在宿主机存储目录，containerd标准输出的宿主机路径是&#x2F;var&#x2F;log&#x2F;pods&#x2F;下，因此用elk采集containerd的标准输出日志需要采集宿主机的&#x2F;var&#x2F;log&#x2F;pods&#x2F;路径。</p>
+<figure class="highlight subunit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs subunit">[root@VM<span class="hljs-string">-17</span><span class="hljs-string">-16</span>-centos ~]# crictl inspect 0375c0e679d57 | grep logPath<br>    &quot;logPath&quot;: &quot;/var/log/pods/kube-system_tke-log-agent-k82vc_fd92c0e4-e08d<span class="hljs-string">-46</span>d5<span class="hljs-string">-9</span>a52-e6e1c4f29f3d/loglistener/0.log&quot;<br>[root@VM<span class="hljs-string">-17</span><span class="hljs-string">-16</span>-centos ~]# cd /var/log/pods/kube-system_tke-log-agent-k82vc_fd92c0e4-e08d<span class="hljs-string">-46</span>d5<span class="hljs-string">-9</span>a52-e6e1c4f29f3d/loglistener<br>[root@VM<span class="hljs-string">-17</span><span class="hljs-string">-16</span>-centos loglistener]# ls<br>0.log<br></code></pre></td></tr></table></figure>
+
+<h2 id="日志写入容器内日志文件-1"><a href="#日志写入容器内日志文件-1" class="headerlink" title="日志写入容器内日志文件"></a>日志写入容器内日志文件</h2><p>查找容器id，然后根据容器id，用df查找到容器的rootfs目录，再进入对应的目录即可。</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs gradle">[root@VM-<span class="hljs-number">17</span>-<span class="hljs-number">16</span>-centos vol]# crictl ps | <span class="hljs-keyword">grep</span> go-test<br><span class="hljs-number">2380</span>b4524eebf       <span class="hljs-number">57</span>b1777ee4b87       About a minute ago   Running             go-test             <span class="hljs-number">0</span>                   <span class="hljs-number">10389</span>f95f91b6<br>[root@VM-<span class="hljs-number">17</span>-<span class="hljs-number">16</span>-centos vol]# df -h | <span class="hljs-keyword">grep</span> <span class="hljs-number">2380</span>b4524eebf<br>overlay          <span class="hljs-number">50</span>G   <span class="hljs-number">14</span>G   <span class="hljs-number">34</span>G  <span class="hljs-number">30</span>% <span class="hljs-regexp">/run/</span>containerd<span class="hljs-regexp">/io.containerd.runtime.v2.task/</span>k8s.io<span class="hljs-regexp">/2380b4524eebf3455a79442204bf68efb0325f466429238bc4338a8eccea28c8/</span>rootfs<br>[root@VM-<span class="hljs-number">17</span>-<span class="hljs-number">16</span>-centos vol]# cd <span class="hljs-regexp">/run/</span>containerd<span class="hljs-regexp">/io.containerd.runtime.v2.task/</span>k8s.io<span class="hljs-regexp">/2380b4524eebf3455a79442204bf68efb0325f466429238bc4338a8eccea28c8/</span>rootfs<br>[root@VM-<span class="hljs-number">17</span>-<span class="hljs-number">16</span>-centos rootfs]# cd data/<br>[root@VM-<span class="hljs-number">17</span>-<span class="hljs-number">16</span>-centos data]# ls<br>go.log<br></code></pre></td></tr></table></figure>
+
+<h2 id="日志写入容器内日志文件并挂载-1"><a href="#日志写入容器内日志文件并挂载-1" class="headerlink" title="日志写入容器内日志文件并挂载"></a>日志写入容器内日志文件并挂载</h2><h3 id="挂载到emptyDir-1"><a href="#挂载到emptyDir-1" class="headerlink" title="挂载到emptyDir"></a>挂载到emptyDir</h3><p>根据容器id，inspect查找empty目录，如果你是将容器目录挂载到emptyDir，对应的宿主机目录是在&#x2F;var&#x2F;lib&#x2F;kubelet下，一般这个目录不会外挂数据盘，如果你的日志占用磁盘空间比较大，不建议挂载emptyDir，因为会将&#x2F;var&#x2F;lib&#x2F;kubelet所在磁盘空间占满，一般是系统盘，从而触发kubelet的驱逐。</p>
+<figure class="highlight subunit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs subunit">[root@VM<span class="hljs-string">-17</span><span class="hljs-string">-16</span>-centos loglistener]# crictl ps | grep go-test<br>43fd8249aba3b       57b1777ee4b87       2 hours ago         Running             go-test             0                   b4eccdc968348<br>[root@VM<span class="hljs-string">-17</span><span class="hljs-string">-16</span>-centos data]# crictl inspect 43fd8249aba3b | grep empty<br>        &quot;hostPath&quot;: &quot;/var/lib/kubelet/pods/7d32e2e6<span class="hljs-string">-169</span>a<span class="hljs-string">-40</span>c3-b36e<span class="hljs-string">-4</span>ce22e248776/volumes/kubernetes.io~empty-dir/vol&quot;,<br>          &quot;host_path&quot;: &quot;/var/lib/kubelet/pods/7d32e2e6<span class="hljs-string">-169</span>a<span class="hljs-string">-40</span>c3-b36e<span class="hljs-string">-4</span>ce22e248776/volumes/kubernetes.io~empty-dir/vol&quot;<br>          &quot;source&quot;: &quot;/var/lib/kubelet/pods/7d32e2e6<span class="hljs-string">-169</span>a<span class="hljs-string">-40</span>c3-b36e<span class="hljs-string">-4</span>ce22e248776/volumes/kubernetes.io~empty-dir/vol&quot;,<br>[root@VM<span class="hljs-string">-17</span><span class="hljs-string">-16</span>-centos data]# cd /var/lib/kubelet/pods/7d32e2e6<span class="hljs-string">-169</span>a<span class="hljs-string">-40</span>c3-b36e<span class="hljs-string">-4</span>ce22e248776/volumes/kubernetes.io~empty-dir/vol<br>[root@VM<span class="hljs-string">-17</span><span class="hljs-string">-16</span>-centos vol]# ls<br>go.log<br></code></pre></td></tr></table></figure>
+
+<h3 id="挂载到pvc-1"><a href="#挂载到pvc-1" class="headerlink" title="挂载到pvc"></a>挂载到pvc</h3><p>如果容器内文件挂载的是pvc，pvc包含cbs，nfs，或者云上的对象存储，这里最终就是将对应的目录挂载到cbs，cfs，对象存储。这里根据cfs的服务端ip，cbs_id，cos实例名称用df查找目录即可。和docker的方式是一致的。</p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Kubernetes/" class="category-chain-item">Kubernetes</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Kubernetes/">#Kubernetes</a>
+      
+        <a href="/tags/containers/">#containers</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>k8s中pod的容器日志存储说明</div>
+      <div>https://www.niewx.cn/2021/10/29/2021-10-29-Container-log-storage-description-of-pod-in-k8s/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>VashonNie</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2021年10月29日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by-nc/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by-nc/4.0/">
+              <span class="hint--top hint--rounded" aria-label="NC - 非商业性使用">
+                <i class="iconfont icon-nc"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2021/11/01/2021-11-01-How-to-get-an-alert-through-PrometheusAlert/" title="如何通过PrometheusAlert发生告警">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">如何通过PrometheusAlert发生告警</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2021/09/14/2021-09-14-The-elastic-cluster-collects-nginx-ingress-controller-access-logs/" title="弹性集群收集nginx-ingress controller访问日志">
+                        <span class="hidden-mobile">弹性集群收集nginx-ingress controller访问日志</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <div id="valine"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#valine', function() {
+      Fluid.utils.createScript('https://lib.baomitu.com/valine/1.4.16/Valine.min.js', function() {
+        var options = Object.assign(
+          {"appId":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","appKey":"TuwIbmst7Q1N12V1EgEfVgDm","path":"window.location.pathname","placeholder":null,"avatar":"retro","meta":["nick","mail","link"],"requiredFields":[],"pageSize":10,"lang":"zh-CN","highlight":false,"recordIP":false,"serverURLs":"","emojiCDN":null,"emojiMaps":null,"enableQQ":false},
+          {
+            el: "#valine",
+            path: window.location.pathname
+          }
+        )
+        new Valine(options);
+        Fluid.utils.waitElementVisible('#valine .vcontent', () => {
+          var imgSelector = '#valine .vcontent img:not(.vemoji)';
+          Fluid.plugins.imageCaption(imgSelector);
+          Fluid.plugins.fancyBox(imgSelector);
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+   <div id="music_div" style="position: fixed; bottom: 0px; left: 30px;">
+    <iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=110 
+    	src="//music.163.com/outchain/player?type=0&id=919444742&auto=1&height=90">
+    </iframe>
+    <script src="https://cdn.staticfile.org/jquery/3.3.1/jquery.min.js"></script>
+    <script src="/js/musicshow.js"></script>
+</div>
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> </div>
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="leancloud-site-pv-container" style="display: none">
+        总访问量 
+        <span id="leancloud-site-pv"></span>
+         次
+      </span>
+    
+    
+      <span id="leancloud-site-uv-container" style="display: none">
+        总访客数 
+        <span id="leancloud-site-uv"></span>
+         人
+      </span>
+    
+    
+
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?bfe4709ccd8c5c9e559c89f4fd0866f3";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="/js/leancloud.js" ></script>
+
+
+
+
+  
+<script src="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/DynamicRibbon.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/runtime.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/love.min.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/z16.model.json"},"display":{"position":"right","width":180,"height":360},"mobile":{"show":true},"react":{"opacity":0.7},"log":false});</script></body>
+</html>

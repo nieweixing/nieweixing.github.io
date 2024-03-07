@@ -1,1 +1,948 @@
-<!DOCTYPE html><html lang="zh-CN" data-default-color-scheme="auto"><head><meta charset="UTF-8"><link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png"><link rel="icon" href="/img/fluid.png"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,shrink-to-fit=no"><meta http-equiv="x-ua-compatible" content="ie=edge"><meta name="theme-color" content="#2f4154"><meta name="author" content="VashonNie"><meta name="keywords" content=""><meta name="description" content="Istio的自动双向TLS特性，您只需配置认证策略即可使用双向 TLS，而无需关注目标规则。 Istio 跟踪迁移到 sidecar 的服务端工作负载，并将客户端 sidecar 配置为自动向这些工作负载发送双向 TLS 流量， 同时将明文流量发送到没有 sidecar 的工作负载。这使您可以通过最少的配置，逐步在网格中使用双向 TLS。 istio1.5版本的安全认证默认是使用的SDS（安全发现"><meta property="og:type" content="article"><meta property="og:title" content="istio入门系列之TLS安全认证的配置"><meta property="og:url" content="https://www.niewx.cn/2020/12/07/2020-12-07-TLS-security-authentication-configuration-of-istio-entry-series/index.html"><meta property="og:site_name" content="Hexo"><meta property="og:description" content="Istio的自动双向TLS特性，您只需配置认证策略即可使用双向 TLS，而无需关注目标规则。 Istio 跟踪迁移到 sidecar 的服务端工作负载，并将客户端 sidecar 配置为自动向这些工作负载发送双向 TLS 流量， 同时将明文流量发送到没有 sidecar 的工作负载。这使您可以通过最少的配置，逐步在网格中使用双向 TLS。 istio1.5版本的安全认证默认是使用的SDS（安全发现"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://www.niewx.cn/img/2020-12-07-TLS-security-authentication-configuration-of-istio-entry-series/snail-bg.jpg"><meta property="article:published_time" content="2020-12-07T02:10:00.000Z"><meta property="article:modified_time" content="2020-12-07T02:10:00.000Z"><meta property="article:author" content="VashonNie"><meta property="article:tag" content="Kubernetes"><meta property="article:tag" content="Istio"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://www.niewx.cn/img/2020-12-07-TLS-security-authentication-configuration-of-istio-entry-series/snail-bg.jpg"><title>istio入门系列之TLS安全认证的配置 - Hexo</title><link rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css"><link rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css"><link rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css"><link rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css"><link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css"><link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css"><link rel="stylesheet" href="/css/main.css"><link id="highlight-css" rel="stylesheet" href="/css/highlight.css"><link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/shubiao.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/scroll.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/gradient.css"><script id="fluid-configs">var Fluid=window.Fluid||{},CONFIG={hostname:"www.niewx.cn",root:"/",version:"1.8.14",typing:{enable:!0,typeSpeed:70,cursorChar:"_",loop:!1,scope:[]},anchorjs:{enable:!0,element:"h1,h2,h3,h4,h5,h6",placement:"left",visible:"hover",icon:""},progressbar:{enable:!0,height_px:3,color:"#29d",options:{showSpinner:!1,trickleSpeed:100}},code_language:{enable:!0,default:"TEXT"},copy_btn:!0,image_caption:{enable:!0},image_zoom:{enable:!0,img_url_replace:["",""]},toc:{enable:!0,placement:"right",headingSelector:"h1,h2,h3,h4,h5,h6",collapseDepth:0},lazyload:{enable:!0,loading_img:"/img/loading.gif",onlypost:!1,offset_factor:2},web_analytics:{enable:!0,baidu:"bfe4709ccd8c5c9e559c89f4fd0866f3",google:null,gtag:null,tencent:{sid:null,cid:null},woyaola:null,cnzz:null,leancloud:{app_id:"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz",app_key:"TuwIbmst7Q1N12V1EgEfVgDm",server_url:null,path:"window.location.pathname",ignore_local:!1}},search_path:"/local-search.xml"}</script><script src="/js/utils.js"></script><script src="/js/color-schema.js"></script><meta name="generator" content="Hexo 6.1.0"></head><body><header><div class="header-inner" style="height:70vh"><nav id="navbar" class="navbar fixed-top navbar-expand-lg navbar-dark scrolling-navbar"><div class="container"><a class="navbar-brand" href="/"><strong>聂伟星</strong> </a><button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><div class="animated-icon"><span></span><span></span><span></span></div></button><iframe width="350" scrolling="no" height="20" frameborder="0" allowtransparency="true" src="https://i.tianqi.com?c=code&id=40&color=%23FFFFFF&icon=1&site=12"></iframe><div class="collapse navbar-collapse" id="navbarSupportedContent"><ul class="navbar-nav ml-auto text-center"><li class="nav-item"><a class="nav-link" href="/"><i class="iconfont icon-home-fill"></i> 首页</a></li><li class="nav-item"><a class="nav-link" href="/archives/"><i class="iconfont icon-archive-fill"></i> 归档</a></li><li class="nav-item"><a class="nav-link" href="/categories/"><i class="iconfont icon-category-fill"></i> 分类</a></li><li class="nav-item"><a class="nav-link" href="/tags/"><i class="iconfont icon-tags-fill"></i> 标签</a></li><li class="nav-item"><a class="nav-link" href="/about/"><i class="iconfont icon-user-fill"></i> 关于</a></li><li class="nav-item"><a class="nav-link" href="/links/"><i class="iconfont icon-link-fill"></i> 友链</a></li><li class="nav-item dropdown"><a class="nav-link dropdown-toggle" target="_self" href="javascript:;" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="iconfont icon-books"></i> 文档</a><div class="dropdown-menu" aria-labelledby="navbarDropdown"><a class="dropdown-item" href="https://www.niewx.cn/mybook/"><i class="iconfont icon-notebook"></i> 运维笔记 </a><a class="dropdown-item" target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/column/87421"><i class="iconfont icon-addrbook"></i> 云+社区文档 </a><a class="dropdown-item" href="https://www.niewx.cn/question/"><i class="iconfont icon-notebook"></i> 运维问题集锦</a></div></li><li class="nav-item"><a class="nav-link" href="/playlist/"><i class="iconfont icon-music"></i> 音乐</a></li><li class="nav-item dropdown"><a class="nav-link dropdown-toggle" target="_self" href="javascript:;" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="iconfont icon-douban-fill"></i> 豆瓣</a><div class="dropdown-menu" aria-labelledby="navbarDropdown"><a class="dropdown-item" href="/books"><i class="iconfont icon-book"></i> 书籍 </a><a class="dropdown-item" href="/movies"><i class="iconfont icon-youtube-fill"></i> 电影 </a><a class="dropdown-item" href="/games"><i class="iconfont icon-switch-fill"></i> 游戏</a></div></li><li class="nav-item" id="search-btn"><a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">&nbsp;<i class="iconfont icon-search"></i>&nbsp;</a></li><li class="nav-item" id="color-toggle-btn"><a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a></li></ul></div></div></nav><div id="banner" class="banner" parallax="true" style="background:url(/img/default.png) no-repeat center center;background-size:cover"><div class="full-bg-img"><div class="mask flex-center" style="background-color:rgba(0,0,0,.3)"><div class="banner-text text-center fade-in-up"><div class="h2"><span id="subtitle" data-typed-text="istio入门系列之TLS安全认证的配置"></span></div><div class="mt-3"><span class="post-meta mr-2"><i class="iconfont icon-author" aria-hidden="true"></i> VashonNie </span><span class="post-meta"><i class="iconfont icon-date-fill" aria-hidden="true"></i> <time datetime="2020-12-07 10:10" pubdate>2020年12月7日 上午</time></span></div><div class="mt-1"><span class="post-meta mr-2"><i class="iconfont icon-chart"></i>4.6k 字 </span><span class="post-meta mr-2"><i class="iconfont icon-clock-fill"></i>39 分钟 </span><span id="leancloud-page-views-container" class="post-meta" style="display:none"><i class="iconfont icon-eye" aria-hidden="true"></i> <span id="leancloud-page-views"></span> 次</span></div></div></div></div></div></div></header><main><div class="container-fluid nopadding-x"><div class="row nomargin-x"><div class="side-col d-none d-lg-block col-lg-2"></div><div class="col-lg-8 nopadding-x-md"><div class="container nopadding-x-md" id="board-ctn"><div id="board"><article class="post-content mx-auto"><h1 style="display:none">istio入门系列之TLS安全认证的配置</h1><div class="markdown-body"><p>Istio的自动双向TLS特性，您只需配置认证策略即可使用双向 TLS，而无需关注目标规则。</p><p>Istio 跟踪迁移到 sidecar 的服务端工作负载，并将客户端 sidecar 配置为自动向这些工作负载发送双向 TLS 流量， 同时将明文流量发送到没有 sidecar 的工作负载。这使您可以通过最少的配置，逐步在网格中使用双向 TLS。</p><p>istio1.5版本的安全认证默认是使用的SDS（安全发现服务），并且这个服务趋于稳定、默认开启</p><h1 id="单向认证"><a href="#单向认证" class="headerlink" title="单向认证"></a>单向认证</h1><p><img src="/img/2020-12-07-TLS-security-authentication-configuration-of-istio-entry-series/1.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><p>首先我们生成一下所需要证书秘钥</p><figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs stylus"><span class="hljs-number">1</span>.为服务创建根证书和私钥：<br>openssl req -x509 -sha256 -nodes -days <span class="hljs-number">365</span> -newkey rsa:<span class="hljs-number">2048</span> -subj <span class="hljs-string">&#x27;/O=example Inc./CN=example.com&#x27;</span> -keyout example<span class="hljs-selector-class">.com</span><span class="hljs-selector-class">.key</span> -out example<span class="hljs-selector-class">.com</span><span class="hljs-selector-class">.crt</span><br><br><span class="hljs-number">2</span>.为httpbin<span class="hljs-selector-class">.example</span>.com创建证书和私钥：<br>openssl req -out httpbin<span class="hljs-selector-class">.example</span><span class="hljs-selector-class">.com</span><span class="hljs-selector-class">.csr</span> -newkey rsa:<span class="hljs-number">2048</span> -nodes -keyout httpbin<span class="hljs-selector-class">.example</span><span class="hljs-selector-class">.com</span><span class="hljs-selector-class">.key</span> -subj <span class="hljs-string">&quot;/CN=httpbin.example.com/O=httpbin organization&quot;</span><br>openssl x509 -req -days <span class="hljs-number">365</span> -CA example<span class="hljs-selector-class">.com</span><span class="hljs-selector-class">.crt</span> -CAkey example<span class="hljs-selector-class">.com</span><span class="hljs-selector-class">.key</span> -set_serial <span class="hljs-number">0</span> -<span class="hljs-keyword">in</span> httpbin<span class="hljs-selector-class">.example</span><span class="hljs-selector-class">.com</span><span class="hljs-selector-class">.csr</span> -out httpbin<span class="hljs-selector-class">.example</span><span class="hljs-selector-class">.com</span>.crt<br></code></pre></td></tr></table></figure><p>部署一下httpbin这个服务，之前部署就可以不用部署了</p><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Service</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">httpbin</span><br>  <span class="hljs-attr">labels:</span><br>    <span class="hljs-attr">app:</span> <span class="hljs-string">httpbin</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">ports:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">http</span><br>    <span class="hljs-attr">port:</span> <span class="hljs-number">8000</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">app:</span> <span class="hljs-string">httpbin</span><br><span class="hljs-meta">---</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">apps/v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Deployment</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">httpbin</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">replicas:</span> <span class="hljs-number">1</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">matchLabels:</span><br>      <span class="hljs-attr">app:</span> <span class="hljs-string">httpbin</span><br>      <span class="hljs-attr">version:</span> <span class="hljs-string">v1</span><br>  <span class="hljs-attr">template:</span><br>    <span class="hljs-attr">metadata:</span><br>      <span class="hljs-attr">labels:</span><br>        <span class="hljs-attr">app:</span> <span class="hljs-string">httpbin</span><br>        <span class="hljs-attr">version:</span> <span class="hljs-string">v1</span><br>    <span class="hljs-attr">spec:</span><br>      <span class="hljs-attr">containers:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">image:</span> <span class="hljs-string">docker.io/citizenstig/httpbin</span><br>        <span class="hljs-attr">imagePullPolicy:</span> <span class="hljs-string">IfNotPresent</span><br>        <span class="hljs-attr">name:</span> <span class="hljs-string">httpbin</span><br>        <span class="hljs-attr">ports:</span><br>        <span class="hljs-bullet">-</span> <span class="hljs-attr">containerPort:</span> <span class="hljs-number">8000</span><br></code></pre></td></tr></table></figure><p>接下来给网关配置一个secret来挂载这个证书</p><figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs stylus">kubectl create -n istio-system secret tls httpbin-credential <span class="hljs-attr">--key</span>=httpbin<span class="hljs-selector-class">.example</span><span class="hljs-selector-class">.com</span><span class="hljs-selector-class">.key</span> <span class="hljs-attr">--cert</span>=httpbin<span class="hljs-selector-class">.example</span><span class="hljs-selector-class">.com</span>.crt<br></code></pre></td></tr></table></figure><p>配置ingress网关</p><figure class="highlight nestedtext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs nestedtext"><span class="hljs-attribute">kubectl apply -f - &lt;&lt; EOF</span><br><span class="hljs-attribute">apiVersion</span><span class="hljs-punctuation">:</span> <span class="hljs-string">networking.istio.io/v1alpha3</span><br><span class="hljs-attribute">kind</span><span class="hljs-punctuation">:</span> <span class="hljs-string">Gateway</span><br><span class="hljs-attribute">metadata</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-attribute">name</span><span class="hljs-punctuation">:</span> <span class="hljs-string">mygateway</span><br><span class="hljs-attribute">spec</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-attribute">selector</span><span class="hljs-punctuation">:</span><br>    <span class="hljs-attribute">istio</span><span class="hljs-punctuation">:</span> <span class="hljs-string">ingressgateway </span><br>  <span class="hljs-attribute">servers</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-string">port:</span><br>      <span class="hljs-attribute">number</span><span class="hljs-punctuation">:</span> <span class="hljs-string">443</span><br>      <span class="hljs-attribute">name</span><span class="hljs-punctuation">:</span> <span class="hljs-string">https</span><br>      <span class="hljs-attribute">protocol</span><span class="hljs-punctuation">:</span> <span class="hljs-string">HTTPS</span><br>    <span class="hljs-attribute">tls</span><span class="hljs-punctuation">:</span><br>      <span class="hljs-attribute">mode</span><span class="hljs-punctuation">:</span> <span class="hljs-string">SIMPLE  #单向TLS</span><br>      <span class="hljs-attribute">credentialName</span><span class="hljs-punctuation">:</span> <span class="hljs-string">httpbin-credential</span><br>    <span class="hljs-attribute">hosts</span><span class="hljs-punctuation">:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-string">httpbin.example.com</span><br>EOF<br></code></pre></td></tr></table></figure><p>给httpbin配置一个VirtualService</p><figure class="highlight nestedtext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs nestedtext"><span class="hljs-attribute">kubectl apply -f - &lt;&lt; EOF</span><br><span class="hljs-attribute">apiVersion</span><span class="hljs-punctuation">:</span> <span class="hljs-string">networking.istio.io/v1alpha3</span><br><span class="hljs-attribute">kind</span><span class="hljs-punctuation">:</span> <span class="hljs-string">VirtualService</span><br><span class="hljs-attribute">metadata</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-attribute">name</span><span class="hljs-punctuation">:</span> <span class="hljs-string">httpbin</span><br><span class="hljs-attribute">spec</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-attribute">hosts</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-string">&quot;httpbin.example.com&quot;</span><br>  <span class="hljs-attribute">gateways</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-string">mygateway</span><br>  <span class="hljs-attribute">http</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-string">match:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-string">uri:</span><br>        <span class="hljs-attribute">prefix</span><span class="hljs-punctuation">:</span> <span class="hljs-string">/status</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-string">uri:</span><br>        <span class="hljs-attribute">prefix</span><span class="hljs-punctuation">:</span> <span class="hljs-string">/delay</span><br>    <span class="hljs-attribute">route</span><span class="hljs-punctuation">:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-string">destination:</span><br>        <span class="hljs-attribute">port</span><span class="hljs-punctuation">:</span><br>          <span class="hljs-attribute">number</span><span class="hljs-punctuation">:</span> <span class="hljs-string">8000</span><br>        <span class="hljs-attribute">host</span><span class="hljs-punctuation">:</span> <span class="hljs-string">httpbin   </span><br>EOF<br></code></pre></td></tr></table></figure><p>下面我们执行这条命令测试一下</p><figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs stylus">curl -v -HHost:httpbin<span class="hljs-selector-class">.example</span><span class="hljs-selector-class">.com</span> <span class="hljs-attr">--resolve</span> httpbin<span class="hljs-selector-class">.example</span><span class="hljs-selector-class">.com</span>:<span class="hljs-number">443</span>:<span class="hljs-number">127.0</span>.<span class="hljs-number">0.1</span> <span class="hljs-attr">--cacert</span> example<span class="hljs-selector-class">.com</span><span class="hljs-selector-class">.crt</span> <span class="hljs-string">&quot;https://httpbin.example.com:443/status/418&quot;</span><br></code></pre></td></tr></table></figure><h1 id="双向认证"><a href="#双向认证" class="headerlink" title="双向认证"></a>双向认证</h1><p>借助 Istio 的自动双向 TLS 特性，您只需配置认证策略即可使用双向 TLS，而无需关注目标规则。</p><p>Istio 跟踪迁移到 sidecar 的服务端工作负载，并将客户端 sidecar 配置为自动向这些工作负载发送双向 TLS 流量， 同时将明文流量发送到没有 sidecar 的工作负载。这使您可以通过最少的配置，逐步在网格中使用双向 TLS</p><p><img src="/img/2020-12-07-TLS-security-authentication-configuration-of-istio-entry-series/2.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><p>我们创建一个testauth的ns，在里面部署一下sleep服务，然后去请求default下的httpbin服务。</p><figure class="highlight subunit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs subunit">[root@VM<span class="hljs-string">-0</span><span class="hljs-string">-13</span>-centos istio<span class="hljs-string">-1</span>.5.1]# kubectl create ns testauth<br>namespace/testauth created<br>[root@VM<span class="hljs-string">-0</span><span class="hljs-string">-13</span>-centos istio<span class="hljs-string">-1</span>.5.1]# kubectl apply -f samples/sleep/sleep.yaml -n testauth<br>serviceaccount/sleep created<br>service/sleep created<br>deployment.apps/sleep created<br>[root@VM<span class="hljs-string">-0</span><span class="hljs-string">-13</span>-centos istio<span class="hljs-string">-1</span>.5.1]# k get pod -n testauth<br>NAME                     READY   STATUS    RESTARTS   AGE<br>sleep<span class="hljs-string">-5</span>b7bf56c54<span class="hljs-string">-8</span>gt4q   1/1     Running   0          21s<br>[root@VM<span class="hljs-string">-0</span><span class="hljs-string">-13</span>-centos istio<span class="hljs-string">-1</span>.5.1]# kubectl exec -it sleep<span class="hljs-string">-5</span>b7bf56c54<span class="hljs-string">-8</span>gt4q -n testauth -c sleep -- curl http://httpbin.default:8000/ip<br>&#123;<br>  &quot;origin&quot;: &quot;127.0.0.1&quot;<br>&#125;<br></code></pre></td></tr></table></figure><p>这里默认是可以访问通的，因为我们还没配置双向tls认证，下面我们来配置下认证策略</p><figure class="highlight avrasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs avrasm">kubectl apply -f - &lt;&lt;EOF<br><span class="hljs-symbol">apiVersion:</span> <span class="hljs-string">&quot;security.istio.io/v1beta1&quot;</span><br><span class="hljs-symbol">kind:</span> <span class="hljs-string">&quot;PeerAuthentication&quot;</span><br><span class="hljs-symbol">metadata:</span><br>  name: <span class="hljs-string">&quot;default&quot;</span><br>  namespace: <span class="hljs-string">&quot;default&quot;</span> <span class="hljs-meta">#基于default下的一个对等认证</span><br><span class="hljs-symbol">spec:</span><br>  mtls:<br>    mode: PERMISSIVE  <span class="hljs-meta">#兼容模式</span><br>EOF<br></code></pre></td></tr></table></figure><p>兼容模式下默认是可以访问的</p><figure class="highlight llvm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs llvm">[root<span class="hljs-title">@VM-0-13-centos</span> istio<span class="hljs-number">-1.5</span>.<span class="hljs-number">1</span>]# kubectl exec -it sleep<span class="hljs-number">-5</span>b<span class="hljs-number">7</span>bf<span class="hljs-number">56</span><span class="hljs-keyword">c</span><span class="hljs-number">54</span><span class="hljs-number">-8</span>gt<span class="hljs-number">4</span>q -n testauth -<span class="hljs-keyword">c</span> sleep -- curl http://httpbin.<span class="hljs-keyword">default</span>:<span class="hljs-number">8000</span>/ip<br>&#123;<br>  <span class="hljs-string">&quot;origin&quot;</span>: <span class="hljs-string">&quot;127.0.0.1&quot;</span><br>&#125;<br></code></pre></td></tr></table></figure><p>下面我们把对等认证模式改成严格模式</p><figure class="highlight vbnet"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs vbnet">kubectl apply -f - &lt;&lt;EOF<br><span class="hljs-symbol">apiVersion:</span> <span class="hljs-string">&quot;security.istio.io/v1beta1&quot;</span><br><span class="hljs-symbol">kind:</span> <span class="hljs-string">&quot;PeerAuthentication&quot;</span><br><span class="hljs-symbol">metadata:</span><br>  name: <span class="hljs-string">&quot;default&quot;</span><br>  <span class="hljs-keyword">namespace</span>: <span class="hljs-string">&quot;default&quot;</span><br><span class="hljs-symbol">spec:</span><br>  mtls:<br>    mode: <span class="hljs-keyword">STRICT</span> #严格模式<br>EOF<br></code></pre></td></tr></table></figure><p>再执行访问请求就会被拒绝</p><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs awk">[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">13</span>-centos istio-<span class="hljs-number">1.5</span>.<span class="hljs-number">1</span>]<span class="hljs-comment"># kubectl exec -it sleep-5b7bf56c54-8gt4q -n testauth -c sleep -- curl http://httpbin.default:8000/ip</span><br>curl: (<span class="hljs-number">56</span>) Recv failure: Connection reset by peer<br>command terminated with <span class="hljs-keyword">exit</span> code <span class="hljs-number">56</span><br></code></pre></td></tr></table></figure><p>那么如何让sleep去访问到httpbin呢，我们只需要将sleep注入到istio就可以，因为istio会去管理证书和秘钥</p><figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs perl">[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">13</span>-centos istio-<span class="hljs-number">1.5</span>.<span class="hljs-number">1</span>]<span class="hljs-comment"># kubectl apply -f &lt;(istioctl kube-inject -f samples/sleep/sleep.yaml) -n testauth</span><br>serviceaccount/<span class="hljs-keyword">sleep</span> unchanged<br>service/<span class="hljs-keyword">sleep</span> unchanged<br>deployment.apps/<span class="hljs-keyword">sleep</span> configured<br>[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">13</span>-centos istio-<span class="hljs-number">1.5</span>.<span class="hljs-number">1</span>]<span class="hljs-comment"># kubectl get pod -n testauth</span><br>NAME                     READY   STATUS        RESTARTS   AGE<br><span class="hljs-keyword">sleep</span>-<span class="hljs-number">5</span>b7bf56c54-<span class="hljs-number">8</span>gt4q   <span class="hljs-number">1</span>/<span class="hljs-number">1</span>     Terminating   <span class="hljs-number">0</span>          <span class="hljs-number">10</span>m<br><span class="hljs-keyword">sleep</span>-<span class="hljs-number">68</span>dc95bf4c-fwftq   <span class="hljs-number">2</span>/<span class="hljs-number">2</span>     Running       <span class="hljs-number">0</span>          <span class="hljs-number">38</span>s<br>[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">13</span>-centos istio-<span class="hljs-number">1.5</span>.<span class="hljs-number">1</span>]<span class="hljs-comment"># kubectl exec -it sleep-68dc95bf4c-fwftq -n testauth -c sleep -- curl http://httpbin.default:8000/ip</span><br>&#123;<br>  <span class="hljs-string">&quot;origin&quot;</span>: <span class="hljs-string">&quot;127.0.0.1&quot;</span><br>&#125;<br></code></pre></td></tr></table></figure><p>将sleep服务注入到istio中，就可以访问到httpbin的服务了，我们上面是针对ns进行对等认证的策略配置，也可以进行全局的对等认证的配置，只需要将ns去掉就行。</p><figure class="highlight vbnet"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs vbnet">kubectl apply -f - &lt;&lt;EOF<br><span class="hljs-symbol">apiVersion:</span> <span class="hljs-string">&quot;security.istio.io/v1beta1&quot;</span><br><span class="hljs-symbol">kind:</span> <span class="hljs-string">&quot;PeerAuthentication&quot;</span><br><span class="hljs-symbol">metadata:</span><br>  name: <span class="hljs-string">&quot;default&quot;</span><br><span class="hljs-symbol">spec:</span><br>  mtls:<br>    mode: <span class="hljs-keyword">STRICT</span><br>EOF<br></code></pre></td></tr></table></figure></div><hr><div><div class="post-metas my-3"><div class="post-meta mr-3 d-flex align-items-center"><i class="iconfont icon-category"></i> <span class="category-chains"><span class="category-chain"><a href="/categories/Istio/" class="category-chain-item">Istio</a></span></span></div><div class="post-meta"><i class="iconfont icon-tags"></i> <a href="/tags/Kubernetes/">#Kubernetes</a> <a href="/tags/Istio/">#Istio</a></div></div><div class="license-box my-3"><div class="license-title"><div>istio入门系列之TLS安全认证的配置</div><div>https://www.niewx.cn/2020/12/07/2020-12-07-TLS-security-authentication-configuration-of-istio-entry-series/</div></div><div class="license-meta"><div class="license-meta-item"><div>作者</div><div>VashonNie</div></div><div class="license-meta-item license-meta-date"><div>发布于</div><div>2020年12月7日</div></div><div class="license-meta-item"><div>许可协议</div><div><a target="_blank" href="https://creativecommons.org/licenses/by-nc/4.0/"><span class="hint--top hint--rounded" aria-label="BY - 署名"><i class="iconfont icon-by"></i> </span></a><a target="_blank" href="https://creativecommons.org/licenses/by-nc/4.0/"><span class="hint--top hint--rounded" aria-label="NC - 非商业性使用"><i class="iconfont icon-nc"></i></span></a></div></div></div><div class="license-icon iconfont"></div></div><div class="post-prevnext my-3"><article class="post-prev col-6"><a href="/2020/12/07/2020-12-07-Security-authorization-configuration-of-istio-entry-series/" title="istio入门系列之安全授权配置"><i class="iconfont icon-arrowleft"></i> <span class="hidden-mobile">istio入门系列之安全授权配置</span> <span class="visible-mobile">上一篇</span></a></article><article class="post-next col-6"><a href="/2020/12/06/2020-12-06-Jaeger-distributed-tracking-of-istio-entry-series/" title="istio入门系列之Jaeger分布式追踪"><span class="hidden-mobile">istio入门系列之Jaeger分布式追踪</span> <span class="visible-mobile">下一篇</span> <i class="iconfont icon-arrowright"></i></a></article></div></div><article id="comments" lazyload><div id="valine"></div><script type="text/javascript">Fluid.utils.loadComments("#valine",(function(){Fluid.utils.createScript("https://lib.baomitu.com/valine/1.4.16/Valine.min.js",(function(){var i=Object.assign({appId:"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz",appKey:"TuwIbmst7Q1N12V1EgEfVgDm",path:"window.location.pathname",placeholder:null,avatar:"retro",meta:["nick","mail","link"],requiredFields:[],pageSize:10,lang:"zh-CN",highlight:!1,recordIP:!1,serverURLs:"",emojiCDN:null,emojiMaps:null,enableQQ:!1},{el:"#valine",path:window.location.pathname});new Valine(i),Fluid.utils.waitElementVisible("#valine .vcontent",()=>{var i="#valine .vcontent img:not(.vemoji)";Fluid.plugins.imageCaption(i),Fluid.plugins.fancyBox(i)})}))}))</script><noscript>Please enable JavaScript to view the comments</noscript></article></article></div></div></div><div class="side-col d-none d-lg-block col-lg-2"><aside class="sidebar" style="margin-left:-1rem"><div id="toc"><p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p><div class="toc-body" id="toc-body"></div></div></aside></div></div></div><a id="scroll-top-button" aria-label="TOP" href="#" role="button"><i class="iconfont icon-arrowup" aria-hidden="true"></i></a><div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable modal-lg" role="document"><div class="modal-content"><div class="modal-header text-center"><h4 class="modal-title w-100 font-weight-bold">搜索</h4><button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button></div><div class="modal-body mx-3"><div class="md-form mb-5"><input type="text" id="local-search-input" class="form-control validate"> <label data-error="x" data-success="v" for="local-search-input">关键词</label></div><div class="list-group" id="local-search-result"></div></div></div></div></div></main><footer><div class="footer-inner"><div id="music_div" style="position:fixed;bottom:0;left:30px"><iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width="330" height="110" src="//music.163.com/outchain/player?type=0&id=919444742&auto=1&height=90"></iframe><script src="https://cdn.staticfile.org/jquery/3.3.1/jquery.min.js"></script><script src="/js/musicshow.js"></script></div><div class="footer-content"><a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a><div><span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span><script src="/js/duration.js"></script></div></div><div class="statistics"><span id="leancloud-site-pv-container" style="display:none">总访问量 <span id="leancloud-site-pv"></span> 次 </span><span id="leancloud-site-uv-container" style="display:none">总访客数 <span id="leancloud-site-uv"></span> 人</span></div></div></footer><script src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js"></script><link rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css"><script>NProgress.configure({showSpinner:!1,trickleSpeed:100}),NProgress.start(),window.addEventListener("load",(function(){NProgress.done()}))</script><script src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js"></script><script src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js"></script><script src="/js/events.js"></script><script src="/js/plugins.js"></script><script src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js"></script><script>!function(t,e){var i=Fluid.plugins.typing,n=e.getElementById("subtitle");n&&i&&i(n.getAttribute("data-typed-text"))}(window,document)</script><script defer>var _hmt=_hmt||[];!function(){var e=document.createElement("script");e.src="https://hm.baidu.com/hm.js?bfe4709ccd8c5c9e559c89f4fd0866f3";var t=document.getElementsByTagName("script")[0];t.parentNode.insertBefore(e,t)}()</script><script src="/js/img-lazyload.js"></script><script>Fluid.utils.createScript("https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js",(function(){var t=jQuery("#toc");if(0!==t.length&&window.tocbot){var o=jQuery("#board-ctn").offset().top;window.tocbot.init({tocSelector:"#toc-body",contentSelector:".markdown-body",headingSelector:CONFIG.toc.headingSelector||"h1,h2,h3,h4,h5,h6",linkClass:"tocbot-link",activeLinkClass:"tocbot-active-link",listClass:"tocbot-list",isCollapsedClass:"tocbot-is-collapsed",collapsibleClass:"tocbot-is-collapsible",collapseDepth:CONFIG.toc.collapseDepth||0,scrollSmooth:!0,headingsOffset:-o}),t.find(".toc-list-item").length>0&&t.css("visibility","visible")}}))</script><script>!function(){var e=CONFIG.code_language.enable&&CONFIG.code_language.default,a=CONFIG.copy_btn;if(e||a){var i="";i+='<div class="code-widget">',i+="LANG",i+="</div>",jQuery(".markdown-body pre").each((function(){var n=jQuery(this);if(!(n.find("code.mermaid").length>0||n.find("span.line").length>0)){var t,c="";e&&(c=CONFIG.code_language.default,n[0].children.length>0&&n[0].children[0].classList.length>=2&&n.children().hasClass("hljs")?c=n[0].children[0].classList[1]:n[0].getAttribute("data-language")?c=n[0].getAttribute("data-language"):n.parent().hasClass("sourceCode")&&n[0].children.length>0&&n[0].children[0].classList.length>=2?(c=n[0].children[0].classList[1],n.parent().addClass("code-wrapper")):n.parent().hasClass("markdown-body")&&0===n[0].classList.length&&n.wrap('<div class="code-wrapper"></div>'),c=c.toUpperCase().replace("NONE",CONFIG.code_language.default)),n.append(i.replace("LANG",c).replace('code-widget">',(t=n[0],(Fluid.utils.getBackgroundLightness(t)>=0?"code-widget-light":"code-widget-dark")+(a?' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>':' code-widget">')))),a&&Fluid.utils.createScript("https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js",(function(){new window.ClipboardJS(".copy-btn",{target:function(e){for(var a=e.parentNode.childNodes,i=0;i<a.length;i++)if("CODE"===a[i].tagName)return a[i]}}).on("success",(function(e){e.clearSelection(),e.trigger.innerHTML=e.trigger.innerHTML.replace("icon-copy","icon-success"),setTimeout((function(){e.trigger.innerHTML=e.trigger.innerHTML.replace("icon-success","icon-copy")}),2e3)}))}))}}))}}()</script><script>Fluid.utils.createScript("https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js",(function(){window.anchors.options={placement:CONFIG.anchorjs.placement,visible:CONFIG.anchorjs.visible},CONFIG.anchorjs.icon&&(window.anchors.options.icon=CONFIG.anchorjs.icon);var o=(CONFIG.anchorjs.element||"h1,h2,h3,h4,h5,h6").split(","),n=[];for(var i of o)n.push(".markdown-body > "+i.trim());"left"===CONFIG.anchorjs.placement&&(window.anchors.options.class="anchorjs-link-left"),window.anchors.add(n.join(", "))}))</script><script>Fluid.utils.createScript("https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js",(function(){Fluid.plugins.fancyBox()}))</script><script>Fluid.plugins.imageCaption()</script><script src="/js/local-search.js"></script><script defer src="/js/leancloud.js"></script><script src="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/DynamicRibbon.min.js"></script><script src="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/runtime.min.js"></script><script src="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/love.min.js"></script><script src="/js/boot.js"></script><noscript><div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div></noscript><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/z16.model.json"},"display":{"position":"right","width":180,"height":360},"mobile":{"show":true},"react":{"opacity":0.7},"log":false});</script></body></html>
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="VashonNie">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Istio的自动双向TLS特性，您只需配置认证策略即可使用双向 TLS，而无需关注目标规则。 Istio 跟踪迁移到 sidecar 的服务端工作负载，并将客户端 sidecar 配置为自动向这些工作负载发送双向 TLS 流量， 同时将明文流量发送到没有 sidecar 的工作负载。这使您可以通过最少的配置，逐步在网格中使用双向 TLS。 istio1.5版本的安全认证默认是使用的SDS（安全发现">
+<meta property="og:type" content="article">
+<meta property="og:title" content="istio入门系列之TLS安全认证的配置">
+<meta property="og:url" content="https://www.niewx.cn/2020/12/07/2020-12-07-TLS-security-authentication-configuration-of-istio-entry-series/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="Istio的自动双向TLS特性，您只需配置认证策略即可使用双向 TLS，而无需关注目标规则。 Istio 跟踪迁移到 sidecar 的服务端工作负载，并将客户端 sidecar 配置为自动向这些工作负载发送双向 TLS 流量， 同时将明文流量发送到没有 sidecar 的工作负载。这使您可以通过最少的配置，逐步在网格中使用双向 TLS。 istio1.5版本的安全认证默认是使用的SDS（安全发现">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-12-07-TLS-security-authentication-configuration-of-istio-entry-series/snail-bg.jpg">
+<meta property="article:published_time" content="2020-12-07T02:10:00.000Z">
+<meta property="article:modified_time" content="2020-12-07T02:10:00.000Z">
+<meta property="article:author" content="VashonNie">
+<meta property="article:tag" content="Kubernetes">
+<meta property="article:tag" content="Istio">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.niewx.cn/img/2020-12-07-TLS-security-authentication-configuration-of-istio-entry-series/snail-bg.jpg">
+  
+  
+  <title>istio入门系列之TLS安全认证的配置 - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/shubiao.css">
+<link rel="stylesheet" href="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/scroll.css">
+<link rel="stylesheet" href="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/gradient.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"www.niewx.cn","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>聂伟星</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+	
+	<iframe width="350" scrolling="no" height="20" frameborder="0" allowtransparency="true" src="https://i.tianqi.com?c=code&id=40&color=%23FFFFFF&icon=1&site=12"></iframe>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" target="_self" href="javascript:;" role="button"
+                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="iconfont icon-books"></i>
+                文档
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="https://www.niewx.cn/mybook/">
+                    <i class="iconfont icon-notebook"></i>
+                    运维笔记
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/column/87421">
+                    <i class="iconfont icon-addrbook"></i>
+                    云+社区文档
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="https://www.niewx.cn/question/">
+                    <i class="iconfont icon-notebook"></i>
+                    运维问题集锦
+                  </a>
+                
+              </div>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/playlist/">
+                <i class="iconfont icon-music"></i>
+                音乐
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" target="_self" href="javascript:;" role="button"
+                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="iconfont icon-douban-fill"></i>
+                豆瓣
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="/books">
+                    <i class="iconfont icon-book"></i>
+                    书籍
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="/movies">
+                    <i class="iconfont icon-youtube-fill"></i>
+                    电影
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="/games">
+                    <i class="iconfont icon-switch-fill"></i>
+                    游戏
+                  </a>
+                
+              </div>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="istio入门系列之TLS安全认证的配置"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-author" aria-hidden="true"></i>
+        VashonNie
+      </span>
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2020-12-07 10:10" pubdate>
+          2020年12月7日 上午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          4.6k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          39 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="leancloud-page-views-container" class="post-meta" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="leancloud-page-views"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">istio入门系列之TLS安全认证的配置</h1>
+            
+            <div class="markdown-body">
+              
+              <p>Istio的自动双向TLS特性，您只需配置认证策略即可使用双向 TLS，而无需关注目标规则。</p>
+<p>Istio 跟踪迁移到 sidecar 的服务端工作负载，并将客户端 sidecar 配置为自动向这些工作负载发送双向 TLS 流量， 同时将明文流量发送到没有 sidecar 的工作负载。这使您可以通过最少的配置，逐步在网格中使用双向 TLS。</p>
+<p>istio1.5版本的安全认证默认是使用的SDS（安全发现服务），并且这个服务趋于稳定、默认开启</p>
+<h1 id="单向认证"><a href="#单向认证" class="headerlink" title="单向认证"></a>单向认证</h1><p><img src="/img/2020-12-07-TLS-security-authentication-configuration-of-istio-entry-series/1.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>首先我们生成一下所需要证书秘钥</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs stylus"><span class="hljs-number">1</span>.为服务创建根证书和私钥：<br>openssl req -x509 -sha256 -nodes -days <span class="hljs-number">365</span> -newkey rsa:<span class="hljs-number">2048</span> -subj <span class="hljs-string">&#x27;/O=example Inc./CN=example.com&#x27;</span> -keyout example<span class="hljs-selector-class">.com</span><span class="hljs-selector-class">.key</span> -out example<span class="hljs-selector-class">.com</span><span class="hljs-selector-class">.crt</span><br><br><span class="hljs-number">2</span>.为httpbin<span class="hljs-selector-class">.example</span>.com创建证书和私钥：<br>openssl req -out httpbin<span class="hljs-selector-class">.example</span><span class="hljs-selector-class">.com</span><span class="hljs-selector-class">.csr</span> -newkey rsa:<span class="hljs-number">2048</span> -nodes -keyout httpbin<span class="hljs-selector-class">.example</span><span class="hljs-selector-class">.com</span><span class="hljs-selector-class">.key</span> -subj <span class="hljs-string">&quot;/CN=httpbin.example.com/O=httpbin organization&quot;</span><br>openssl x509 -req -days <span class="hljs-number">365</span> -CA example<span class="hljs-selector-class">.com</span><span class="hljs-selector-class">.crt</span> -CAkey example<span class="hljs-selector-class">.com</span><span class="hljs-selector-class">.key</span> -set_serial <span class="hljs-number">0</span> -<span class="hljs-keyword">in</span> httpbin<span class="hljs-selector-class">.example</span><span class="hljs-selector-class">.com</span><span class="hljs-selector-class">.csr</span> -out httpbin<span class="hljs-selector-class">.example</span><span class="hljs-selector-class">.com</span>.crt<br></code></pre></td></tr></table></figure>
+
+<p>部署一下httpbin这个服务，之前部署就可以不用部署了</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Service</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">httpbin</span><br>  <span class="hljs-attr">labels:</span><br>    <span class="hljs-attr">app:</span> <span class="hljs-string">httpbin</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">ports:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">http</span><br>    <span class="hljs-attr">port:</span> <span class="hljs-number">8000</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">app:</span> <span class="hljs-string">httpbin</span><br><span class="hljs-meta">---</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">apps/v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Deployment</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">httpbin</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">replicas:</span> <span class="hljs-number">1</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">matchLabels:</span><br>      <span class="hljs-attr">app:</span> <span class="hljs-string">httpbin</span><br>      <span class="hljs-attr">version:</span> <span class="hljs-string">v1</span><br>  <span class="hljs-attr">template:</span><br>    <span class="hljs-attr">metadata:</span><br>      <span class="hljs-attr">labels:</span><br>        <span class="hljs-attr">app:</span> <span class="hljs-string">httpbin</span><br>        <span class="hljs-attr">version:</span> <span class="hljs-string">v1</span><br>    <span class="hljs-attr">spec:</span><br>      <span class="hljs-attr">containers:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">image:</span> <span class="hljs-string">docker.io/citizenstig/httpbin</span><br>        <span class="hljs-attr">imagePullPolicy:</span> <span class="hljs-string">IfNotPresent</span><br>        <span class="hljs-attr">name:</span> <span class="hljs-string">httpbin</span><br>        <span class="hljs-attr">ports:</span><br>        <span class="hljs-bullet">-</span> <span class="hljs-attr">containerPort:</span> <span class="hljs-number">8000</span><br></code></pre></td></tr></table></figure>
+
+<p>接下来给网关配置一个secret来挂载这个证书</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs stylus">kubectl create -n istio-system secret tls httpbin-credential <span class="hljs-attr">--key</span>=httpbin<span class="hljs-selector-class">.example</span><span class="hljs-selector-class">.com</span><span class="hljs-selector-class">.key</span> <span class="hljs-attr">--cert</span>=httpbin<span class="hljs-selector-class">.example</span><span class="hljs-selector-class">.com</span>.crt<br></code></pre></td></tr></table></figure>
+
+<p>配置ingress网关</p>
+<figure class="highlight nestedtext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs nestedtext"><span class="hljs-attribute">kubectl apply -f - &lt;&lt; EOF</span><br><span class="hljs-attribute">apiVersion</span><span class="hljs-punctuation">:</span> <span class="hljs-string">networking.istio.io/v1alpha3</span><br><span class="hljs-attribute">kind</span><span class="hljs-punctuation">:</span> <span class="hljs-string">Gateway</span><br><span class="hljs-attribute">metadata</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-attribute">name</span><span class="hljs-punctuation">:</span> <span class="hljs-string">mygateway</span><br><span class="hljs-attribute">spec</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-attribute">selector</span><span class="hljs-punctuation">:</span><br>    <span class="hljs-attribute">istio</span><span class="hljs-punctuation">:</span> <span class="hljs-string">ingressgateway </span><br>  <span class="hljs-attribute">servers</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-string">port:</span><br>      <span class="hljs-attribute">number</span><span class="hljs-punctuation">:</span> <span class="hljs-string">443</span><br>      <span class="hljs-attribute">name</span><span class="hljs-punctuation">:</span> <span class="hljs-string">https</span><br>      <span class="hljs-attribute">protocol</span><span class="hljs-punctuation">:</span> <span class="hljs-string">HTTPS</span><br>    <span class="hljs-attribute">tls</span><span class="hljs-punctuation">:</span><br>      <span class="hljs-attribute">mode</span><span class="hljs-punctuation">:</span> <span class="hljs-string">SIMPLE  #单向TLS</span><br>      <span class="hljs-attribute">credentialName</span><span class="hljs-punctuation">:</span> <span class="hljs-string">httpbin-credential</span><br>    <span class="hljs-attribute">hosts</span><span class="hljs-punctuation">:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-string">httpbin.example.com</span><br>EOF<br></code></pre></td></tr></table></figure>
+
+<p>给httpbin配置一个VirtualService</p>
+<figure class="highlight nestedtext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs nestedtext"><span class="hljs-attribute">kubectl apply -f - &lt;&lt; EOF</span><br><span class="hljs-attribute">apiVersion</span><span class="hljs-punctuation">:</span> <span class="hljs-string">networking.istio.io/v1alpha3</span><br><span class="hljs-attribute">kind</span><span class="hljs-punctuation">:</span> <span class="hljs-string">VirtualService</span><br><span class="hljs-attribute">metadata</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-attribute">name</span><span class="hljs-punctuation">:</span> <span class="hljs-string">httpbin</span><br><span class="hljs-attribute">spec</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-attribute">hosts</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-string">&quot;httpbin.example.com&quot;</span><br>  <span class="hljs-attribute">gateways</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-string">mygateway</span><br>  <span class="hljs-attribute">http</span><span class="hljs-punctuation">:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-string">match:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-string">uri:</span><br>        <span class="hljs-attribute">prefix</span><span class="hljs-punctuation">:</span> <span class="hljs-string">/status</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-string">uri:</span><br>        <span class="hljs-attribute">prefix</span><span class="hljs-punctuation">:</span> <span class="hljs-string">/delay</span><br>    <span class="hljs-attribute">route</span><span class="hljs-punctuation">:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-string">destination:</span><br>        <span class="hljs-attribute">port</span><span class="hljs-punctuation">:</span><br>          <span class="hljs-attribute">number</span><span class="hljs-punctuation">:</span> <span class="hljs-string">8000</span><br>        <span class="hljs-attribute">host</span><span class="hljs-punctuation">:</span> <span class="hljs-string">httpbin   </span><br>EOF<br></code></pre></td></tr></table></figure>
+
+<p>下面我们执行这条命令测试一下</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs stylus">curl -v -HHost:httpbin<span class="hljs-selector-class">.example</span><span class="hljs-selector-class">.com</span> <span class="hljs-attr">--resolve</span> httpbin<span class="hljs-selector-class">.example</span><span class="hljs-selector-class">.com</span>:<span class="hljs-number">443</span>:<span class="hljs-number">127.0</span>.<span class="hljs-number">0.1</span> <span class="hljs-attr">--cacert</span> example<span class="hljs-selector-class">.com</span><span class="hljs-selector-class">.crt</span> <span class="hljs-string">&quot;https://httpbin.example.com:443/status/418&quot;</span><br></code></pre></td></tr></table></figure>
+
+<h1 id="双向认证"><a href="#双向认证" class="headerlink" title="双向认证"></a>双向认证</h1><p>借助 Istio 的自动双向 TLS 特性，您只需配置认证策略即可使用双向 TLS，而无需关注目标规则。</p>
+<p>Istio 跟踪迁移到 sidecar 的服务端工作负载，并将客户端 sidecar 配置为自动向这些工作负载发送双向 TLS 流量， 同时将明文流量发送到没有 sidecar 的工作负载。这使您可以通过最少的配置，逐步在网格中使用双向 TLS</p>
+<p><img src="/img/2020-12-07-TLS-security-authentication-configuration-of-istio-entry-series/2.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>我们创建一个testauth的ns，在里面部署一下sleep服务，然后去请求default下的httpbin服务。</p>
+<figure class="highlight subunit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs subunit">[root@VM<span class="hljs-string">-0</span><span class="hljs-string">-13</span>-centos istio<span class="hljs-string">-1</span>.5.1]# kubectl create ns testauth<br>namespace/testauth created<br>[root@VM<span class="hljs-string">-0</span><span class="hljs-string">-13</span>-centos istio<span class="hljs-string">-1</span>.5.1]# kubectl apply -f samples/sleep/sleep.yaml -n testauth<br>serviceaccount/sleep created<br>service/sleep created<br>deployment.apps/sleep created<br>[root@VM<span class="hljs-string">-0</span><span class="hljs-string">-13</span>-centos istio<span class="hljs-string">-1</span>.5.1]# k get pod -n testauth<br>NAME                     READY   STATUS    RESTARTS   AGE<br>sleep<span class="hljs-string">-5</span>b7bf56c54<span class="hljs-string">-8</span>gt4q   1/1     Running   0          21s<br>[root@VM<span class="hljs-string">-0</span><span class="hljs-string">-13</span>-centos istio<span class="hljs-string">-1</span>.5.1]# kubectl exec -it sleep<span class="hljs-string">-5</span>b7bf56c54<span class="hljs-string">-8</span>gt4q -n testauth -c sleep -- curl http://httpbin.default:8000/ip<br>&#123;<br>  &quot;origin&quot;: &quot;127.0.0.1&quot;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>这里默认是可以访问通的，因为我们还没配置双向tls认证，下面我们来配置下认证策略</p>
+<figure class="highlight avrasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs avrasm">kubectl apply -f - &lt;&lt;EOF<br><span class="hljs-symbol">apiVersion:</span> <span class="hljs-string">&quot;security.istio.io/v1beta1&quot;</span><br><span class="hljs-symbol">kind:</span> <span class="hljs-string">&quot;PeerAuthentication&quot;</span><br><span class="hljs-symbol">metadata:</span><br>  name: <span class="hljs-string">&quot;default&quot;</span><br>  namespace: <span class="hljs-string">&quot;default&quot;</span> <span class="hljs-meta">#基于default下的一个对等认证</span><br><span class="hljs-symbol">spec:</span><br>  mtls:<br>    mode: PERMISSIVE  <span class="hljs-meta">#兼容模式</span><br>EOF<br></code></pre></td></tr></table></figure>
+
+<p>兼容模式下默认是可以访问的</p>
+<figure class="highlight llvm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs llvm">[root<span class="hljs-title">@VM-0-13-centos</span> istio<span class="hljs-number">-1.5</span>.<span class="hljs-number">1</span>]# kubectl exec -it sleep<span class="hljs-number">-5</span>b<span class="hljs-number">7</span>bf<span class="hljs-number">56</span><span class="hljs-keyword">c</span><span class="hljs-number">54</span><span class="hljs-number">-8</span>gt<span class="hljs-number">4</span>q -n testauth -<span class="hljs-keyword">c</span> sleep -- curl http://httpbin.<span class="hljs-keyword">default</span>:<span class="hljs-number">8000</span>/ip<br>&#123;<br>  <span class="hljs-string">&quot;origin&quot;</span>: <span class="hljs-string">&quot;127.0.0.1&quot;</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>下面我们把对等认证模式改成严格模式</p>
+<figure class="highlight vbnet"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs vbnet">kubectl apply -f - &lt;&lt;EOF<br><span class="hljs-symbol">apiVersion:</span> <span class="hljs-string">&quot;security.istio.io/v1beta1&quot;</span><br><span class="hljs-symbol">kind:</span> <span class="hljs-string">&quot;PeerAuthentication&quot;</span><br><span class="hljs-symbol">metadata:</span><br>  name: <span class="hljs-string">&quot;default&quot;</span><br>  <span class="hljs-keyword">namespace</span>: <span class="hljs-string">&quot;default&quot;</span><br><span class="hljs-symbol">spec:</span><br>  mtls:<br>    mode: <span class="hljs-keyword">STRICT</span> #严格模式<br>EOF<br></code></pre></td></tr></table></figure>
+
+<p>再执行访问请求就会被拒绝</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs awk">[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">13</span>-centos istio-<span class="hljs-number">1.5</span>.<span class="hljs-number">1</span>]<span class="hljs-comment"># kubectl exec -it sleep-5b7bf56c54-8gt4q -n testauth -c sleep -- curl http://httpbin.default:8000/ip</span><br>curl: (<span class="hljs-number">56</span>) Recv failure: Connection reset by peer<br>command terminated with <span class="hljs-keyword">exit</span> code <span class="hljs-number">56</span><br></code></pre></td></tr></table></figure>
+
+<p>那么如何让sleep去访问到httpbin呢，我们只需要将sleep注入到istio就可以，因为istio会去管理证书和秘钥</p>
+<figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs perl">[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">13</span>-centos istio-<span class="hljs-number">1.5</span>.<span class="hljs-number">1</span>]<span class="hljs-comment"># kubectl apply -f &lt;(istioctl kube-inject -f samples/sleep/sleep.yaml) -n testauth</span><br>serviceaccount/<span class="hljs-keyword">sleep</span> unchanged<br>service/<span class="hljs-keyword">sleep</span> unchanged<br>deployment.apps/<span class="hljs-keyword">sleep</span> configured<br>[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">13</span>-centos istio-<span class="hljs-number">1.5</span>.<span class="hljs-number">1</span>]<span class="hljs-comment"># kubectl get pod -n testauth</span><br>NAME                     READY   STATUS        RESTARTS   AGE<br><span class="hljs-keyword">sleep</span>-<span class="hljs-number">5</span>b7bf56c54-<span class="hljs-number">8</span>gt4q   <span class="hljs-number">1</span>/<span class="hljs-number">1</span>     Terminating   <span class="hljs-number">0</span>          <span class="hljs-number">10</span>m<br><span class="hljs-keyword">sleep</span>-<span class="hljs-number">68</span>dc95bf4c-fwftq   <span class="hljs-number">2</span>/<span class="hljs-number">2</span>     Running       <span class="hljs-number">0</span>          <span class="hljs-number">38</span>s<br>[root@VM-<span class="hljs-number">0</span>-<span class="hljs-number">13</span>-centos istio-<span class="hljs-number">1.5</span>.<span class="hljs-number">1</span>]<span class="hljs-comment"># kubectl exec -it sleep-68dc95bf4c-fwftq -n testauth -c sleep -- curl http://httpbin.default:8000/ip</span><br>&#123;<br>  <span class="hljs-string">&quot;origin&quot;</span>: <span class="hljs-string">&quot;127.0.0.1&quot;</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>将sleep服务注入到istio中，就可以访问到httpbin的服务了，我们上面是针对ns进行对等认证的策略配置，也可以进行全局的对等认证的配置，只需要将ns去掉就行。</p>
+<figure class="highlight vbnet"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs vbnet">kubectl apply -f - &lt;&lt;EOF<br><span class="hljs-symbol">apiVersion:</span> <span class="hljs-string">&quot;security.istio.io/v1beta1&quot;</span><br><span class="hljs-symbol">kind:</span> <span class="hljs-string">&quot;PeerAuthentication&quot;</span><br><span class="hljs-symbol">metadata:</span><br>  name: <span class="hljs-string">&quot;default&quot;</span><br><span class="hljs-symbol">spec:</span><br>  mtls:<br>    mode: <span class="hljs-keyword">STRICT</span><br>EOF<br></code></pre></td></tr></table></figure>
+
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Istio/" class="category-chain-item">Istio</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Kubernetes/">#Kubernetes</a>
+      
+        <a href="/tags/Istio/">#Istio</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>istio入门系列之TLS安全认证的配置</div>
+      <div>https://www.niewx.cn/2020/12/07/2020-12-07-TLS-security-authentication-configuration-of-istio-entry-series/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>VashonNie</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2020年12月7日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by-nc/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by-nc/4.0/">
+              <span class="hint--top hint--rounded" aria-label="NC - 非商业性使用">
+                <i class="iconfont icon-nc"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2020/12/07/2020-12-07-Security-authorization-configuration-of-istio-entry-series/" title="istio入门系列之安全授权配置">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">istio入门系列之安全授权配置</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2020/12/06/2020-12-06-Jaeger-distributed-tracking-of-istio-entry-series/" title="istio入门系列之Jaeger分布式追踪">
+                        <span class="hidden-mobile">istio入门系列之Jaeger分布式追踪</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <div id="valine"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#valine', function() {
+      Fluid.utils.createScript('https://lib.baomitu.com/valine/1.4.16/Valine.min.js', function() {
+        var options = Object.assign(
+          {"appId":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","appKey":"TuwIbmst7Q1N12V1EgEfVgDm","path":"window.location.pathname","placeholder":null,"avatar":"retro","meta":["nick","mail","link"],"requiredFields":[],"pageSize":10,"lang":"zh-CN","highlight":false,"recordIP":false,"serverURLs":"","emojiCDN":null,"emojiMaps":null,"enableQQ":false},
+          {
+            el: "#valine",
+            path: window.location.pathname
+          }
+        )
+        new Valine(options);
+        Fluid.utils.waitElementVisible('#valine .vcontent', () => {
+          var imgSelector = '#valine .vcontent img:not(.vemoji)';
+          Fluid.plugins.imageCaption(imgSelector);
+          Fluid.plugins.fancyBox(imgSelector);
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+   <div id="music_div" style="position: fixed; bottom: 0px; left: 30px;">
+    <iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=110 
+    	src="//music.163.com/outchain/player?type=0&id=919444742&auto=1&height=90">
+    </iframe>
+    <script src="https://cdn.staticfile.org/jquery/3.3.1/jquery.min.js"></script>
+    <script src="/js/musicshow.js"></script>
+</div>
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> </div>
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="leancloud-site-pv-container" style="display: none">
+        总访问量 
+        <span id="leancloud-site-pv"></span>
+         次
+      </span>
+    
+    
+      <span id="leancloud-site-uv-container" style="display: none">
+        总访客数 
+        <span id="leancloud-site-uv"></span>
+         人
+      </span>
+    
+    
+
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?bfe4709ccd8c5c9e559c89f4fd0866f3";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="/js/leancloud.js" ></script>
+
+
+
+
+  
+<script src="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/DynamicRibbon.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/runtime.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/love.min.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/z16.model.json"},"display":{"position":"right","width":180,"height":360},"mobile":{"show":true},"react":{"opacity":0.7},"log":false});</script></body>
+</html>

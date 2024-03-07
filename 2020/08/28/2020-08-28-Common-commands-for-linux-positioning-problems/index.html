@@ -1,1 +1,1162 @@
-<!DOCTYPE html><html lang="zh-CN" data-default-color-scheme="auto"><head><meta charset="UTF-8"><link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png"><link rel="icon" href="/img/fluid.png"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,shrink-to-fit=no"><meta http-equiv="x-ua-compatible" content="ie=edge"><meta name="theme-color" content="#2f4154"><meta name="author" content="VashonNie"><meta name="keywords" content=""><meta name="description" content="本篇文章主要介绍了在使用linux过程中常见的一些定位问题的命令。 ifconfig(查看网卡)12345678910111213141516171819$ ifconfigenp1s0    Link encap:Ethernet  HWaddr 28:d2:44:eb:bd:98            inet addr:192.168.0.103  Bcast:192.168.0.255"><meta property="og:type" content="article"><meta property="og:title" content="linux定位问题常用命令"><meta property="og:url" content="https://www.niewx.cn/2020/08/28/2020-08-28-Common-commands-for-linux-positioning-problems/index.html"><meta property="og:site_name" content="Hexo"><meta property="og:description" content="本篇文章主要介绍了在使用linux过程中常见的一些定位问题的命令。 ifconfig(查看网卡)12345678910111213141516171819$ ifconfigenp1s0    Link encap:Ethernet  HWaddr 28:d2:44:eb:bd:98            inet addr:192.168.0.103  Bcast:192.168.0.255"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://www.niewx.cn/img/2020-08-28-Common-commands-for-linux-positioning-problems/snail-bg.jpg"><meta property="article:published_time" content="2020-08-28T06:10:00.000Z"><meta property="article:modified_time" content="2020-08-28T06:10:00.000Z"><meta property="article:author" content="VashonNie"><meta property="article:tag" content="linux"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://www.niewx.cn/img/2020-08-28-Common-commands-for-linux-positioning-problems/snail-bg.jpg"><title>linux定位问题常用命令 - Hexo</title><link rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css"><link rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css"><link rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css"><link rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css"><link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css"><link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css"><link rel="stylesheet" href="/css/main.css"><link id="highlight-css" rel="stylesheet" href="/css/highlight.css"><link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/shubiao.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/scroll.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/gradient.css"><script id="fluid-configs">var Fluid=window.Fluid||{},CONFIG={hostname:"www.niewx.cn",root:"/",version:"1.8.14",typing:{enable:!0,typeSpeed:70,cursorChar:"_",loop:!1,scope:[]},anchorjs:{enable:!0,element:"h1,h2,h3,h4,h5,h6",placement:"left",visible:"hover",icon:""},progressbar:{enable:!0,height_px:3,color:"#29d",options:{showSpinner:!1,trickleSpeed:100}},code_language:{enable:!0,default:"TEXT"},copy_btn:!0,image_caption:{enable:!0},image_zoom:{enable:!0,img_url_replace:["",""]},toc:{enable:!0,placement:"right",headingSelector:"h1,h2,h3,h4,h5,h6",collapseDepth:0},lazyload:{enable:!0,loading_img:"/img/loading.gif",onlypost:!1,offset_factor:2},web_analytics:{enable:!0,baidu:"bfe4709ccd8c5c9e559c89f4fd0866f3",google:null,gtag:null,tencent:{sid:null,cid:null},woyaola:null,cnzz:null,leancloud:{app_id:"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz",app_key:"TuwIbmst7Q1N12V1EgEfVgDm",server_url:null,path:"window.location.pathname",ignore_local:!1}},search_path:"/local-search.xml"}</script><script src="/js/utils.js"></script><script src="/js/color-schema.js"></script><meta name="generator" content="Hexo 6.1.0"></head><body><header><div class="header-inner" style="height:70vh"><nav id="navbar" class="navbar fixed-top navbar-expand-lg navbar-dark scrolling-navbar"><div class="container"><a class="navbar-brand" href="/"><strong>聂伟星</strong> </a><button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><div class="animated-icon"><span></span><span></span><span></span></div></button><iframe width="350" scrolling="no" height="20" frameborder="0" allowtransparency="true" src="https://i.tianqi.com?c=code&id=40&color=%23FFFFFF&icon=1&site=12"></iframe><div class="collapse navbar-collapse" id="navbarSupportedContent"><ul class="navbar-nav ml-auto text-center"><li class="nav-item"><a class="nav-link" href="/"><i class="iconfont icon-home-fill"></i> 首页</a></li><li class="nav-item"><a class="nav-link" href="/archives/"><i class="iconfont icon-archive-fill"></i> 归档</a></li><li class="nav-item"><a class="nav-link" href="/categories/"><i class="iconfont icon-category-fill"></i> 分类</a></li><li class="nav-item"><a class="nav-link" href="/tags/"><i class="iconfont icon-tags-fill"></i> 标签</a></li><li class="nav-item"><a class="nav-link" href="/about/"><i class="iconfont icon-user-fill"></i> 关于</a></li><li class="nav-item"><a class="nav-link" href="/links/"><i class="iconfont icon-link-fill"></i> 友链</a></li><li class="nav-item dropdown"><a class="nav-link dropdown-toggle" target="_self" href="javascript:;" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="iconfont icon-books"></i> 文档</a><div class="dropdown-menu" aria-labelledby="navbarDropdown"><a class="dropdown-item" href="https://www.niewx.cn/mybook/"><i class="iconfont icon-notebook"></i> 运维笔记 </a><a class="dropdown-item" target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/column/87421"><i class="iconfont icon-addrbook"></i> 云+社区文档 </a><a class="dropdown-item" href="https://www.niewx.cn/question/"><i class="iconfont icon-notebook"></i> 运维问题集锦</a></div></li><li class="nav-item"><a class="nav-link" href="/playlist/"><i class="iconfont icon-music"></i> 音乐</a></li><li class="nav-item dropdown"><a class="nav-link dropdown-toggle" target="_self" href="javascript:;" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="iconfont icon-douban-fill"></i> 豆瓣</a><div class="dropdown-menu" aria-labelledby="navbarDropdown"><a class="dropdown-item" href="/books"><i class="iconfont icon-book"></i> 书籍 </a><a class="dropdown-item" href="/movies"><i class="iconfont icon-youtube-fill"></i> 电影 </a><a class="dropdown-item" href="/games"><i class="iconfont icon-switch-fill"></i> 游戏</a></div></li><li class="nav-item" id="search-btn"><a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">&nbsp;<i class="iconfont icon-search"></i>&nbsp;</a></li><li class="nav-item" id="color-toggle-btn"><a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a></li></ul></div></div></nav><div id="banner" class="banner" parallax="true" style="background:url(/img/default.png) no-repeat center center;background-size:cover"><div class="full-bg-img"><div class="mask flex-center" style="background-color:rgba(0,0,0,.3)"><div class="banner-text text-center fade-in-up"><div class="h2"><span id="subtitle" data-typed-text="linux定位问题常用命令"></span></div><div class="mt-3"><span class="post-meta mr-2"><i class="iconfont icon-author" aria-hidden="true"></i> VashonNie </span><span class="post-meta"><i class="iconfont icon-date-fill" aria-hidden="true"></i> <time datetime="2020-08-28 14:10" pubdate>2020年8月28日 下午</time></span></div><div class="mt-1"><span class="post-meta mr-2"><i class="iconfont icon-chart"></i>14k 字 </span><span class="post-meta mr-2"><i class="iconfont icon-clock-fill"></i>114 分钟 </span><span id="leancloud-page-views-container" class="post-meta" style="display:none"><i class="iconfont icon-eye" aria-hidden="true"></i> <span id="leancloud-page-views"></span> 次</span></div></div></div></div></div></div></header><main><div class="container-fluid nopadding-x"><div class="row nomargin-x"><div class="side-col d-none d-lg-block col-lg-2"></div><div class="col-lg-8 nopadding-x-md"><div class="container nopadding-x-md" id="board-ctn"><div id="board"><article class="post-content mx-auto"><h1 style="display:none">linux定位问题常用命令</h1><div class="markdown-body"><p>本篇文章主要介绍了在使用linux过程中常见的一些定位问题的命令。</p><h1 id="ifconfig-查看网卡"><a href="#ifconfig-查看网卡" class="headerlink" title="ifconfig(查看网卡)"></a>ifconfig(查看网卡)</h1><figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs vim">$ ifconfig<br><br>enp1s0    Link encap:Ethernet  HWaddr <span class="hljs-number">28</span>:d2:<span class="hljs-number">44</span>:<span class="hljs-keyword">e</span><span class="hljs-variable">b:bd</span>:<span class="hljs-number">98</span>  <br>          inet addr:<span class="hljs-number">192.168</span>.<span class="hljs-number">0.103</span>  Bcas<span class="hljs-variable">t:192</span>.<span class="hljs-number">168.0</span>.<span class="hljs-number">255</span>  Mask:<span class="hljs-number">255.255</span>.<span class="hljs-number">255.0</span><br>          inet6 addr: fe80::<span class="hljs-number">8</span>f0c:<span class="hljs-number">7825</span>:<span class="hljs-number">8057</span>:<span class="hljs-number">5</span>eec/<span class="hljs-number">64</span> Scope:Link<br>          UP BROADCAST RUNNING MULTICAST  MTU:<span class="hljs-number">1500</span>  Metric:<span class="hljs-number">1</span><br>          RX packet<span class="hljs-variable">s:169854</span> error<span class="hljs-variable">s:0</span> dropped:<span class="hljs-number">0</span> overrun<span class="hljs-variable">s:0</span> frame:<span class="hljs-number">0</span><br>          TX packet<span class="hljs-variable">s:125995</span> error<span class="hljs-variable">s:0</span> dropped:<span class="hljs-number">0</span> overrun<span class="hljs-variable">s:0</span> carrier:<span class="hljs-number">0</span><br>          collision<span class="hljs-variable">s:0</span> txqueuelen:<span class="hljs-number">1000</span> <br>          RX byte<span class="hljs-variable">s:174146270</span> (<span class="hljs-number">174.1</span> MB)  TX byte<span class="hljs-variable">s:21062129</span> (<span class="hljs-number">21.0</span> MB)<br><br><span class="hljs-keyword">lo</span>        Link encap:Local Loopback  <br>          inet addr:<span class="hljs-number">127.0</span>.<span class="hljs-number">0.1</span>  Mask:<span class="hljs-number">255.0</span>.<span class="hljs-number">0.0</span><br>          inet6 addr: ::<span class="hljs-number">1</span>/<span class="hljs-number">128</span> Scope:Host<br>          UP LOOPBACK RUNNING  MTU:<span class="hljs-number">65536</span>  Metric:<span class="hljs-number">1</span><br>          RX packet<span class="hljs-variable">s:15793</span> error<span class="hljs-variable">s:0</span> dropped:<span class="hljs-number">0</span> overrun<span class="hljs-variable">s:0</span> frame:<span class="hljs-number">0</span><br>          TX packet<span class="hljs-variable">s:15793</span> error<span class="hljs-variable">s:0</span> dropped:<span class="hljs-number">0</span> overrun<span class="hljs-variable">s:0</span> carrier:<span class="hljs-number">0</span><br>          collision<span class="hljs-variable">s:0</span> txqueuelen:<span class="hljs-number">1</span> <br>          RX byte<span class="hljs-variable">s:2898946</span> (<span class="hljs-number">2.8</span> MB)  TX byte<span class="hljs-variable">s:2898946</span> (<span class="hljs-number">2.8</span> MB)<br></code></pre></td></tr></table></figure><p>如果要显示所有的网络接口，包含在线（up）的或下线（down）的，使用-a 选项。</p><figure class="highlight crystal"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs crystal"><span class="hljs-variable">$ </span>ifconfig -a   <br></code></pre></td></tr></table></figure><p>如果要给一个网络接口分配一个IP地址，使用下面的命令</p><figure class="highlight dns"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs dns">$ sudo ifconfig eth<span class="hljs-number">0 192.168.56</span>.<span class="hljs-number">5</span> netmask <span class="hljs-number">255.255.255.0</span><br></code></pre></td></tr></table></figure><p>如果要启用一个网络接口，使用下面命令</p><figure class="highlight crystal"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs crystal"><span class="hljs-variable">$ </span>sudo ifconfig up eth0<br></code></pre></td></tr></table></figure><p>如果要禁用一个网络接口，使用下面命令</p><figure class="highlight crystal"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs crystal"><span class="hljs-variable">$ </span>sudo ifconfig down eth0<br></code></pre></td></tr></table></figure><h1 id="ip-查看网卡"><a href="#ip-查看网卡" class="headerlink" title="ip(查看网卡)"></a>ip(查看网卡)</h1><p>显示所有网卡</p><figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-comment"># ip addr show</span><br><span class="hljs-attribute">1</span>: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu <span class="hljs-number">65536</span> qdisc noqueue state UNKNOWN group default qlen <span class="hljs-number">1000</span><br>    <span class="hljs-attribute">link</span>/loopback <span class="hljs-number">00</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00</span> brd <span class="hljs-number">00</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00</span><br>    <span class="hljs-attribute">inet</span> <span class="hljs-number">127.0.0.1</span>/<span class="hljs-number">8</span> scope host lo<br>       <span class="hljs-attribute">valid_lft</span> forever preferred_lft forever<br>    <span class="hljs-attribute">inet6</span> ::<span class="hljs-number">1</span>/<span class="hljs-number">128</span> scope host <br>       <span class="hljs-attribute">valid_lft</span> forever preferred_lft forever<br><span class="hljs-attribute">2</span>: eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu <span class="hljs-number">1500</span> qdisc mq state UP group default qlen <span class="hljs-number">1000</span><br>    <span class="hljs-attribute">link</span>/ether <span class="hljs-number">52</span>:<span class="hljs-number">54</span>:<span class="hljs-number">00</span>:eb:<span class="hljs-number">2</span>b:<span class="hljs-number">9</span>b brd ff:ff:ff:ff:ff:ff<br>    <span class="hljs-attribute">inet</span> <span class="hljs-number">10.168.1.4</span>/<span class="hljs-number">24</span> brd <span class="hljs-number">10.168.1.255</span> scope global eth0<br>       <span class="hljs-attribute">valid_lft</span> forever preferred_lft forever<br>    <span class="hljs-attribute">inet6</span> fe80::<span class="hljs-number">5054</span>:ff:feeb:<span class="hljs-number">2</span>b9b/<span class="hljs-number">64</span> scope link <br>       <span class="hljs-attribute">valid_lft</span> forever preferred_lft forever<br><span class="hljs-attribute">3</span>: eth1: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu <span class="hljs-number">1500</span> qdisc mq state UP group default qlen <span class="hljs-number">1000</span><br>    <span class="hljs-attribute">link</span>/ether <span class="hljs-number">20</span>:<span class="hljs-number">90</span>:<span class="hljs-number">6</span>f:<span class="hljs-number">6</span>a:<span class="hljs-number">7</span>f:ae brd ff:ff:ff:ff:ff:ff<br>    <span class="hljs-attribute">inet6</span> fe80::<span class="hljs-number">2290</span>:<span class="hljs-number">6</span>fff:fe6a:<span class="hljs-number">7</span>fae/<span class="hljs-number">64</span> scope link <br>       <span class="hljs-attribute">valid_lft</span> forever preferred_lft forever<br><span class="hljs-attribute">4</span>: docker0: &lt;NO-CARRIER,BROADCAST,MULTICAST,UP&gt; mtu <span class="hljs-number">1500</span> qdisc noqueue state DOWN group default <br>    <span class="hljs-attribute">link</span>/ether <span class="hljs-number">02</span>:<span class="hljs-number">42</span>:<span class="hljs-number">76</span>:<span class="hljs-number">73</span>:f4:f6 brd ff:ff:ff:ff:ff:ff<br></code></pre></td></tr></table></figure><p>查看路由信息</p><figure class="highlight accesslog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs accesslog"><span class="hljs-string">[root@VM_1_4_centos ~]</span># ip route show<br>default via <span class="hljs-number">10</span>.<span class="hljs-number">168</span>.<span class="hljs-number">1</span>.<span class="hljs-number">1</span> dev eth0 <br><span class="hljs-number">10.168.1.0</span>/<span class="hljs-number">24</span> dev eth0 proto kernel scope link src <span class="hljs-number">10</span>.<span class="hljs-number">168</span>.<span class="hljs-number">1</span>.<span class="hljs-number">4</span> <br><span class="hljs-number">10.168.100.3</span> dev enic3c3d718fcd scope link <br><span class="hljs-number">10.168.100.11</span> dev enib229b17365d scope link <br><span class="hljs-number">169.254.0.0</span>/<span class="hljs-number">16</span> dev eth0 scope link metric <span class="hljs-number">1002</span> <br><span class="hljs-number">169.254.32.0</span>/<span class="hljs-number">28</span> dev docker0 proto kernel scope link src <span class="hljs-number">169</span>.<span class="hljs-number">254</span>.<span class="hljs-number">32</span>.<span class="hljs-number">1</span> linkdown <br><span class="hljs-number">172.16.3.64</span>/<span class="hljs-number">26</span> dev cbr0 proto kernel scope link src <span class="hljs-number">172</span>.<span class="hljs-number">16</span>.<span class="hljs-number">3</span>.<span class="hljs-number">65</span> <br></code></pre></td></tr></table></figure><h1 id="ifup，ifdown-激活或者禁用网卡"><a href="#ifup，ifdown-激活或者禁用网卡" class="headerlink" title="ifup，ifdown(激活或者禁用网卡)"></a>ifup，ifdown(激活或者禁用网卡)</h1><p>ifup命令用于激活一个网络接口，使得可以接收或传输数据。</p><figure class="highlight crystal"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs crystal"><span class="hljs-variable">$ </span>sudo ifup eth0<br></code></pre></td></tr></table></figure><p>ifdown命令可以禁用一个网络接口，禁掉后就不能传输和接收数据了。</p><figure class="highlight crystal"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs crystal"><span class="hljs-variable">$ </span>sudo ifdown eth0<br></code></pre></td></tr></table></figure><h1 id="ping-探测网络连通性"><a href="#ping-探测网络连通性" class="headerlink" title="ping(探测网络连通性)"></a>ping(探测网络连通性)</h1><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs routeros">[root@VM_1_4_centos ~]#<span class="hljs-built_in"> ping </span>www.baidu.com<span class="hljs-built_in"></span><br><span class="hljs-built_in">PING </span>www.a.shifen.com (14.215.177.38) 56(84) bytes of data.<br>64 bytes <span class="hljs-keyword">from</span> 14.215.177.38 (14.215.177.38): <span class="hljs-attribute">icmp_seq</span>=1 <span class="hljs-attribute">ttl</span>=54 <span class="hljs-attribute">time</span>=3.30 ms<br>64 bytes <span class="hljs-keyword">from</span> 14.215.177.38 (14.215.177.38): <span class="hljs-attribute">icmp_seq</span>=2 <span class="hljs-attribute">ttl</span>=54 <span class="hljs-attribute">time</span>=3.15 ms<br></code></pre></td></tr></table></figure><p>发送指定数量的包</p><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs routeros">[root@VM_1_4_centos ~]#<span class="hljs-built_in"> ping </span>-c 4 www.baidu.com<span class="hljs-built_in"></span><br><span class="hljs-built_in">PING </span>www.a.shifen.com (14.215.177.38) 56(84) bytes of data.<br>64 bytes <span class="hljs-keyword">from</span> 14.215.177.38 (14.215.177.38): <span class="hljs-attribute">icmp_seq</span>=1 <span class="hljs-attribute">ttl</span>=54 <span class="hljs-attribute">time</span>=3.59 ms<br>64 bytes <span class="hljs-keyword">from</span> 14.215.177.38 (14.215.177.38): <span class="hljs-attribute">icmp_seq</span>=2 <span class="hljs-attribute">ttl</span>=54 <span class="hljs-attribute">time</span>=3.16 ms<br>64 bytes <span class="hljs-keyword">from</span> 14.215.177.38 (14.215.177.38): <span class="hljs-attribute">icmp_seq</span>=3 <span class="hljs-attribute">ttl</span>=54 <span class="hljs-attribute">time</span>=3.19 ms<br>64 bytes <span class="hljs-keyword">from</span> 14.215.177.38 (14.215.177.38): <span class="hljs-attribute">icmp_seq</span>=4 <span class="hljs-attribute">ttl</span>=54 <span class="hljs-attribute">time</span>=3.14 ms<br><br>--- www.a.shifen.com<span class="hljs-built_in"> ping </span>statistics ---<br>4 packets transmitted, 4 received, 0% packet loss, time 3003ms<br>rtt min/avg/max/mdev = 3.148/3.275/3.591/0.191 ms<br></code></pre></td></tr></table></figure><h1 id="traceroute-查看数据包路由途径"><a href="#traceroute-查看数据包路由途径" class="headerlink" title="traceroute(查看数据包路由途径)"></a>traceroute(查看数据包路由途径)</h1><figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs crmsh">[root@VM_1_4_centos ~]<span class="hljs-comment"># traceroute 106.55.165.251</span><br>traceroute to <span class="hljs-number">106.55</span>.<span class="hljs-number">165.251</span> (<span class="hljs-number">106.55</span>.<span class="hljs-number">165.251</span>), <span class="hljs-number">30</span> hops max, <span class="hljs-number">60</span> byte packets<br> <span class="hljs-number">1</span>  <span class="hljs-number">9.31</span>.<span class="hljs-number">61.129</span> (<span class="hljs-number">9.31</span>.<span class="hljs-number">61.129</span>)  <span class="hljs-number">1.033</span> <span class="hljs-keyword">ms</span>  <span class="hljs-title">1</span>.<span class="hljs-number">954</span> <span class="hljs-keyword">ms</span>  <span class="hljs-title">1</span>.<span class="hljs-number">574</span> <span class="hljs-keyword">ms</span><br> <span class="hljs-title">2</span>  <span class="hljs-number">9.31</span>.<span class="hljs-number">123.96</span> (<span class="hljs-number">9.31</span>.<span class="hljs-number">123.96</span>)  <span class="hljs-number">0.831</span> <span class="hljs-keyword">ms</span>  <span class="hljs-title">1</span>.<span class="hljs-number">058</span> <span class="hljs-keyword">ms</span>  <span class="hljs-title">1</span>.<span class="hljs-number">319</span> <span class="hljs-keyword">ms</span><br> <span class="hljs-title">3</span>  <span class="hljs-number">9.31</span>.<span class="hljs-number">123.105</span> (<span class="hljs-number">9.31</span>.<span class="hljs-number">123.105</span>)  <span class="hljs-number">0.763</span> <span class="hljs-keyword">ms</span>  <span class="hljs-title">1</span>.<span class="hljs-number">330</span> <span class="hljs-keyword">ms</span>  <span class="hljs-title">1</span>.<span class="hljs-number">052</span> <span class="hljs-keyword">ms</span><br> <span class="hljs-title">4</span>  <span class="hljs-number">106.55</span>.<span class="hljs-number">165.251</span> (<span class="hljs-number">106.55</span>.<span class="hljs-number">165.251</span>)  <span class="hljs-number">0.504</span> <span class="hljs-keyword">ms</span>  <span class="hljs-title">0</span>.<span class="hljs-number">524</span> <span class="hljs-keyword">ms</span>  <span class="hljs-title">0</span>.<span class="hljs-number">555</span> ms<br></code></pre></td></tr></table></figure><h1 id="mtr-ping-traceroute"><a href="#mtr-ping-traceroute" class="headerlink" title="mtr(ping+traceroute)"></a>mtr(ping+traceroute)</h1><figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs 1c"><span class="hljs-meta"># mtr qq.com</span><br></code></pre></td></tr></table></figure><p><img src="/img/2020-08-28-Common-commands-for-linux-positioning-problems/1.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><h1 id="route-查看路由表"><a href="#route-查看路由表" class="headerlink" title="route(查看路由表)"></a>route(查看路由表)</h1><figure class="highlight accesslog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs accesslog"><span class="hljs-string">[root@VM_1_4_centos ~]</span># route <br>Kernel IP routing table<br>Destination     Gateway         Genmask         Flags Metric Ref    Use Iface<br>default         gateway         <span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>         UG    <span class="hljs-number">0</span>      <span class="hljs-number">0</span>        <span class="hljs-number">0</span> eth0<br><span class="hljs-number">10.168.1.0</span>      <span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>         <span class="hljs-number">255</span>.<span class="hljs-number">255</span>.<span class="hljs-number">255</span>.<span class="hljs-number">0</span>   U     <span class="hljs-number">0</span>      <span class="hljs-number">0</span>        <span class="hljs-number">0</span> eth0<br><span class="hljs-number">10.168.100.3</span>    <span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>         <span class="hljs-number">255</span>.<span class="hljs-number">255</span>.<span class="hljs-number">255</span>.<span class="hljs-number">255</span> UH    <span class="hljs-number">0</span>      <span class="hljs-number">0</span>        <span class="hljs-number">0</span> enic3c3d718fcd<br><span class="hljs-number">10.168.100.11</span>   <span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>         <span class="hljs-number">255</span>.<span class="hljs-number">255</span>.<span class="hljs-number">255</span>.<span class="hljs-number">255</span> UH    <span class="hljs-number">0</span>      <span class="hljs-number">0</span>        <span class="hljs-number">0</span> enib229b17365d<br>link-local      <span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>         <span class="hljs-number">255</span>.<span class="hljs-number">255</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>     U     <span class="hljs-number">1002</span>   <span class="hljs-number">0</span>        <span class="hljs-number">0</span> eth0<br><span class="hljs-number">169.254.32.0</span>    <span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>         <span class="hljs-number">255</span>.<span class="hljs-number">255</span>.<span class="hljs-number">255</span>.<span class="hljs-number">240</span> U     <span class="hljs-number">0</span>      <span class="hljs-number">0</span>        <span class="hljs-number">0</span> docker0<br><span class="hljs-number">172.16.3.64</span>     <span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>         <span class="hljs-number">255</span>.<span class="hljs-number">255</span>.<span class="hljs-number">255</span>.<span class="hljs-number">192</span> U     <span class="hljs-number">0</span>      <span class="hljs-number">0</span>        <span class="hljs-number">0</span> cbr0<br></code></pre></td></tr></table></figure><p>添加一个网络路由到一个路由表：</p><figure class="highlight pf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs pf">$ sudo <span class="hljs-keyword">route</span> add -net <span class="hljs-variable">&lt;network ip/cidr&gt;</span> gw <span class="hljs-variable">&lt;gateway ip&gt;</span> <span class="hljs-variable">&lt;interface&gt;</span><br></code></pre></td></tr></table></figure><p>从路由表中删除特定的路由项：</p><figure class="highlight dos"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs dos">$ sudo route <span class="hljs-built_in">del</span> -<span class="hljs-built_in">net</span> &lt;network ip/cidr&gt;<br></code></pre></td></tr></table></figure><h1 id="netstat-查看连接数"><a href="#netstat-查看连接数" class="headerlink" title="netstat(查看连接数)"></a>netstat(查看连接数)</h1><p>查看某个服务的TCP连接数</p><figure class="highlight coq"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs coq"># netstat -an | <span class="hljs-type">grep</span> ESTABLISHED | <span class="hljs-type">grep</span> <span class="hljs-number">126</span>:<span class="hljs-number">80</span> | <span class="hljs-type">wc</span> -l<br></code></pre></td></tr></table></figure><p>查看udp的连接数</p><figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ebnf"><span class="hljs-attribute">netstat -nu</span><br></code></pre></td></tr></table></figure><p>查看网卡列表</p><figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs tap">[root@VM_1_4_centos ~]<span class="hljs-comment"># netstat -i </span><br>Kernel Interface table<br>Iface             MTU    RX-OK RX-ERR RX-DRP RX-OVR    TX-OK TX-ERR TX-DRP TX-OVR Flg<br>cbr0            <span class="hljs-number"> 1500 </span>421966834     <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>0     <span class="hljs-number"> 478598834 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>BMPRU<br>docker0         <span class="hljs-number"> 1500 </span>      <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>0            <span class="hljs-number"> 7 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>BMU<br>enib229b17365d  <span class="hljs-number"> 1500 </span><span class="hljs-number"> 3399766 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>0      <span class="hljs-number"> 5942984 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>BMRU<br>enic3c3d718fcd  <span class="hljs-number"> 1500 </span><span class="hljs-number"> 1187714 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>0      <span class="hljs-number"> 1188197 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>BMRU<br>eth0            <span class="hljs-number"> 1500 </span>945294724     <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>0     <span class="hljs-number"> 695281730 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>BMRU<br>eth1            <span class="hljs-number"> 1500 </span><span class="hljs-number"> 8390504 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>0      <span class="hljs-number"> 4818989 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>BMRU<br>lo             <span class="hljs-number"> 65536 </span><span class="hljs-number"> 6202712 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>0      <span class="hljs-number"> 6202712 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>LRU<br>veth00bf0de2    <span class="hljs-number"> 1500 </span>     <span class="hljs-number"> 10 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>0        <span class="hljs-number"> 10516 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>BMRU<br></code></pre></td></tr></table></figure><p>显示组播组的关系</p><figure class="highlight nsis"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs nsis"><span class="hljs-comment"># netstat -g</span><br>IPv6/IPv4 Group Memberships<br>Interface    RefCnt Group<br>--------------- ------ ---------------------<br>lo       <span class="hljs-number">1</span>   <span class="hljs-literal">ALL</span>-<span class="hljs-params">SYSTEM</span>S.MCAST.NET<br>eth0      <span class="hljs-number">1</span>   <span class="hljs-literal">ALL</span>-<span class="hljs-params">SYSTEM</span>S.MCAST.NET<br>lo       <span class="hljs-number">1</span>   <span class="hljs-title function_">ff02::1</span><br>eth0      <span class="hljs-number">1</span>   <span class="hljs-title function_">ff02::1</span>:ff0a:b0c<br>eth0      <span class="hljs-number">1</span>   <span class="hljs-title function_">ff02::1</span><br></code></pre></td></tr></table></figure><p>显示网络统计信息</p><figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs tap"><span class="hljs-comment"># netstat -s</span><br>Ip:<br> <span class="hljs-number"> 184695 </span>total packets received<br> <span class="hljs-number"> 0 </span>forwarded<br> <span class="hljs-number"> 0 </span>incoming packets discarded<br> <span class="hljs-number"> 184687 </span>incoming packets delivered<br> <span class="hljs-number"> 143917 </span>requests sent out<br> <span class="hljs-number"> 32 </span>outgoing packets dropped<br> <span class="hljs-number"> 30 </span>dropped because of missing route<br>Icmp:<br> <span class="hljs-number"> 676 </span>ICMP messages received<br></code></pre></td></tr></table></figure><p>显示监听的套接口</p><figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-comment"># netstat -l</span><br><span class="hljs-attribute">Active</span> Internet connections (only servers)<br><span class="hljs-attribute">Proto</span> Recv-Q Send-Q Local Address           Foreign Address         State      <br><span class="hljs-attribute">tcp</span>        <span class="hljs-number">0</span>      <span class="hljs-number">0</span> <span class="hljs-number">0.0.0.0</span>:ssh             <span class="hljs-number">0.0.0.0</span>:*               LISTEN     <br><span class="hljs-attribute">tcp</span>        <span class="hljs-number">0</span>      <span class="hljs-number">0</span> VM_1_4_centos:<span class="hljs-number">33437</span>     <span class="hljs-number">0.0.0.0</span>:*               LISTEN     <br><span class="hljs-attribute">tcp</span>        <span class="hljs-number">0</span>      <span class="hljs-number">0</span> VM_1_4_centos:<span class="hljs-number">50050</span>     <span class="hljs-number">0.0.0.0</span>:*               LISTEN     <br><span class="hljs-attribute">tcp</span>        <span class="hljs-number">0</span>      <span class="hljs-number">0</span> VM_1_4_centos:<span class="hljs-number">10248</span>     <span class="hljs-number">0.0.0.0</span>:*               LISTEN     <br><span class="hljs-attribute">tcp</span>        <span class="hljs-number">0</span>      <span class="hljs-number">0</span> <span class="hljs-number">0.0.0.0:46313</span>           <span class="hljs-number">0.0.0.0</span>:*               LISTEN     <br><span class="hljs-attribute">tcp</span>        <span class="hljs-number">0</span>      <span class="hljs-number">0</span> VM_1_4_centos:<span class="hljs-number">10249</span>     <span class="hljs-number">0.0.0.0</span>:*               LISTEN     <br><span class="hljs-attribute">tcp</span>        <span class="hljs-number">0</span>      <span class="hljs-number">0</span> <span class="hljs-number">0.0.0.0</span>:sunrpc          <span class="hljs-number">0.0.0.0</span>:*               LISTEN     <br><span class="hljs-attribute">tcp6</span>       <span class="hljs-number">0</span>      <span class="hljs-number">0</span><span class="hljs-meta"> [::]:30099              [::]:*                  LISTEN     </span><br></code></pre></td></tr></table></figure><h1 id="ss-检测套接字"><a href="#ss-检测套接字" class="headerlink" title="ss(检测套接字)"></a>ss(检测套接字)</h1><figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs tap">$ ss -ta<br>State      Recv-Q Send-Q                                         Local Address:Port                                                          Peer Address:Port                <br>LISTEN    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 128 </span>                                                       *:ssh                                                                      *:*                    <br>LISTEN    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 32768 </span>                                             127.0.0.1:33437                                                                    *:*                    <br>LISTEN    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 32768 </span>                                             127.0.0.1:50050                                                                    *:*                    <br>LISTEN    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 32768 </span>                                             127.0.0.1:10248                                                                    *:*                    <br>LISTEN    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 64 </span>                                                        *:46313                                                                    *:*                    <br>LISTEN    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 32768 </span>                                             127.0.0.1:10249                                                                    *:*                    <br>LISTEN    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 128 </span>                                                       *:sunrpc                                                                   *:*                    <br>TIME-WAIT <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>                                               172.16.3.65:48682                                                          172.16.3.75:websm                <br>ESTAB     <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>                                              172.16.252.1:54536                                                         172.16.252.1:https                <br>ESTAB     <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>                                                10.168.1.4:46820                                                       169.254.128.15:60002                <br>ESTAB     <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>                                                10.168.1.4:ssh                                                          163.177.68.35:11123                <br>ESTAB     <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>                                                10.168.1.4:51178                                                         169.254.0.71:http                 <br>ESTAB     <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>                                              172.16.252.1:45940                                                         172.16.252.1:https    <br></code></pre></td></tr></table></figure><p>显示所有活动的TCP连接以及计时器，运行以下命令：</p><figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs applescript">$ ss -<span class="hljs-keyword">to</span><br></code></pre></td></tr></table></figure><h1 id="ncat-nc"><a href="#ncat-nc" class="headerlink" title="ncat(nc)"></a>ncat(nc)</h1><p>ncat&#x2F;nc既是一个端口扫描工具，也是一款安全工具，还是一款监测工具，甚至可以做为一个简单的TCP代理。 由于有这么多的功能，它被誉为是网络界的瑞士军刀。<br>安装</p><figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cmake">yum <span class="hljs-keyword">install</span> nmap-ncat -y<br></code></pre></td></tr></table></figure><p>监听某个端口的入站连接</p><figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">ncat</span> -l <span class="hljs-number">80</span><br></code></pre></td></tr></table></figure><p>连接远程服务器执行命令</p><figure class="highlight gherkin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs gherkin">ncat IP_address port_number<br><br>[root<span class="hljs-meta">@VM-6-17-centos</span> ~]<span class="hljs-comment"># ncat 49.235.179.157 80</span><br>curl localhost  <br>HTTP/1.1 400 Bad Request<br>Server: nginx/1.16.1<br>Date: Fri, 28 Aug 2020 09:08:14 GMT<br>Content-Type: text/html<br>Content-Length: 157<br>Connection: close<br><br><span class="hljs-variable">&lt;html&gt;</span><br><span class="hljs-variable">&lt;head&gt;</span><span class="hljs-variable">&lt;title&gt;</span>400 Bad Request<span class="hljs-variable">&lt;/title&gt;</span><span class="hljs-variable">&lt;/head&gt;</span><br><span class="hljs-variable">&lt;body&gt;</span><br><span class="hljs-variable">&lt;center&gt;</span><span class="hljs-variable">&lt;h1&gt;</span>400 Bad Request<span class="hljs-variable">&lt;/h1&gt;</span><span class="hljs-variable">&lt;/center&gt;</span><br><span class="hljs-variable">&lt;hr&gt;</span><span class="hljs-variable">&lt;center&gt;</span>nginx/1.16.1<span class="hljs-variable">&lt;/center&gt;</span><br><span class="hljs-variable">&lt;/body&gt;</span><br><span class="hljs-variable">&lt;/html&gt;</span><br></code></pre></td></tr></table></figure><p>测试主机端口的连通性</p><figure class="highlight avrasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs avrasm">[root@VM<span class="hljs-number">-6</span><span class="hljs-number">-17</span>-centos ~]<span class="hljs-meta"># ncat -v 49.235.179.157 22</span><br><span class="hljs-symbol">Ncat:</span> Version <span class="hljs-number">7.50</span> ( https://nmap<span class="hljs-meta">.org</span>/ncat )<br><span class="hljs-symbol">Ncat:</span> Connected to <span class="hljs-number">49.235</span><span class="hljs-number">.179</span><span class="hljs-number">.157</span>:<span class="hljs-number">22.</span><br>SSH<span class="hljs-number">-2.0</span>-OpenSSH_7<span class="hljs-number">.4</span><br></code></pre></td></tr></table></figure><p>nc进行主机间通信聊天</p><figure class="highlight autoit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs autoit">[root<span class="hljs-symbol">@VM_0_13_centos</span> ~]<span class="hljs-meta"># ncat 42.194.143.131 8081</span><br>hello<br><br>[root<span class="hljs-symbol">@VM_1_4_centos</span> ~]<span class="hljs-meta"># ncat -l 8081</span><br>hello<br></code></pre></td></tr></table></figure><h1 id="nmap-扫描主机"><a href="#nmap-扫描主机" class="headerlink" title="nmap(扫描主机)"></a>nmap(扫描主机)</h1><p>扫描<a target="_blank" rel="noopener" href="http://www.niewx.club这个地址的状态/">www.niewx.club这个地址的状态</a></p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs bash">[root@VM_1_4_centos ~]<span class="hljs-comment"># nmap www.niewx.club</span><br><br>Starting Nmap 6.40 ( http://nmap.org ) at 2020-08-28 17:16 CST<br>Nmap scan report <span class="hljs-keyword">for</span> www.niewx.club (49.235.179.157)<br>Host is up (0.029s latency).<br>Not shown: 992 filtered ports<br>PORT      STATE  SERVICE<br>20/tcp    closed ftp-data<br>21/tcp    closed ftp<br>22/tcp    open   ssh<br>80/tcp    open   http<br>443/tcp   open   https<br>3389/tcp  closed ms-wbt-server<br>5555/tcp  closed freeciv<br>55555/tcp closed unknown<br><br>Nmap <span class="hljs-keyword">done</span>: 1 IP address (1 host up) scanned <span class="hljs-keyword">in</span> 80.76 seconds<br></code></pre></td></tr></table></figure><h1 id="iftop-查看流量"><a href="#iftop-查看流量" class="headerlink" title="iftop(查看流量)"></a>iftop(查看流量)</h1><figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs cmake">yum <span class="hljs-keyword">install</span> iftop -y<br><span class="hljs-comment"># iftop -i eth0</span><br></code></pre></td></tr></table></figure><p>-i: 接口</p><p>-B: 以字节而非比特显示</p><p><img src="/img/2020-08-28-Common-commands-for-linux-positioning-problems/2.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><p>TX：发送流量</p><p>RX：接收流量</p><p>TOTAL：总流量</p><p>Cumm：运行iftop到目前时间的总流量</p><p>peak：流量峰值</p><p>rates：分别表示过去 2s 10s 40s 的平均流量</p><h1 id="trickle-限制带宽"><a href="#trickle-限制带宽" class="headerlink" title="trickle(限制带宽)"></a>trickle(限制带宽)</h1><figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cmake">yum <span class="hljs-keyword">install</span> trickle -y<br></code></pre></td></tr></table></figure><p>这个应用用于限制网络带宽</p><ol><li>限制wget的上传和下载速度限制上传为10KB&#x2F;S,下载为20KB&#x2F;s</li></ol><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">trickle -u 10 -d 20 wget http://mirrors.163.com/centos/7/isos/x86_64/CentOS-7-x86_64-Minimal-1503-01.iso</span><br></code></pre></td></tr></table></figure><ol start="2"><li>单独限制某个进程的下载和上传速度</li></ol><figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs 1c"><span class="hljs-meta"># trickle -s -d 50 -u 25 ftp</span><br></code></pre></td></tr></table></figure><ol start="3"><li>限制终端下的所有命令带宽为，下载500KB&#x2F;S，上传250KB&#x2F;s;</li></ol><figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs 1c"><span class="hljs-meta"># trickle -s -d 500 -u 250 bash</span><br>备注，单独命令使用时，必须加-s参数<br></code></pre></td></tr></table></figure><h1 id="dstat-监控cpu内存"><a href="#dstat-监控cpu内存" class="headerlink" title="dstat(监控cpu内存)"></a>dstat(监控cpu内存)</h1><figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs tap">yum install dstat -y<br>-c: 显示cpu综合占有率<br>-m: 显示内存使用情况<br>-n: 显示网络状况<br>-l：显示系统负载情况<br>-r：显示I/O请求(读/写)情况<br>[root@VM_1_4_centos ~]<span class="hljs-comment"># dstat -ncmlr</span><br>-net/total- ----total-cpu-usage---- ------memory-usage----- ---load-avg--- --io/total-<br> recv  send|usr sys idl wai hiq siq| used  buff  cach  free| 1m   5m  15m | read  writ<br>  <span class="hljs-number"> 0 </span>   <span class="hljs-number"> 0 </span>| <span class="hljs-number"> 8 </span> <span class="hljs-number"> 2 </span><span class="hljs-number"> 90 </span> <span class="hljs-number"> 0 </span> <span class="hljs-number"> 0 </span>  0|6769M 1226M 6870M  661M|0.61 0.50 0.46|2.85  23.7 <br>  78k  141k| <span class="hljs-number"> 2 </span> <span class="hljs-number"> 2 </span><span class="hljs-number"> 95 </span> <span class="hljs-number"> 0 </span> <span class="hljs-number"> 0 </span>  0|6777M 1226M 6870M  653M|0.56 0.49 0.45|  <span class="hljs-number"> 0 </span> 25.0 <br>  71k   97k| <span class="hljs-number"> 6 </span> <span class="hljs-number"> 1 </span><span class="hljs-number"> 93 </span> <span class="hljs-number"> 0 </span> <span class="hljs-number"> 0 </span>  0|6771M 1226M 6870M  659M|0.56 0.49 0.45|  <span class="hljs-number"> 0 </span> 9.00 <br> 273k  235k| <span class="hljs-number"> 7 </span> <span class="hljs-number"> 1 </span><span class="hljs-number"> 92 </span> <span class="hljs-number"> 0 </span> <span class="hljs-number"> 0 </span>  0|6771M 1227M 6870M  659M|0.56 0.49 0.45|  <span class="hljs-number"> 0 </span> 32.0 <br> 214k  401k| <span class="hljs-number"> 3 </span> <span class="hljs-number"> 1 </span><span class="hljs-number"> 96 </span> <span class="hljs-number"> 0 </span> <span class="hljs-number"> 0 </span>  0|6771M 1227M 6870M  659M|0.56 0.49 0.45|  <span class="hljs-number"> 0 </span> 5.00 <br> 123k  132k| <span class="hljs-number"> 2 </span> <span class="hljs-number"> 1 </span><span class="hljs-number"> 97 </span> <span class="hljs-number"> 0 </span> <span class="hljs-number"> 0 </span>  0|6772M 1227M 6870M  658M|0.56 0.49 0.45|  <span class="hljs-number"> 0 </span> 35.0 <br></code></pre></td></tr></table></figure><h1 id="tcpdump-网络抓包"><a href="#tcpdump-网络抓包" class="headerlink" title="tcpdump(网络抓包)"></a>tcpdump(网络抓包)</h1><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs css">tcpdump <span class="hljs-selector-attr">[ -adeflnNOpqStvx ]</span> <span class="hljs-selector-attr">[ -c 数量 ]</span> <span class="hljs-selector-attr">[ -F 文件名 ]</span><br>　　　　　　　　　　<span class="hljs-selector-attr">[ -i 网络接口 ]</span> <span class="hljs-selector-attr">[ -r 文件名]</span> <span class="hljs-selector-attr">[ -s snaplen ]</span><br>                                       <span class="hljs-selector-attr">[ -T 类型 ]</span> <span class="hljs-selector-attr">[ -w 文件名 ]</span> <span class="hljs-selector-attr">[表达式 ]</span><br> tcpdump的选项介绍<br>　　　-<span class="hljs-selector-tag">a</span> 　　　将网络地址和广播地址转变成名字；<br>　　　-d 　　　将匹配信息包的代码以人们能够理解的汇编格式给出；<br>　　　-<span class="hljs-selector-tag">dd</span> 　　　将匹配信息包的代码以c语言程序段的格式给出；<br>　　　-ddd 　　　将匹配信息包的代码以十进制的形式给出；<br>　　　-e 　　　在输出行打印出数据链路层的头部信息，包括源mac和目的mac，以及网络层的协议；<br>　　　-f 　　　将外部的Internet地址以数字的形式打印出来；<br>　　　-l 　　　使标准输出变为缓冲行形式；<br>　　　-n 　　　指定将每个监听到数据包中的域名转换成IP地址后显示，不把网络地址转换成名字；<br>     -nn：    指定将每个监听到的数据包中的域名转换成IP、端口从应用名称转换成端口号后显示<br>　　　-t 　　　在输出的每一行不打印时间戳；<br>　　　-v 　　　输出一个稍微详细的信息，例如在ip包中可以包括ttl和服务类型的信息；<br>　　　-vv 　　　输出详细的报文信息；<br>　　　-c 　　　在收到指定的包的数目后，tcpdump就会停止；<br>　　　-F 　　　从指定的文件中读取表达式,忽略其它的表达式；<br>　　　-<span class="hljs-selector-tag">i</span> 　　　指定监听的网络接口；<br>      -<span class="hljs-selector-tag">p</span>：    将网卡设置为非混杂模式，不能与host或broadcast一起使用<br>　　　-r 　　　从指定的文件中读取包(这些包一般通过-w选项产生)；<br>　　　-w 　　　直接将包写入文件中，并不分析和打印出来；<br>      -s snaplen         snaplen表示从一个包中截取的字节数。<span class="hljs-number">0</span>表示包不截断，抓完整的数据包。默认的话 tcpdump 只显示部分数据包,默认<span class="hljs-number">68</span>字节。<br>　　　-T 　　　将监听到的包直接解释为指定的类型的报文，常见的类型有rpc （远程过程调用）和snmp（简单网络管理协议；）<br>     -X            告诉tcpdump命令，需要把协议头和包内容都原原本本的显示出来（tcpdump会以<span class="hljs-number">16</span>进制和ASCII的形式显示），这在进行协议分析时是绝对的利器。<br></code></pre></td></tr></table></figure><ol><li>抓取包含10.10.10.122的数据包</li></ol><figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs 1c"><span class="hljs-meta"># tcpdump -i eth0 -vnn host 10.10.10.122</span><br></code></pre></td></tr></table></figure><ol start="2"><li>抓取包含10.10.10.0&#x2F;24网段的数据包</li></ol><figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs 1c"><span class="hljs-meta"># tcpdump -i eth0 -vnn net 10.10.10.0/24</span><br></code></pre></td></tr></table></figure><ol start="3"><li>抓取包含端口22的数据包</li></ol><figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs 1c"><span class="hljs-meta"># tcpdump -i eth0 -vnn port 22</span><br></code></pre></td></tr></table></figure><ol start="4"><li>抓取udp协议的数据包</li></ol><figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs 1c"><span class="hljs-meta"># tcpdump -i eth0 -vnn  udp</span><br></code></pre></td></tr></table></figure><ol start="5"><li>抓取icmp协议的数据包</li></ol><figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs 1c"><span class="hljs-meta"># tcpdump -i eth0 -vnn icmp</span><br></code></pre></td></tr></table></figure><ol start="6"><li>抓取arp协议的数据包</li></ol><figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs 1c"><span class="hljs-meta"># tcpdump -i eth0 -vnn arp</span><br></code></pre></td></tr></table></figure><ol start="7"><li>抓取ip协议的数据包</li></ol><figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs 1c"><span class="hljs-meta"># tcpdump -i eth0 -vnn ip</span><br></code></pre></td></tr></table></figure><ol start="8"><li>抓取源ip是10.10.10.122数据包。</li></ol><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs css"># tcpdump -<span class="hljs-selector-tag">i</span> eth0 -vnn <span class="hljs-attribute">src</span> host <span class="hljs-number">10.10</span>.<span class="hljs-number">10.122</span><br></code></pre></td></tr></table></figure><ol start="9"><li>抓取目的ip是10.10.10.122数据包</li></ol><figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs 1c"><span class="hljs-meta"># tcpdump -i eth0 -vnn dst host 10.10.10.122</span><br></code></pre></td></tr></table></figure><ol start="10"><li>抓取源端口是22的数据包</li></ol><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs css"># tcpdump -<span class="hljs-selector-tag">i</span> eth0 -vnn <span class="hljs-attribute">src</span> port <span class="hljs-number">22</span><br></code></pre></td></tr></table></figure><ol start="11"><li>抓取源ip是10.10.10.253且目的ip是22的数据包</li></ol><figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-comment"># tcpdump -i eth0 -vnn src host 10.10.10.253 and dst port 22</span><br></code></pre></td></tr></table></figure><ol start="12"><li>抓取源ip是10.10.10.122或者包含端口是22的数据包</li></ol><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs css"># tcpdump -<span class="hljs-selector-tag">i</span> eth0 -vnn <span class="hljs-attribute">src</span> host <span class="hljs-number">10.10</span>.<span class="hljs-number">10.122</span> or port <span class="hljs-number">22</span><br></code></pre></td></tr></table></figure><ol start="13"><li>抓取源ip是10.10.10.122且端口不是22的数据包</li></ol><figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-comment"># tcpdump -i eth0 -vnn src host 10.10.10.122 and not port 22</span><br></code></pre></td></tr></table></figure><ol start="14"><li>抓取源ip是10.10.10.2且目的端口是22，或源ip是10.10.10.65且目的端口是80的数据包。</li></ol><figure class="highlight taggerscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs taggerscript"># tcpdump -i eth0 -vnn <span class="hljs-symbol">\(</span> src host 10.10.10.2 and dst port 22 <span class="hljs-symbol">\)</span> or   <span class="hljs-symbol">\(</span> src host 10.10.10.65 and dst port 80 <span class="hljs-symbol">\)</span><br></code></pre></td></tr></table></figure><ol start="15"><li>抓取源ip是10.10.10.59且目的端口是22，或源ip是10.10.10.68且目的端口是80的数据包。</li></ol><figure class="highlight autoit"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs autoit">[root<span class="hljs-symbol">@localhost</span> ~]<span class="hljs-meta"># tcpdump -i  eth0 -vnn <span class="hljs-string">&#x27;src host 10.10.10.59 and dst port 22&#x27;</span> or  <span class="hljs-string">&#x27; src host 10.10.10.68 and dst port 80 &#x27;</span></span><br></code></pre></td></tr></table></figure><ol start="16"><li>把抓取的数据包记录存到&#x2F;tmp&#x2F;fill文件中，当抓取100个数据包后就退出程序。</li></ol><figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs gradle"># tcpdump –i eth0 -vnn -w  <span class="hljs-regexp">/tmp/</span>fil1 -c <span class="hljs-number">100</span><br></code></pre></td></tr></table></figure><ol start="17"><li>从&#x2F;tmp&#x2F;fill记录中读取tcp协议的数据包</li></ol><figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs gradle"># tcpdump –i eth0 -vnn -r  <span class="hljs-regexp">/tmp/</span>fil1 tcp<br></code></pre></td></tr></table></figure><ol start="18"><li>从&#x2F;tmp&#x2F;fill记录中读取包含10.10.10.58的数据包</li></ol><figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs gradle"># tcpdump –i eth0 -vnn -r  <span class="hljs-regexp">/tmp/</span>fil1 host  <span class="hljs-number">10.10</span>.<span class="hljs-number">10.58</span><br></code></pre></td></tr></table></figure><h1 id="curl-发送请求"><a href="#curl-发送请求" class="headerlink" title="curl(发送请求)"></a>curl(发送请求)</h1><figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs nginx"><span class="hljs-attribute">curl</span> www.baidu.com<br></code></pre></td></tr></table></figure><p>也可以保存源码 用curl -O 文件名 url，这个和wget类似</p><figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs stylus">curl -O baidu<span class="hljs-selector-class">.txt</span> wwww<span class="hljs-selector-class">.baidu</span>.com<br></code></pre></td></tr></table></figure><p>显示网页头部信息 用-i,当然也会把网页信息显示出来</p><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs yaml">[<span class="hljs-string">root@VM_0_11_centos</span> <span class="hljs-string">training</span>]<span class="hljs-comment"># curl -i www.baidu.com</span><br><span class="hljs-string">HTTP/1.1</span> <span class="hljs-number">200</span> <span class="hljs-string">OK</span><br><span class="hljs-attr">Accept-Ranges:</span> <span class="hljs-string">bytes</span><br><span class="hljs-attr">Cache-Control:</span> <span class="hljs-string">private,</span> <span class="hljs-literal">no</span><span class="hljs-string">-cache,</span> <span class="hljs-literal">no</span><span class="hljs-string">-store,</span> <span class="hljs-string">proxy-revalidate,</span> <span class="hljs-literal">no</span><span class="hljs-string">-transform</span><br><span class="hljs-attr">Connection:</span> <span class="hljs-string">keep-alive</span><br><span class="hljs-attr">Content-Length:</span> <span class="hljs-number">2381</span><br><span class="hljs-attr">Content-Type:</span> <span class="hljs-string">text/html</span><br><span class="hljs-attr">Date:</span> <span class="hljs-string">Thu,</span> <span class="hljs-number">02</span> <span class="hljs-string">Apr</span> <span class="hljs-number">2020 02:14:33 </span><span class="hljs-string">GMT</span><br><span class="hljs-attr">Etag:</span> <span class="hljs-string">&quot;588604c8-94d&quot;</span><br><span class="hljs-attr">Last-Modified:</span> <span class="hljs-string">Mon,</span> <span class="hljs-number">23</span> <span class="hljs-string">Jan</span> <span class="hljs-number">2017 13:27:36 </span><span class="hljs-string">GMT</span><br><span class="hljs-attr">Pragma:</span> <span class="hljs-literal">no</span><span class="hljs-string">-cache</span><br><span class="hljs-attr">Server:</span> <span class="hljs-string">bfe/1.0.8.18</span><br><span class="hljs-attr">Set-Cookie:</span> <span class="hljs-string">BDORZ=27315;</span> <span class="hljs-string">max-age=86400;</span> <span class="hljs-string">domain=.baidu.com;</span> <span class="hljs-string">path=/</span><br><br><span class="hljs-string">&lt;!DOCTYPE</span> <span class="hljs-string">html&gt;</span><br> <span class="hljs-string">xxx</span><br>  <span class="hljs-string">&lt;/html&gt;</span> <br></code></pre></td></tr></table></figure><p>参数 -v可以显示通信的过程：</p><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs yaml">[<span class="hljs-string">root@VM_0_11_centos</span> <span class="hljs-string">training</span>]<span class="hljs-comment"># curl -v www.baidu.com</span><br><span class="hljs-string">*</span> <span class="hljs-string">About</span> <span class="hljs-string">to</span> <span class="hljs-string">connect()</span> <span class="hljs-string">to</span> <span class="hljs-string">www.baidu.com</span> <span class="hljs-string">port</span> <span class="hljs-number">80</span> <span class="hljs-string">(#0)</span><br><span class="hljs-string">*</span>   <span class="hljs-string">Trying</span> <span class="hljs-number">180.101</span><span class="hljs-number">.49</span><span class="hljs-number">.11</span><span class="hljs-string">...</span><br><span class="hljs-string">*</span> <span class="hljs-string">Connected</span> <span class="hljs-string">to</span> <span class="hljs-string">www.baidu.com</span> <span class="hljs-string">(180.101.49.11)</span> <span class="hljs-string">port</span> <span class="hljs-number">80</span> <span class="hljs-string">(#0)</span><br><span class="hljs-string">&gt;</span> <span class="hljs-string">GET</span> <span class="hljs-string">/</span> <span class="hljs-string">HTTP/1.1</span><br><span class="hljs-string">&gt;</span> <span class="hljs-attr">User-Agent:</span> <span class="hljs-string">curl/7.29.0</span><br><span class="hljs-string">&gt;</span> <span class="hljs-attr">Host:</span> <span class="hljs-string">www.baidu.com</span><br><span class="hljs-string">&gt;</span> <span class="hljs-attr">Accept:</span> <span class="hljs-string">*/*</span><br><span class="hljs-string">&gt;</span> <br><span class="hljs-string">&lt;</span> <span class="hljs-string">HTTP/1.1</span> <span class="hljs-number">200</span> <span class="hljs-string">OK</span><br><span class="hljs-string">&lt;</span> <span class="hljs-attr">Accept-Ranges:</span> <span class="hljs-string">bytes</span><br><span class="hljs-string">&lt;</span> <span class="hljs-attr">Cache-Control:</span> <span class="hljs-string">private,</span> <span class="hljs-literal">no</span><span class="hljs-string">-cache,</span> <span class="hljs-literal">no</span><span class="hljs-string">-store,</span> <span class="hljs-string">proxy-revalidate,</span> <span class="hljs-literal">no</span><span class="hljs-string">-transform</span><br><span class="hljs-string">&lt;</span> <span class="hljs-attr">Connection:</span> <span class="hljs-string">keep-alive</span><br><span class="hljs-string">&lt;</span> <span class="hljs-attr">Content-Length:</span> <span class="hljs-number">2381</span><br><span class="hljs-string">&lt;</span> <span class="hljs-attr">Content-Type:</span> <span class="hljs-string">text/html</span><br><span class="hljs-string">&lt;</span> <span class="hljs-attr">Date:</span> <span class="hljs-string">Thu,</span> <span class="hljs-number">02</span> <span class="hljs-string">Apr</span> <span class="hljs-number">2020 02:16:36 </span><span class="hljs-string">GMT</span><br><span class="hljs-string">&lt;</span> <span class="hljs-attr">Etag:</span> <span class="hljs-string">&quot;588604c8-94d&quot;</span><br><span class="hljs-string">&lt;</span> <span class="hljs-attr">Last-Modified:</span> <span class="hljs-string">Mon,</span> <span class="hljs-number">23</span> <span class="hljs-string">Jan</span> <span class="hljs-number">2017 13:27:36 </span><span class="hljs-string">GMT</span><br><span class="hljs-string">&lt;</span> <span class="hljs-attr">Pragma:</span> <span class="hljs-literal">no</span><span class="hljs-string">-cache</span><br><span class="hljs-string">&lt;</span> <span class="hljs-attr">Server:</span> <span class="hljs-string">bfe/1.0.8.18</span><br><span class="hljs-string">&lt;</span> <span class="hljs-attr">Set-Cookie:</span> <span class="hljs-string">BDORZ=27315;</span> <span class="hljs-string">max-age=86400;</span> <span class="hljs-string">domain=.baidu.com;</span> <span class="hljs-string">path=/</span><br><span class="hljs-string">&lt;</span><br></code></pre></td></tr></table></figure><p>更详细的通信信息可以用 参数 –trance 文件名 url,具体信息保存到单独的文件中</p><figure class="highlight autoit"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs autoit">[root<span class="hljs-symbol">@VM_0_11_centos</span> training]<span class="hljs-meta"># curl --trace info.txt www.baidu.com</span><br></code></pre></td></tr></table></figure><p>htpp的动词，例如GET POST，PUT，DELETE等,需要参数 -X</p><p>curl默认的是get请求，如果发送POSt请求</p><figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs nginx"><span class="hljs-attribute">curl</span> -X POST www.baidu.com<br></code></pre></td></tr></table></figure><p>发送表单的时候，GET很简单 只需要把数据拼接到url后面就行</p><figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs haskell"><span class="hljs-title">curl</span> www.baidu.com?<span class="hljs-class"><span class="hljs-keyword">data</span>=xxx&amp;data1=xxx</span><br></code></pre></td></tr></table></figure><p>POST也不难</p><figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs stata">curl -X <span class="hljs-keyword">POST</span> --data <span class="hljs-string">&quot;data=xxx&quot;</span> example.com/<span class="hljs-keyword">form</span>.cgi<br></code></pre></td></tr></table></figure><p>POST发送请求的数据体可以用-d</p><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs awk">$ curl -d<span class="hljs-string">&#x27;login=emma＆password=123&#x27;</span>-X POST https:<span class="hljs-regexp">//g</span>oogle.com/login<br> 或者<br>$ curl -d <span class="hljs-string">&#x27;login=emma&#x27;</span> -d <span class="hljs-string">&#x27;password=123&#x27;</span> -X POST  https:<span class="hljs-regexp">//g</span>oogle.com/login<br></code></pre></td></tr></table></figure><p>使用-d参数以后，HTTP 请求会自动加上标头Content-Type : application&#x2F;x-www-form-urlencoded。并且会自动将请求转为 POST 方法，因此可以省略-X POST。-d参数可以读取本地文本文件的数据，向服务器发送。</p><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs awk">$ curl -d <span class="hljs-string">&#x27;@data.txt&#x27;</span> https:<span class="hljs-regexp">//g</span>oogle.com/login<br></code></pre></td></tr></table></figure><p>上面命令读取data.txt文件的内容，作为数据体向服务器发送。<br>文件上传： 假定文件上传的表单是下面这样：</p><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs xml">　<span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">method</span>=<span class="hljs-string">&quot;POST&quot;</span> <span class="hljs-attr">enctype</span>=<span class="hljs-string">&#x27;multipart/form-data&#x27;</span> <span class="hljs-attr">action</span>=<span class="hljs-string">&quot;upload.cgi&quot;</span>&gt;</span><br>　　　　<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">file</span> <span class="hljs-attr">name</span>=<span class="hljs-string">upload</span>&gt;</span><br>　　　　<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">submit</span> <span class="hljs-attr">name</span>=<span class="hljs-string">press</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;OK&quot;</span>&gt;</span><br>　　<span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span><br></code></pre></td></tr></table></figure><p>curl上传就应该是：</p><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs routeros">curl --form <span class="hljs-attribute">upload</span>=@localfilename --form <span class="hljs-attribute">press</span>=OK [URL]<br></code></pre></td></tr></table></figure><p>–referer参数表示的是你从哪个页面来的</p><figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs angelscript"><span class="hljs-string">[root@VM_0_11_centos training]</span># curl --<span class="hljs-built_in">ref</span>erer www.baidu.com www.baidu.com<br></code></pre></td></tr></table></figure><p>User Agent字段，这个字段表示的是客户端设备的信息，服务器可能会根据这个User Agent字段来判断是手机还是电脑</p><figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs stata">curl --user-agent <span class="hljs-string">&quot; xx&quot;</span> url<br>比如IPhone <br>Mozilla/5.0 (iPhone; <span class="hljs-keyword">U</span>; CPU iPhone OS 4_3_3 like <span class="hljs-keyword">Mac</span> OS X; <span class="hljs-keyword">en</span>-<span class="hljs-keyword">us</span>) <br>AppleWebKit/533.17.9 (KHTML, like Gecko) <span class="hljs-keyword">Version</span>/5.0.2 Mobile/8J2 Safari/6533.18.5<br><br><br> curl --user-agent &quot;Mozilla/5.0 (iPhone; <span class="hljs-keyword">U</span>; CPU iPhone OS 4_3_3 like <span class="hljs-keyword">Mac</span> OS X; <span class="hljs-keyword">en</span>-<span class="hljs-keyword">us</span>) <br> AppleWebKit/533.17.9 (KHTML, like Gecko) <span class="hljs-keyword">Version</span>/5.0.2 Mobile/8J2 Safari/6533.18.5&quot;  www.baidu.com<br></code></pre></td></tr></table></figure><ul><li>–user-agent 可以用-A或者-H来替代</li><li>–cookie参数，使用–cookie可以携带cookie信息</li></ul><figure class="highlight autohotkey"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs autohotkey">curl --cookie <span class="hljs-string">&quot;name=xxx&quot;</span> URL<br> `-c cookie-file`可以保存服务器返回的cookie到文件，<br> `-b cookie-file`可以使用这个文件作为cookie信息，进行后续的请求。<br></code></pre></td></tr></table></figure><p>增加头部信息 –header</p><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs awk">curl --header <span class="hljs-string">&quot;Content-Type:application/json&quot;</span> http:<span class="hljs-regexp">//</span>example.com<br></code></pre></td></tr></table></figure><h1 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h1><p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/39b9d66c9dbf">https://www.jianshu.com/p/39b9d66c9dbf</a></p><p><a target="_blank" rel="noopener" href="https://www.toutiao.com/i6812988437512061452/">https://www.toutiao.com/i6812988437512061452/</a><br><a target="_blank" rel="noopener" href="https://www.toutiao.com/i6850221908475003405/">https://www.toutiao.com/i6850221908475003405/</a></p></div><hr><div><div class="post-metas my-3"><div class="post-meta mr-3 d-flex align-items-center"><i class="iconfont icon-category"></i> <span class="category-chains"><span class="category-chain"><a href="/categories/linux/" class="category-chain-item">linux</a></span></span></div><div class="post-meta"><i class="iconfont icon-tags"></i> <a href="/tags/linux/">#linux</a></div></div><div class="license-box my-3"><div class="license-title"><div>linux定位问题常用命令</div><div>https://www.niewx.cn/2020/08/28/2020-08-28-Common-commands-for-linux-positioning-problems/</div></div><div class="license-meta"><div class="license-meta-item"><div>作者</div><div>VashonNie</div></div><div class="license-meta-item license-meta-date"><div>发布于</div><div>2020年8月28日</div></div><div class="license-meta-item"><div>许可协议</div><div><a target="_blank" href="https://creativecommons.org/licenses/by-nc/4.0/"><span class="hint--top hint--rounded" aria-label="BY - 署名"><i class="iconfont icon-by"></i> </span></a><a target="_blank" href="https://creativecommons.org/licenses/by-nc/4.0/"><span class="hint--top hint--rounded" aria-label="NC - 非商业性使用"><i class="iconfont icon-nc"></i></span></a></div></div></div><div class="license-icon iconfont"></div></div><div class="post-prevnext my-3"><article class="post-prev col-6"><a href="/2020/08/28/2020-08-28-Ip-masq-agent-of-Kubernetes-plug-in/" title="Kubernetes插件之ip-masq-agent"><i class="iconfont icon-arrowleft"></i> <span class="hidden-mobile">Kubernetes插件之ip-masq-agent</span> <span class="visible-mobile">上一篇</span></a></article><article class="post-next col-6"><a href="/2020/08/27/2020-08-27-Use-of-Kubectl-command-line-jsonpath/" title="Kubectl命令行jsonpath的使用"><span class="hidden-mobile">Kubectl命令行jsonpath的使用</span> <span class="visible-mobile">下一篇</span> <i class="iconfont icon-arrowright"></i></a></article></div></div><article id="comments" lazyload><div id="valine"></div><script type="text/javascript">Fluid.utils.loadComments("#valine",(function(){Fluid.utils.createScript("https://lib.baomitu.com/valine/1.4.16/Valine.min.js",(function(){var i=Object.assign({appId:"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz",appKey:"TuwIbmst7Q1N12V1EgEfVgDm",path:"window.location.pathname",placeholder:null,avatar:"retro",meta:["nick","mail","link"],requiredFields:[],pageSize:10,lang:"zh-CN",highlight:!1,recordIP:!1,serverURLs:"",emojiCDN:null,emojiMaps:null,enableQQ:!1},{el:"#valine",path:window.location.pathname});new Valine(i),Fluid.utils.waitElementVisible("#valine .vcontent",()=>{var i="#valine .vcontent img:not(.vemoji)";Fluid.plugins.imageCaption(i),Fluid.plugins.fancyBox(i)})}))}))</script><noscript>Please enable JavaScript to view the comments</noscript></article></article></div></div></div><div class="side-col d-none d-lg-block col-lg-2"><aside class="sidebar" style="margin-left:-1rem"><div id="toc"><p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p><div class="toc-body" id="toc-body"></div></div></aside></div></div></div><a id="scroll-top-button" aria-label="TOP" href="#" role="button"><i class="iconfont icon-arrowup" aria-hidden="true"></i></a><div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable modal-lg" role="document"><div class="modal-content"><div class="modal-header text-center"><h4 class="modal-title w-100 font-weight-bold">搜索</h4><button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button></div><div class="modal-body mx-3"><div class="md-form mb-5"><input type="text" id="local-search-input" class="form-control validate"> <label data-error="x" data-success="v" for="local-search-input">关键词</label></div><div class="list-group" id="local-search-result"></div></div></div></div></div></main><footer><div class="footer-inner"><div id="music_div" style="position:fixed;bottom:0;left:30px"><iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width="330" height="110" src="//music.163.com/outchain/player?type=0&id=919444742&auto=1&height=90"></iframe><script src="https://cdn.staticfile.org/jquery/3.3.1/jquery.min.js"></script><script src="/js/musicshow.js"></script></div><div class="footer-content"><a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a><div><span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span><script src="/js/duration.js"></script></div></div><div class="statistics"><span id="leancloud-site-pv-container" style="display:none">总访问量 <span id="leancloud-site-pv"></span> 次 </span><span id="leancloud-site-uv-container" style="display:none">总访客数 <span id="leancloud-site-uv"></span> 人</span></div></div></footer><script src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js"></script><link rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css"><script>NProgress.configure({showSpinner:!1,trickleSpeed:100}),NProgress.start(),window.addEventListener("load",(function(){NProgress.done()}))</script><script src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js"></script><script src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js"></script><script src="/js/events.js"></script><script src="/js/plugins.js"></script><script src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js"></script><script>!function(t,e){var i=Fluid.plugins.typing,n=e.getElementById("subtitle");n&&i&&i(n.getAttribute("data-typed-text"))}(window,document)</script><script defer>var _hmt=_hmt||[];!function(){var e=document.createElement("script");e.src="https://hm.baidu.com/hm.js?bfe4709ccd8c5c9e559c89f4fd0866f3";var t=document.getElementsByTagName("script")[0];t.parentNode.insertBefore(e,t)}()</script><script src="/js/img-lazyload.js"></script><script>Fluid.utils.createScript("https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js",(function(){var t=jQuery("#toc");if(0!==t.length&&window.tocbot){var o=jQuery("#board-ctn").offset().top;window.tocbot.init({tocSelector:"#toc-body",contentSelector:".markdown-body",headingSelector:CONFIG.toc.headingSelector||"h1,h2,h3,h4,h5,h6",linkClass:"tocbot-link",activeLinkClass:"tocbot-active-link",listClass:"tocbot-list",isCollapsedClass:"tocbot-is-collapsed",collapsibleClass:"tocbot-is-collapsible",collapseDepth:CONFIG.toc.collapseDepth||0,scrollSmooth:!0,headingsOffset:-o}),t.find(".toc-list-item").length>0&&t.css("visibility","visible")}}))</script><script>!function(){var e=CONFIG.code_language.enable&&CONFIG.code_language.default,a=CONFIG.copy_btn;if(e||a){var i="";i+='<div class="code-widget">',i+="LANG",i+="</div>",jQuery(".markdown-body pre").each((function(){var n=jQuery(this);if(!(n.find("code.mermaid").length>0||n.find("span.line").length>0)){var t,c="";e&&(c=CONFIG.code_language.default,n[0].children.length>0&&n[0].children[0].classList.length>=2&&n.children().hasClass("hljs")?c=n[0].children[0].classList[1]:n[0].getAttribute("data-language")?c=n[0].getAttribute("data-language"):n.parent().hasClass("sourceCode")&&n[0].children.length>0&&n[0].children[0].classList.length>=2?(c=n[0].children[0].classList[1],n.parent().addClass("code-wrapper")):n.parent().hasClass("markdown-body")&&0===n[0].classList.length&&n.wrap('<div class="code-wrapper"></div>'),c=c.toUpperCase().replace("NONE",CONFIG.code_language.default)),n.append(i.replace("LANG",c).replace('code-widget">',(t=n[0],(Fluid.utils.getBackgroundLightness(t)>=0?"code-widget-light":"code-widget-dark")+(a?' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>':' code-widget">')))),a&&Fluid.utils.createScript("https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js",(function(){new window.ClipboardJS(".copy-btn",{target:function(e){for(var a=e.parentNode.childNodes,i=0;i<a.length;i++)if("CODE"===a[i].tagName)return a[i]}}).on("success",(function(e){e.clearSelection(),e.trigger.innerHTML=e.trigger.innerHTML.replace("icon-copy","icon-success"),setTimeout((function(){e.trigger.innerHTML=e.trigger.innerHTML.replace("icon-success","icon-copy")}),2e3)}))}))}}))}}()</script><script>Fluid.utils.createScript("https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js",(function(){window.anchors.options={placement:CONFIG.anchorjs.placement,visible:CONFIG.anchorjs.visible},CONFIG.anchorjs.icon&&(window.anchors.options.icon=CONFIG.anchorjs.icon);var o=(CONFIG.anchorjs.element||"h1,h2,h3,h4,h5,h6").split(","),n=[];for(var i of o)n.push(".markdown-body > "+i.trim());"left"===CONFIG.anchorjs.placement&&(window.anchors.options.class="anchorjs-link-left"),window.anchors.add(n.join(", "))}))</script><script>Fluid.utils.createScript("https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js",(function(){Fluid.plugins.fancyBox()}))</script><script>Fluid.plugins.imageCaption()</script><script src="/js/local-search.js"></script><script defer src="/js/leancloud.js"></script><script src="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/DynamicRibbon.min.js"></script><script src="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/runtime.min.js"></script><script src="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/love.min.js"></script><script src="/js/boot.js"></script><noscript><div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div></noscript><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/z16.model.json"},"display":{"position":"right","width":180,"height":360},"mobile":{"show":true},"react":{"opacity":0.7},"log":false});</script></body></html>
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="VashonNie">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="本篇文章主要介绍了在使用linux过程中常见的一些定位问题的命令。 ifconfig(查看网卡)12345678910111213141516171819$ ifconfigenp1s0    Link encap:Ethernet  HWaddr 28:d2:44:eb:bd:98            inet addr:192.168.0.103  Bcast:192.168.0.255">
+<meta property="og:type" content="article">
+<meta property="og:title" content="linux定位问题常用命令">
+<meta property="og:url" content="https://www.niewx.cn/2020/08/28/2020-08-28-Common-commands-for-linux-positioning-problems/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="本篇文章主要介绍了在使用linux过程中常见的一些定位问题的命令。 ifconfig(查看网卡)12345678910111213141516171819$ ifconfigenp1s0    Link encap:Ethernet  HWaddr 28:d2:44:eb:bd:98            inet addr:192.168.0.103  Bcast:192.168.0.255">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-08-28-Common-commands-for-linux-positioning-problems/snail-bg.jpg">
+<meta property="article:published_time" content="2020-08-28T06:10:00.000Z">
+<meta property="article:modified_time" content="2020-08-28T06:10:00.000Z">
+<meta property="article:author" content="VashonNie">
+<meta property="article:tag" content="linux">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.niewx.cn/img/2020-08-28-Common-commands-for-linux-positioning-problems/snail-bg.jpg">
+  
+  
+  <title>linux定位问题常用命令 - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/shubiao.css">
+<link rel="stylesheet" href="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/scroll.css">
+<link rel="stylesheet" href="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/gradient.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"www.niewx.cn","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>聂伟星</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+	
+	<iframe width="350" scrolling="no" height="20" frameborder="0" allowtransparency="true" src="https://i.tianqi.com?c=code&id=40&color=%23FFFFFF&icon=1&site=12"></iframe>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" target="_self" href="javascript:;" role="button"
+                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="iconfont icon-books"></i>
+                文档
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="https://www.niewx.cn/mybook/">
+                    <i class="iconfont icon-notebook"></i>
+                    运维笔记
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/column/87421">
+                    <i class="iconfont icon-addrbook"></i>
+                    云+社区文档
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="https://www.niewx.cn/question/">
+                    <i class="iconfont icon-notebook"></i>
+                    运维问题集锦
+                  </a>
+                
+              </div>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/playlist/">
+                <i class="iconfont icon-music"></i>
+                音乐
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" target="_self" href="javascript:;" role="button"
+                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="iconfont icon-douban-fill"></i>
+                豆瓣
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="/books">
+                    <i class="iconfont icon-book"></i>
+                    书籍
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="/movies">
+                    <i class="iconfont icon-youtube-fill"></i>
+                    电影
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="/games">
+                    <i class="iconfont icon-switch-fill"></i>
+                    游戏
+                  </a>
+                
+              </div>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="linux定位问题常用命令"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-author" aria-hidden="true"></i>
+        VashonNie
+      </span>
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2020-08-28 14:10" pubdate>
+          2020年8月28日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          14k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          114 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="leancloud-page-views-container" class="post-meta" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="leancloud-page-views"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">linux定位问题常用命令</h1>
+            
+            <div class="markdown-body">
+              
+              <p>本篇文章主要介绍了在使用linux过程中常见的一些定位问题的命令。</p>
+<h1 id="ifconfig-查看网卡"><a href="#ifconfig-查看网卡" class="headerlink" title="ifconfig(查看网卡)"></a>ifconfig(查看网卡)</h1><figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs vim">$ ifconfig<br><br>enp1s0    Link encap:Ethernet  HWaddr <span class="hljs-number">28</span>:d2:<span class="hljs-number">44</span>:<span class="hljs-keyword">e</span><span class="hljs-variable">b:bd</span>:<span class="hljs-number">98</span>  <br>          inet addr:<span class="hljs-number">192.168</span>.<span class="hljs-number">0.103</span>  Bcas<span class="hljs-variable">t:192</span>.<span class="hljs-number">168.0</span>.<span class="hljs-number">255</span>  Mask:<span class="hljs-number">255.255</span>.<span class="hljs-number">255.0</span><br>          inet6 addr: fe80::<span class="hljs-number">8</span>f0c:<span class="hljs-number">7825</span>:<span class="hljs-number">8057</span>:<span class="hljs-number">5</span>eec/<span class="hljs-number">64</span> Scope:Link<br>          UP BROADCAST RUNNING MULTICAST  MTU:<span class="hljs-number">1500</span>  Metric:<span class="hljs-number">1</span><br>          RX packet<span class="hljs-variable">s:169854</span> error<span class="hljs-variable">s:0</span> dropped:<span class="hljs-number">0</span> overrun<span class="hljs-variable">s:0</span> frame:<span class="hljs-number">0</span><br>          TX packet<span class="hljs-variable">s:125995</span> error<span class="hljs-variable">s:0</span> dropped:<span class="hljs-number">0</span> overrun<span class="hljs-variable">s:0</span> carrier:<span class="hljs-number">0</span><br>          collision<span class="hljs-variable">s:0</span> txqueuelen:<span class="hljs-number">1000</span> <br>          RX byte<span class="hljs-variable">s:174146270</span> (<span class="hljs-number">174.1</span> MB)  TX byte<span class="hljs-variable">s:21062129</span> (<span class="hljs-number">21.0</span> MB)<br><br><span class="hljs-keyword">lo</span>        Link encap:Local Loopback  <br>          inet addr:<span class="hljs-number">127.0</span>.<span class="hljs-number">0.1</span>  Mask:<span class="hljs-number">255.0</span>.<span class="hljs-number">0.0</span><br>          inet6 addr: ::<span class="hljs-number">1</span>/<span class="hljs-number">128</span> Scope:Host<br>          UP LOOPBACK RUNNING  MTU:<span class="hljs-number">65536</span>  Metric:<span class="hljs-number">1</span><br>          RX packet<span class="hljs-variable">s:15793</span> error<span class="hljs-variable">s:0</span> dropped:<span class="hljs-number">0</span> overrun<span class="hljs-variable">s:0</span> frame:<span class="hljs-number">0</span><br>          TX packet<span class="hljs-variable">s:15793</span> error<span class="hljs-variable">s:0</span> dropped:<span class="hljs-number">0</span> overrun<span class="hljs-variable">s:0</span> carrier:<span class="hljs-number">0</span><br>          collision<span class="hljs-variable">s:0</span> txqueuelen:<span class="hljs-number">1</span> <br>          RX byte<span class="hljs-variable">s:2898946</span> (<span class="hljs-number">2.8</span> MB)  TX byte<span class="hljs-variable">s:2898946</span> (<span class="hljs-number">2.8</span> MB)<br></code></pre></td></tr></table></figure>
+
+<p>如果要显示所有的网络接口，包含在线（up）的或下线（down）的，使用-a 选项。</p>
+<figure class="highlight crystal"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs crystal"><span class="hljs-variable">$ </span>ifconfig -a   <br></code></pre></td></tr></table></figure>
+
+<p>如果要给一个网络接口分配一个IP地址，使用下面的命令</p>
+<figure class="highlight dns"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs dns">$ sudo ifconfig eth<span class="hljs-number">0 192.168.56</span>.<span class="hljs-number">5</span> netmask <span class="hljs-number">255.255.255.0</span><br></code></pre></td></tr></table></figure>
+
+<p>如果要启用一个网络接口，使用下面命令</p>
+<figure class="highlight crystal"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs crystal"><span class="hljs-variable">$ </span>sudo ifconfig up eth0<br></code></pre></td></tr></table></figure>
+
+<p>如果要禁用一个网络接口，使用下面命令</p>
+<figure class="highlight crystal"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs crystal"><span class="hljs-variable">$ </span>sudo ifconfig down eth0<br></code></pre></td></tr></table></figure>
+
+<h1 id="ip-查看网卡"><a href="#ip-查看网卡" class="headerlink" title="ip(查看网卡)"></a>ip(查看网卡)</h1><p>显示所有网卡</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-comment"># ip addr show</span><br><span class="hljs-attribute">1</span>: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu <span class="hljs-number">65536</span> qdisc noqueue state UNKNOWN group default qlen <span class="hljs-number">1000</span><br>    <span class="hljs-attribute">link</span>/loopback <span class="hljs-number">00</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00</span> brd <span class="hljs-number">00</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00</span><br>    <span class="hljs-attribute">inet</span> <span class="hljs-number">127.0.0.1</span>/<span class="hljs-number">8</span> scope host lo<br>       <span class="hljs-attribute">valid_lft</span> forever preferred_lft forever<br>    <span class="hljs-attribute">inet6</span> ::<span class="hljs-number">1</span>/<span class="hljs-number">128</span> scope host <br>       <span class="hljs-attribute">valid_lft</span> forever preferred_lft forever<br><span class="hljs-attribute">2</span>: eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu <span class="hljs-number">1500</span> qdisc mq state UP group default qlen <span class="hljs-number">1000</span><br>    <span class="hljs-attribute">link</span>/ether <span class="hljs-number">52</span>:<span class="hljs-number">54</span>:<span class="hljs-number">00</span>:eb:<span class="hljs-number">2</span>b:<span class="hljs-number">9</span>b brd ff:ff:ff:ff:ff:ff<br>    <span class="hljs-attribute">inet</span> <span class="hljs-number">10.168.1.4</span>/<span class="hljs-number">24</span> brd <span class="hljs-number">10.168.1.255</span> scope global eth0<br>       <span class="hljs-attribute">valid_lft</span> forever preferred_lft forever<br>    <span class="hljs-attribute">inet6</span> fe80::<span class="hljs-number">5054</span>:ff:feeb:<span class="hljs-number">2</span>b9b/<span class="hljs-number">64</span> scope link <br>       <span class="hljs-attribute">valid_lft</span> forever preferred_lft forever<br><span class="hljs-attribute">3</span>: eth1: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu <span class="hljs-number">1500</span> qdisc mq state UP group default qlen <span class="hljs-number">1000</span><br>    <span class="hljs-attribute">link</span>/ether <span class="hljs-number">20</span>:<span class="hljs-number">90</span>:<span class="hljs-number">6</span>f:<span class="hljs-number">6</span>a:<span class="hljs-number">7</span>f:ae brd ff:ff:ff:ff:ff:ff<br>    <span class="hljs-attribute">inet6</span> fe80::<span class="hljs-number">2290</span>:<span class="hljs-number">6</span>fff:fe6a:<span class="hljs-number">7</span>fae/<span class="hljs-number">64</span> scope link <br>       <span class="hljs-attribute">valid_lft</span> forever preferred_lft forever<br><span class="hljs-attribute">4</span>: docker0: &lt;NO-CARRIER,BROADCAST,MULTICAST,UP&gt; mtu <span class="hljs-number">1500</span> qdisc noqueue state DOWN group default <br>    <span class="hljs-attribute">link</span>/ether <span class="hljs-number">02</span>:<span class="hljs-number">42</span>:<span class="hljs-number">76</span>:<span class="hljs-number">73</span>:f4:f6 brd ff:ff:ff:ff:ff:ff<br></code></pre></td></tr></table></figure>
+
+<p>查看路由信息</p>
+<figure class="highlight accesslog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs accesslog"><span class="hljs-string">[root@VM_1_4_centos ~]</span># ip route show<br>default via <span class="hljs-number">10</span>.<span class="hljs-number">168</span>.<span class="hljs-number">1</span>.<span class="hljs-number">1</span> dev eth0 <br><span class="hljs-number">10.168.1.0</span>/<span class="hljs-number">24</span> dev eth0 proto kernel scope link src <span class="hljs-number">10</span>.<span class="hljs-number">168</span>.<span class="hljs-number">1</span>.<span class="hljs-number">4</span> <br><span class="hljs-number">10.168.100.3</span> dev enic3c3d718fcd scope link <br><span class="hljs-number">10.168.100.11</span> dev enib229b17365d scope link <br><span class="hljs-number">169.254.0.0</span>/<span class="hljs-number">16</span> dev eth0 scope link metric <span class="hljs-number">1002</span> <br><span class="hljs-number">169.254.32.0</span>/<span class="hljs-number">28</span> dev docker0 proto kernel scope link src <span class="hljs-number">169</span>.<span class="hljs-number">254</span>.<span class="hljs-number">32</span>.<span class="hljs-number">1</span> linkdown <br><span class="hljs-number">172.16.3.64</span>/<span class="hljs-number">26</span> dev cbr0 proto kernel scope link src <span class="hljs-number">172</span>.<span class="hljs-number">16</span>.<span class="hljs-number">3</span>.<span class="hljs-number">65</span> <br></code></pre></td></tr></table></figure>
+
+<h1 id="ifup，ifdown-激活或者禁用网卡"><a href="#ifup，ifdown-激活或者禁用网卡" class="headerlink" title="ifup，ifdown(激活或者禁用网卡)"></a>ifup，ifdown(激活或者禁用网卡)</h1><p>ifup命令用于激活一个网络接口，使得可以接收或传输数据。</p>
+<figure class="highlight crystal"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs crystal"><span class="hljs-variable">$ </span>sudo ifup eth0<br></code></pre></td></tr></table></figure>
+
+<p>ifdown命令可以禁用一个网络接口，禁掉后就不能传输和接收数据了。</p>
+<figure class="highlight crystal"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs crystal"><span class="hljs-variable">$ </span>sudo ifdown eth0<br></code></pre></td></tr></table></figure>
+
+<h1 id="ping-探测网络连通性"><a href="#ping-探测网络连通性" class="headerlink" title="ping(探测网络连通性)"></a>ping(探测网络连通性)</h1><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs routeros">[root@VM_1_4_centos ~]#<span class="hljs-built_in"> ping </span>www.baidu.com<span class="hljs-built_in"></span><br><span class="hljs-built_in">PING </span>www.a.shifen.com (14.215.177.38) 56(84) bytes of data.<br>64 bytes <span class="hljs-keyword">from</span> 14.215.177.38 (14.215.177.38): <span class="hljs-attribute">icmp_seq</span>=1 <span class="hljs-attribute">ttl</span>=54 <span class="hljs-attribute">time</span>=3.30 ms<br>64 bytes <span class="hljs-keyword">from</span> 14.215.177.38 (14.215.177.38): <span class="hljs-attribute">icmp_seq</span>=2 <span class="hljs-attribute">ttl</span>=54 <span class="hljs-attribute">time</span>=3.15 ms<br></code></pre></td></tr></table></figure>
+
+<p>发送指定数量的包</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs routeros">[root@VM_1_4_centos ~]#<span class="hljs-built_in"> ping </span>-c 4 www.baidu.com<span class="hljs-built_in"></span><br><span class="hljs-built_in">PING </span>www.a.shifen.com (14.215.177.38) 56(84) bytes of data.<br>64 bytes <span class="hljs-keyword">from</span> 14.215.177.38 (14.215.177.38): <span class="hljs-attribute">icmp_seq</span>=1 <span class="hljs-attribute">ttl</span>=54 <span class="hljs-attribute">time</span>=3.59 ms<br>64 bytes <span class="hljs-keyword">from</span> 14.215.177.38 (14.215.177.38): <span class="hljs-attribute">icmp_seq</span>=2 <span class="hljs-attribute">ttl</span>=54 <span class="hljs-attribute">time</span>=3.16 ms<br>64 bytes <span class="hljs-keyword">from</span> 14.215.177.38 (14.215.177.38): <span class="hljs-attribute">icmp_seq</span>=3 <span class="hljs-attribute">ttl</span>=54 <span class="hljs-attribute">time</span>=3.19 ms<br>64 bytes <span class="hljs-keyword">from</span> 14.215.177.38 (14.215.177.38): <span class="hljs-attribute">icmp_seq</span>=4 <span class="hljs-attribute">ttl</span>=54 <span class="hljs-attribute">time</span>=3.14 ms<br><br>--- www.a.shifen.com<span class="hljs-built_in"> ping </span>statistics ---<br>4 packets transmitted, 4 received, 0% packet loss, time 3003ms<br>rtt min/avg/max/mdev = 3.148/3.275/3.591/0.191 ms<br></code></pre></td></tr></table></figure>
+
+<h1 id="traceroute-查看数据包路由途径"><a href="#traceroute-查看数据包路由途径" class="headerlink" title="traceroute(查看数据包路由途径)"></a>traceroute(查看数据包路由途径)</h1><figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs crmsh">[root@VM_1_4_centos ~]<span class="hljs-comment"># traceroute 106.55.165.251</span><br>traceroute to <span class="hljs-number">106.55</span>.<span class="hljs-number">165.251</span> (<span class="hljs-number">106.55</span>.<span class="hljs-number">165.251</span>), <span class="hljs-number">30</span> hops max, <span class="hljs-number">60</span> byte packets<br> <span class="hljs-number">1</span>  <span class="hljs-number">9.31</span>.<span class="hljs-number">61.129</span> (<span class="hljs-number">9.31</span>.<span class="hljs-number">61.129</span>)  <span class="hljs-number">1.033</span> <span class="hljs-keyword">ms</span>  <span class="hljs-title">1</span>.<span class="hljs-number">954</span> <span class="hljs-keyword">ms</span>  <span class="hljs-title">1</span>.<span class="hljs-number">574</span> <span class="hljs-keyword">ms</span><br> <span class="hljs-title">2</span>  <span class="hljs-number">9.31</span>.<span class="hljs-number">123.96</span> (<span class="hljs-number">9.31</span>.<span class="hljs-number">123.96</span>)  <span class="hljs-number">0.831</span> <span class="hljs-keyword">ms</span>  <span class="hljs-title">1</span>.<span class="hljs-number">058</span> <span class="hljs-keyword">ms</span>  <span class="hljs-title">1</span>.<span class="hljs-number">319</span> <span class="hljs-keyword">ms</span><br> <span class="hljs-title">3</span>  <span class="hljs-number">9.31</span>.<span class="hljs-number">123.105</span> (<span class="hljs-number">9.31</span>.<span class="hljs-number">123.105</span>)  <span class="hljs-number">0.763</span> <span class="hljs-keyword">ms</span>  <span class="hljs-title">1</span>.<span class="hljs-number">330</span> <span class="hljs-keyword">ms</span>  <span class="hljs-title">1</span>.<span class="hljs-number">052</span> <span class="hljs-keyword">ms</span><br> <span class="hljs-title">4</span>  <span class="hljs-number">106.55</span>.<span class="hljs-number">165.251</span> (<span class="hljs-number">106.55</span>.<span class="hljs-number">165.251</span>)  <span class="hljs-number">0.504</span> <span class="hljs-keyword">ms</span>  <span class="hljs-title">0</span>.<span class="hljs-number">524</span> <span class="hljs-keyword">ms</span>  <span class="hljs-title">0</span>.<span class="hljs-number">555</span> ms<br></code></pre></td></tr></table></figure>
+
+<h1 id="mtr-ping-traceroute"><a href="#mtr-ping-traceroute" class="headerlink" title="mtr(ping+traceroute)"></a>mtr(ping+traceroute)</h1><figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs 1c"><span class="hljs-meta"># mtr qq.com</span><br></code></pre></td></tr></table></figure>
+
+<p><img src="/img/2020-08-28-Common-commands-for-linux-positioning-problems/1.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p>
+<h1 id="route-查看路由表"><a href="#route-查看路由表" class="headerlink" title="route(查看路由表)"></a>route(查看路由表)</h1><figure class="highlight accesslog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs accesslog"><span class="hljs-string">[root@VM_1_4_centos ~]</span># route <br>Kernel IP routing table<br>Destination     Gateway         Genmask         Flags Metric Ref    Use Iface<br>default         gateway         <span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>         UG    <span class="hljs-number">0</span>      <span class="hljs-number">0</span>        <span class="hljs-number">0</span> eth0<br><span class="hljs-number">10.168.1.0</span>      <span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>         <span class="hljs-number">255</span>.<span class="hljs-number">255</span>.<span class="hljs-number">255</span>.<span class="hljs-number">0</span>   U     <span class="hljs-number">0</span>      <span class="hljs-number">0</span>        <span class="hljs-number">0</span> eth0<br><span class="hljs-number">10.168.100.3</span>    <span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>         <span class="hljs-number">255</span>.<span class="hljs-number">255</span>.<span class="hljs-number">255</span>.<span class="hljs-number">255</span> UH    <span class="hljs-number">0</span>      <span class="hljs-number">0</span>        <span class="hljs-number">0</span> enic3c3d718fcd<br><span class="hljs-number">10.168.100.11</span>   <span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>         <span class="hljs-number">255</span>.<span class="hljs-number">255</span>.<span class="hljs-number">255</span>.<span class="hljs-number">255</span> UH    <span class="hljs-number">0</span>      <span class="hljs-number">0</span>        <span class="hljs-number">0</span> enib229b17365d<br>link-local      <span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>         <span class="hljs-number">255</span>.<span class="hljs-number">255</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>     U     <span class="hljs-number">1002</span>   <span class="hljs-number">0</span>        <span class="hljs-number">0</span> eth0<br><span class="hljs-number">169.254.32.0</span>    <span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>         <span class="hljs-number">255</span>.<span class="hljs-number">255</span>.<span class="hljs-number">255</span>.<span class="hljs-number">240</span> U     <span class="hljs-number">0</span>      <span class="hljs-number">0</span>        <span class="hljs-number">0</span> docker0<br><span class="hljs-number">172.16.3.64</span>     <span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>         <span class="hljs-number">255</span>.<span class="hljs-number">255</span>.<span class="hljs-number">255</span>.<span class="hljs-number">192</span> U     <span class="hljs-number">0</span>      <span class="hljs-number">0</span>        <span class="hljs-number">0</span> cbr0<br></code></pre></td></tr></table></figure>
+
+<p>添加一个网络路由到一个路由表：</p>
+<figure class="highlight pf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs pf">$ sudo <span class="hljs-keyword">route</span> add -net <span class="hljs-variable">&lt;network ip/cidr&gt;</span> gw <span class="hljs-variable">&lt;gateway ip&gt;</span> <span class="hljs-variable">&lt;interface&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>从路由表中删除特定的路由项：</p>
+<figure class="highlight dos"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs dos">$ sudo route <span class="hljs-built_in">del</span> -<span class="hljs-built_in">net</span> &lt;network ip/cidr&gt;<br></code></pre></td></tr></table></figure>
+
+<h1 id="netstat-查看连接数"><a href="#netstat-查看连接数" class="headerlink" title="netstat(查看连接数)"></a>netstat(查看连接数)</h1><p>查看某个服务的TCP连接数</p>
+<figure class="highlight coq"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs coq"># netstat -an | <span class="hljs-type">grep</span> ESTABLISHED | <span class="hljs-type">grep</span> <span class="hljs-number">126</span>:<span class="hljs-number">80</span> | <span class="hljs-type">wc</span> -l<br></code></pre></td></tr></table></figure>
+
+<p>查看udp的连接数</p>
+<figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ebnf"><span class="hljs-attribute">netstat -nu</span><br></code></pre></td></tr></table></figure>
+
+<p>查看网卡列表</p>
+<figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs tap">[root@VM_1_4_centos ~]<span class="hljs-comment"># netstat -i </span><br>Kernel Interface table<br>Iface             MTU    RX-OK RX-ERR RX-DRP RX-OVR    TX-OK TX-ERR TX-DRP TX-OVR Flg<br>cbr0            <span class="hljs-number"> 1500 </span>421966834     <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>0     <span class="hljs-number"> 478598834 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>BMPRU<br>docker0         <span class="hljs-number"> 1500 </span>      <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>0            <span class="hljs-number"> 7 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>BMU<br>enib229b17365d  <span class="hljs-number"> 1500 </span><span class="hljs-number"> 3399766 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>0      <span class="hljs-number"> 5942984 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>BMRU<br>enic3c3d718fcd  <span class="hljs-number"> 1500 </span><span class="hljs-number"> 1187714 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>0      <span class="hljs-number"> 1188197 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>BMRU<br>eth0            <span class="hljs-number"> 1500 </span>945294724     <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>0     <span class="hljs-number"> 695281730 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>BMRU<br>eth1            <span class="hljs-number"> 1500 </span><span class="hljs-number"> 8390504 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>0      <span class="hljs-number"> 4818989 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>BMRU<br>lo             <span class="hljs-number"> 65536 </span><span class="hljs-number"> 6202712 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>0      <span class="hljs-number"> 6202712 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>LRU<br>veth00bf0de2    <span class="hljs-number"> 1500 </span>     <span class="hljs-number"> 10 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>0        <span class="hljs-number"> 10516 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>BMRU<br></code></pre></td></tr></table></figure>
+
+<p>显示组播组的关系</p>
+<figure class="highlight nsis"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs nsis"><span class="hljs-comment"># netstat -g</span><br>IPv6/IPv4 Group Memberships<br>Interface    RefCnt Group<br>--------------- ------ ---------------------<br>lo       <span class="hljs-number">1</span>   <span class="hljs-literal">ALL</span>-<span class="hljs-params">SYSTEM</span>S.MCAST.NET<br>eth0      <span class="hljs-number">1</span>   <span class="hljs-literal">ALL</span>-<span class="hljs-params">SYSTEM</span>S.MCAST.NET<br>lo       <span class="hljs-number">1</span>   <span class="hljs-title function_">ff02::1</span><br>eth0      <span class="hljs-number">1</span>   <span class="hljs-title function_">ff02::1</span>:ff0a:b0c<br>eth0      <span class="hljs-number">1</span>   <span class="hljs-title function_">ff02::1</span><br></code></pre></td></tr></table></figure>
+
+<p>显示网络统计信息</p>
+<figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs tap"><span class="hljs-comment"># netstat -s</span><br>Ip:<br> <span class="hljs-number"> 184695 </span>total packets received<br> <span class="hljs-number"> 0 </span>forwarded<br> <span class="hljs-number"> 0 </span>incoming packets discarded<br> <span class="hljs-number"> 184687 </span>incoming packets delivered<br> <span class="hljs-number"> 143917 </span>requests sent out<br> <span class="hljs-number"> 32 </span>outgoing packets dropped<br> <span class="hljs-number"> 30 </span>dropped because of missing route<br>Icmp:<br> <span class="hljs-number"> 676 </span>ICMP messages received<br></code></pre></td></tr></table></figure>
+
+<p>显示监听的套接口</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-comment"># netstat -l</span><br><span class="hljs-attribute">Active</span> Internet connections (only servers)<br><span class="hljs-attribute">Proto</span> Recv-Q Send-Q Local Address           Foreign Address         State      <br><span class="hljs-attribute">tcp</span>        <span class="hljs-number">0</span>      <span class="hljs-number">0</span> <span class="hljs-number">0.0.0.0</span>:ssh             <span class="hljs-number">0.0.0.0</span>:*               LISTEN     <br><span class="hljs-attribute">tcp</span>        <span class="hljs-number">0</span>      <span class="hljs-number">0</span> VM_1_4_centos:<span class="hljs-number">33437</span>     <span class="hljs-number">0.0.0.0</span>:*               LISTEN     <br><span class="hljs-attribute">tcp</span>        <span class="hljs-number">0</span>      <span class="hljs-number">0</span> VM_1_4_centos:<span class="hljs-number">50050</span>     <span class="hljs-number">0.0.0.0</span>:*               LISTEN     <br><span class="hljs-attribute">tcp</span>        <span class="hljs-number">0</span>      <span class="hljs-number">0</span> VM_1_4_centos:<span class="hljs-number">10248</span>     <span class="hljs-number">0.0.0.0</span>:*               LISTEN     <br><span class="hljs-attribute">tcp</span>        <span class="hljs-number">0</span>      <span class="hljs-number">0</span> <span class="hljs-number">0.0.0.0:46313</span>           <span class="hljs-number">0.0.0.0</span>:*               LISTEN     <br><span class="hljs-attribute">tcp</span>        <span class="hljs-number">0</span>      <span class="hljs-number">0</span> VM_1_4_centos:<span class="hljs-number">10249</span>     <span class="hljs-number">0.0.0.0</span>:*               LISTEN     <br><span class="hljs-attribute">tcp</span>        <span class="hljs-number">0</span>      <span class="hljs-number">0</span> <span class="hljs-number">0.0.0.0</span>:sunrpc          <span class="hljs-number">0.0.0.0</span>:*               LISTEN     <br><span class="hljs-attribute">tcp6</span>       <span class="hljs-number">0</span>      <span class="hljs-number">0</span><span class="hljs-meta"> [::]:30099              [::]:*                  LISTEN     </span><br></code></pre></td></tr></table></figure>
+
+<h1 id="ss-检测套接字"><a href="#ss-检测套接字" class="headerlink" title="ss(检测套接字)"></a>ss(检测套接字)</h1><figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs tap">$ ss -ta<br>State      Recv-Q Send-Q                                         Local Address:Port                                                          Peer Address:Port                <br>LISTEN    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 128 </span>                                                       *:ssh                                                                      *:*                    <br>LISTEN    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 32768 </span>                                             127.0.0.1:33437                                                                    *:*                    <br>LISTEN    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 32768 </span>                                             127.0.0.1:50050                                                                    *:*                    <br>LISTEN    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 32768 </span>                                             127.0.0.1:10248                                                                    *:*                    <br>LISTEN    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 64 </span>                                                        *:46313                                                                    *:*                    <br>LISTEN    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 32768 </span>                                             127.0.0.1:10249                                                                    *:*                    <br>LISTEN    <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 128 </span>                                                       *:sunrpc                                                                   *:*                    <br>TIME-WAIT <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>                                               172.16.3.65:48682                                                          172.16.3.75:websm                <br>ESTAB     <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>                                              172.16.252.1:54536                                                         172.16.252.1:https                <br>ESTAB     <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>                                                10.168.1.4:46820                                                       169.254.128.15:60002                <br>ESTAB     <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>                                                10.168.1.4:ssh                                                          163.177.68.35:11123                <br>ESTAB     <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>                                                10.168.1.4:51178                                                         169.254.0.71:http                 <br>ESTAB     <span class="hljs-number"> 0 </span>    <span class="hljs-number"> 0 </span>                                              172.16.252.1:45940                                                         172.16.252.1:https    <br></code></pre></td></tr></table></figure>
+
+<p>显示所有活动的TCP连接以及计时器，运行以下命令：</p>
+<figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs applescript">$ ss -<span class="hljs-keyword">to</span><br></code></pre></td></tr></table></figure>
+
+<h1 id="ncat-nc"><a href="#ncat-nc" class="headerlink" title="ncat(nc)"></a>ncat(nc)</h1><p>ncat&#x2F;nc既是一个端口扫描工具，也是一款安全工具，还是一款监测工具，甚至可以做为一个简单的TCP代理。 由于有这么多的功能，它被誉为是网络界的瑞士军刀。<br>安装</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cmake">yum <span class="hljs-keyword">install</span> nmap-ncat -y<br></code></pre></td></tr></table></figure>
+
+<p>监听某个端口的入站连接</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">ncat</span> -l <span class="hljs-number">80</span><br></code></pre></td></tr></table></figure>
+
+<p>连接远程服务器执行命令</p>
+<figure class="highlight gherkin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs gherkin">ncat IP_address port_number<br><br>[root<span class="hljs-meta">@VM-6-17-centos</span> ~]<span class="hljs-comment"># ncat 49.235.179.157 80</span><br>curl localhost  <br>HTTP/1.1 400 Bad Request<br>Server: nginx/1.16.1<br>Date: Fri, 28 Aug 2020 09:08:14 GMT<br>Content-Type: text/html<br>Content-Length: 157<br>Connection: close<br><br><span class="hljs-variable">&lt;html&gt;</span><br><span class="hljs-variable">&lt;head&gt;</span><span class="hljs-variable">&lt;title&gt;</span>400 Bad Request<span class="hljs-variable">&lt;/title&gt;</span><span class="hljs-variable">&lt;/head&gt;</span><br><span class="hljs-variable">&lt;body&gt;</span><br><span class="hljs-variable">&lt;center&gt;</span><span class="hljs-variable">&lt;h1&gt;</span>400 Bad Request<span class="hljs-variable">&lt;/h1&gt;</span><span class="hljs-variable">&lt;/center&gt;</span><br><span class="hljs-variable">&lt;hr&gt;</span><span class="hljs-variable">&lt;center&gt;</span>nginx/1.16.1<span class="hljs-variable">&lt;/center&gt;</span><br><span class="hljs-variable">&lt;/body&gt;</span><br><span class="hljs-variable">&lt;/html&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>测试主机端口的连通性</p>
+<figure class="highlight avrasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs avrasm">[root@VM<span class="hljs-number">-6</span><span class="hljs-number">-17</span>-centos ~]<span class="hljs-meta"># ncat -v 49.235.179.157 22</span><br><span class="hljs-symbol">Ncat:</span> Version <span class="hljs-number">7.50</span> ( https://nmap<span class="hljs-meta">.org</span>/ncat )<br><span class="hljs-symbol">Ncat:</span> Connected to <span class="hljs-number">49.235</span><span class="hljs-number">.179</span><span class="hljs-number">.157</span>:<span class="hljs-number">22.</span><br>SSH<span class="hljs-number">-2.0</span>-OpenSSH_7<span class="hljs-number">.4</span><br></code></pre></td></tr></table></figure>
+
+<p>nc进行主机间通信聊天</p>
+<figure class="highlight autoit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs autoit">[root<span class="hljs-symbol">@VM_0_13_centos</span> ~]<span class="hljs-meta"># ncat 42.194.143.131 8081</span><br>hello<br><br>[root<span class="hljs-symbol">@VM_1_4_centos</span> ~]<span class="hljs-meta"># ncat -l 8081</span><br>hello<br></code></pre></td></tr></table></figure>
+
+<h1 id="nmap-扫描主机"><a href="#nmap-扫描主机" class="headerlink" title="nmap(扫描主机)"></a>nmap(扫描主机)</h1><p>扫描<a target="_blank" rel="noopener" href="http://www.niewx.club这个地址的状态/">www.niewx.club这个地址的状态</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs bash">[root@VM_1_4_centos ~]<span class="hljs-comment"># nmap www.niewx.club</span><br><br>Starting Nmap 6.40 ( http://nmap.org ) at 2020-08-28 17:16 CST<br>Nmap scan report <span class="hljs-keyword">for</span> www.niewx.club (49.235.179.157)<br>Host is up (0.029s latency).<br>Not shown: 992 filtered ports<br>PORT      STATE  SERVICE<br>20/tcp    closed ftp-data<br>21/tcp    closed ftp<br>22/tcp    open   ssh<br>80/tcp    open   http<br>443/tcp   open   https<br>3389/tcp  closed ms-wbt-server<br>5555/tcp  closed freeciv<br>55555/tcp closed unknown<br><br>Nmap <span class="hljs-keyword">done</span>: 1 IP address (1 host up) scanned <span class="hljs-keyword">in</span> 80.76 seconds<br></code></pre></td></tr></table></figure>
+
+<h1 id="iftop-查看流量"><a href="#iftop-查看流量" class="headerlink" title="iftop(查看流量)"></a>iftop(查看流量)</h1><figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs cmake">yum <span class="hljs-keyword">install</span> iftop -y<br><span class="hljs-comment"># iftop -i eth0</span><br></code></pre></td></tr></table></figure>
+
+<p>-i: 接口</p>
+<p>-B: 以字节而非比特显示</p>
+<p><img src="/img/2020-08-28-Common-commands-for-linux-positioning-problems/2.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p>
+<p>TX：发送流量</p>
+<p>RX：接收流量</p>
+<p>TOTAL：总流量</p>
+<p>Cumm：运行iftop到目前时间的总流量</p>
+<p>peak：流量峰值</p>
+<p>rates：分别表示过去 2s 10s 40s 的平均流量</p>
+<h1 id="trickle-限制带宽"><a href="#trickle-限制带宽" class="headerlink" title="trickle(限制带宽)"></a>trickle(限制带宽)</h1><figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cmake">yum <span class="hljs-keyword">install</span> trickle -y<br></code></pre></td></tr></table></figure>
+
+<p>这个应用用于限制网络带宽</p>
+<ol>
+<li>限制wget的上传和下载速度限制上传为10KB&#x2F;S,下载为20KB&#x2F;s</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">trickle -u 10 -d 20 wget http://mirrors.163.com/centos/7/isos/x86_64/CentOS-7-x86_64-Minimal-1503-01.iso</span><br></code></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>单独限制某个进程的下载和上传速度</li>
+</ol>
+<figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs 1c"><span class="hljs-meta"># trickle -s -d 50 -u 25 ftp</span><br></code></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>限制终端下的所有命令带宽为，下载500KB&#x2F;S，上传250KB&#x2F;s;</li>
+</ol>
+<figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs 1c"><span class="hljs-meta"># trickle -s -d 500 -u 250 bash</span><br>备注，单独命令使用时，必须加-s参数<br></code></pre></td></tr></table></figure>
+
+<h1 id="dstat-监控cpu内存"><a href="#dstat-监控cpu内存" class="headerlink" title="dstat(监控cpu内存)"></a>dstat(监控cpu内存)</h1><figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs tap">yum install dstat -y<br>-c: 显示cpu综合占有率<br>-m: 显示内存使用情况<br>-n: 显示网络状况<br>-l：显示系统负载情况<br>-r：显示I/O请求(读/写)情况<br>[root@VM_1_4_centos ~]<span class="hljs-comment"># dstat -ncmlr</span><br>-net/total- ----total-cpu-usage---- ------memory-usage----- ---load-avg--- --io/total-<br> recv  send|usr sys idl wai hiq siq| used  buff  cach  free| 1m   5m  15m | read  writ<br>  <span class="hljs-number"> 0 </span>   <span class="hljs-number"> 0 </span>| <span class="hljs-number"> 8 </span> <span class="hljs-number"> 2 </span><span class="hljs-number"> 90 </span> <span class="hljs-number"> 0 </span> <span class="hljs-number"> 0 </span>  0|6769M 1226M 6870M  661M|0.61 0.50 0.46|2.85  23.7 <br>  78k  141k| <span class="hljs-number"> 2 </span> <span class="hljs-number"> 2 </span><span class="hljs-number"> 95 </span> <span class="hljs-number"> 0 </span> <span class="hljs-number"> 0 </span>  0|6777M 1226M 6870M  653M|0.56 0.49 0.45|  <span class="hljs-number"> 0 </span> 25.0 <br>  71k   97k| <span class="hljs-number"> 6 </span> <span class="hljs-number"> 1 </span><span class="hljs-number"> 93 </span> <span class="hljs-number"> 0 </span> <span class="hljs-number"> 0 </span>  0|6771M 1226M 6870M  659M|0.56 0.49 0.45|  <span class="hljs-number"> 0 </span> 9.00 <br> 273k  235k| <span class="hljs-number"> 7 </span> <span class="hljs-number"> 1 </span><span class="hljs-number"> 92 </span> <span class="hljs-number"> 0 </span> <span class="hljs-number"> 0 </span>  0|6771M 1227M 6870M  659M|0.56 0.49 0.45|  <span class="hljs-number"> 0 </span> 32.0 <br> 214k  401k| <span class="hljs-number"> 3 </span> <span class="hljs-number"> 1 </span><span class="hljs-number"> 96 </span> <span class="hljs-number"> 0 </span> <span class="hljs-number"> 0 </span>  0|6771M 1227M 6870M  659M|0.56 0.49 0.45|  <span class="hljs-number"> 0 </span> 5.00 <br> 123k  132k| <span class="hljs-number"> 2 </span> <span class="hljs-number"> 1 </span><span class="hljs-number"> 97 </span> <span class="hljs-number"> 0 </span> <span class="hljs-number"> 0 </span>  0|6772M 1227M 6870M  658M|0.56 0.49 0.45|  <span class="hljs-number"> 0 </span> 35.0 <br></code></pre></td></tr></table></figure>
+
+<h1 id="tcpdump-网络抓包"><a href="#tcpdump-网络抓包" class="headerlink" title="tcpdump(网络抓包)"></a>tcpdump(网络抓包)</h1><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs css">tcpdump <span class="hljs-selector-attr">[ -adeflnNOpqStvx ]</span> <span class="hljs-selector-attr">[ -c 数量 ]</span> <span class="hljs-selector-attr">[ -F 文件名 ]</span><br>　　　　　　　　　　<span class="hljs-selector-attr">[ -i 网络接口 ]</span> <span class="hljs-selector-attr">[ -r 文件名]</span> <span class="hljs-selector-attr">[ -s snaplen ]</span><br>                                       <span class="hljs-selector-attr">[ -T 类型 ]</span> <span class="hljs-selector-attr">[ -w 文件名 ]</span> <span class="hljs-selector-attr">[表达式 ]</span><br> tcpdump的选项介绍<br>　　　-<span class="hljs-selector-tag">a</span> 　　　将网络地址和广播地址转变成名字；<br>　　　-d 　　　将匹配信息包的代码以人们能够理解的汇编格式给出；<br>　　　-<span class="hljs-selector-tag">dd</span> 　　　将匹配信息包的代码以c语言程序段的格式给出；<br>　　　-ddd 　　　将匹配信息包的代码以十进制的形式给出；<br>　　　-e 　　　在输出行打印出数据链路层的头部信息，包括源mac和目的mac，以及网络层的协议；<br>　　　-f 　　　将外部的Internet地址以数字的形式打印出来；<br>　　　-l 　　　使标准输出变为缓冲行形式；<br>　　　-n 　　　指定将每个监听到数据包中的域名转换成IP地址后显示，不把网络地址转换成名字；<br>     -nn：    指定将每个监听到的数据包中的域名转换成IP、端口从应用名称转换成端口号后显示<br>　　　-t 　　　在输出的每一行不打印时间戳；<br>　　　-v 　　　输出一个稍微详细的信息，例如在ip包中可以包括ttl和服务类型的信息；<br>　　　-vv 　　　输出详细的报文信息；<br>　　　-c 　　　在收到指定的包的数目后，tcpdump就会停止；<br>　　　-F 　　　从指定的文件中读取表达式,忽略其它的表达式；<br>　　　-<span class="hljs-selector-tag">i</span> 　　　指定监听的网络接口；<br>      -<span class="hljs-selector-tag">p</span>：    将网卡设置为非混杂模式，不能与host或broadcast一起使用<br>　　　-r 　　　从指定的文件中读取包(这些包一般通过-w选项产生)；<br>　　　-w 　　　直接将包写入文件中，并不分析和打印出来；<br>      -s snaplen         snaplen表示从一个包中截取的字节数。<span class="hljs-number">0</span>表示包不截断，抓完整的数据包。默认的话 tcpdump 只显示部分数据包,默认<span class="hljs-number">68</span>字节。<br>　　　-T 　　　将监听到的包直接解释为指定的类型的报文，常见的类型有rpc （远程过程调用）和snmp（简单网络管理协议；）<br>     -X            告诉tcpdump命令，需要把协议头和包内容都原原本本的显示出来（tcpdump会以<span class="hljs-number">16</span>进制和ASCII的形式显示），这在进行协议分析时是绝对的利器。<br></code></pre></td></tr></table></figure>
+
+<ol>
+<li>抓取包含10.10.10.122的数据包</li>
+</ol>
+<figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs 1c"><span class="hljs-meta"># tcpdump -i eth0 -vnn host 10.10.10.122</span><br></code></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>抓取包含10.10.10.0&#x2F;24网段的数据包</li>
+</ol>
+<figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs 1c"><span class="hljs-meta"># tcpdump -i eth0 -vnn net 10.10.10.0/24</span><br></code></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>抓取包含端口22的数据包</li>
+</ol>
+<figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs 1c"><span class="hljs-meta"># tcpdump -i eth0 -vnn port 22</span><br></code></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>抓取udp协议的数据包</li>
+</ol>
+<figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs 1c"><span class="hljs-meta"># tcpdump -i eth0 -vnn  udp</span><br></code></pre></td></tr></table></figure>
+
+<ol start="5">
+<li>抓取icmp协议的数据包</li>
+</ol>
+<figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs 1c"><span class="hljs-meta"># tcpdump -i eth0 -vnn icmp</span><br></code></pre></td></tr></table></figure>
+
+<ol start="6">
+<li>抓取arp协议的数据包</li>
+</ol>
+<figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs 1c"><span class="hljs-meta"># tcpdump -i eth0 -vnn arp</span><br></code></pre></td></tr></table></figure>
+
+<ol start="7">
+<li>抓取ip协议的数据包</li>
+</ol>
+<figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs 1c"><span class="hljs-meta"># tcpdump -i eth0 -vnn ip</span><br></code></pre></td></tr></table></figure>
+
+<ol start="8">
+<li>抓取源ip是10.10.10.122数据包。</li>
+</ol>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs css"># tcpdump -<span class="hljs-selector-tag">i</span> eth0 -vnn <span class="hljs-attribute">src</span> host <span class="hljs-number">10.10</span>.<span class="hljs-number">10.122</span><br></code></pre></td></tr></table></figure>
+
+<ol start="9">
+<li>抓取目的ip是10.10.10.122数据包</li>
+</ol>
+<figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs 1c"><span class="hljs-meta"># tcpdump -i eth0 -vnn dst host 10.10.10.122</span><br></code></pre></td></tr></table></figure>
+
+<ol start="10">
+<li>抓取源端口是22的数据包</li>
+</ol>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs css"># tcpdump -<span class="hljs-selector-tag">i</span> eth0 -vnn <span class="hljs-attribute">src</span> port <span class="hljs-number">22</span><br></code></pre></td></tr></table></figure>
+
+<ol start="11">
+<li>抓取源ip是10.10.10.253且目的ip是22的数据包</li>
+</ol>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-comment"># tcpdump -i eth0 -vnn src host 10.10.10.253 and dst port 22</span><br></code></pre></td></tr></table></figure>
+
+<ol start="12">
+<li>抓取源ip是10.10.10.122或者包含端口是22的数据包</li>
+</ol>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs css"># tcpdump -<span class="hljs-selector-tag">i</span> eth0 -vnn <span class="hljs-attribute">src</span> host <span class="hljs-number">10.10</span>.<span class="hljs-number">10.122</span> or port <span class="hljs-number">22</span><br></code></pre></td></tr></table></figure>
+
+<ol start="13">
+<li>抓取源ip是10.10.10.122且端口不是22的数据包</li>
+</ol>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-comment"># tcpdump -i eth0 -vnn src host 10.10.10.122 and not port 22</span><br></code></pre></td></tr></table></figure>
+
+<ol start="14">
+<li>抓取源ip是10.10.10.2且目的端口是22，或源ip是10.10.10.65且目的端口是80的数据包。</li>
+</ol>
+<figure class="highlight taggerscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs taggerscript"># tcpdump -i eth0 -vnn <span class="hljs-symbol">\(</span> src host 10.10.10.2 and dst port 22 <span class="hljs-symbol">\)</span> or   <span class="hljs-symbol">\(</span> src host 10.10.10.65 and dst port 80 <span class="hljs-symbol">\)</span><br></code></pre></td></tr></table></figure>
+
+<ol start="15">
+<li>抓取源ip是10.10.10.59且目的端口是22，或源ip是10.10.10.68且目的端口是80的数据包。</li>
+</ol>
+<figure class="highlight autoit"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs autoit">[root<span class="hljs-symbol">@localhost</span> ~]<span class="hljs-meta"># tcpdump -i  eth0 -vnn <span class="hljs-string">&#x27;src host 10.10.10.59 and dst port 22&#x27;</span> or  <span class="hljs-string">&#x27; src host 10.10.10.68 and dst port 80 &#x27;</span></span><br></code></pre></td></tr></table></figure>
+
+<ol start="16">
+<li>把抓取的数据包记录存到&#x2F;tmp&#x2F;fill文件中，当抓取100个数据包后就退出程序。</li>
+</ol>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs gradle"># tcpdump –i eth0 -vnn -w  <span class="hljs-regexp">/tmp/</span>fil1 -c <span class="hljs-number">100</span><br></code></pre></td></tr></table></figure>
+
+<ol start="17">
+<li>从&#x2F;tmp&#x2F;fill记录中读取tcp协议的数据包</li>
+</ol>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs gradle"># tcpdump –i eth0 -vnn -r  <span class="hljs-regexp">/tmp/</span>fil1 tcp<br></code></pre></td></tr></table></figure>
+
+<ol start="18">
+<li>从&#x2F;tmp&#x2F;fill记录中读取包含10.10.10.58的数据包</li>
+</ol>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs gradle"># tcpdump –i eth0 -vnn -r  <span class="hljs-regexp">/tmp/</span>fil1 host  <span class="hljs-number">10.10</span>.<span class="hljs-number">10.58</span><br></code></pre></td></tr></table></figure>
+
+<h1 id="curl-发送请求"><a href="#curl-发送请求" class="headerlink" title="curl(发送请求)"></a>curl(发送请求)</h1><figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs nginx"><span class="hljs-attribute">curl</span> www.baidu.com<br></code></pre></td></tr></table></figure>
+
+<p>也可以保存源码 用curl -O 文件名 url，这个和wget类似</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs stylus">curl -O baidu<span class="hljs-selector-class">.txt</span> wwww<span class="hljs-selector-class">.baidu</span>.com<br></code></pre></td></tr></table></figure>
+
+<p>显示网页头部信息 用-i,当然也会把网页信息显示出来</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs yaml">[<span class="hljs-string">root@VM_0_11_centos</span> <span class="hljs-string">training</span>]<span class="hljs-comment"># curl -i www.baidu.com</span><br><span class="hljs-string">HTTP/1.1</span> <span class="hljs-number">200</span> <span class="hljs-string">OK</span><br><span class="hljs-attr">Accept-Ranges:</span> <span class="hljs-string">bytes</span><br><span class="hljs-attr">Cache-Control:</span> <span class="hljs-string">private,</span> <span class="hljs-literal">no</span><span class="hljs-string">-cache,</span> <span class="hljs-literal">no</span><span class="hljs-string">-store,</span> <span class="hljs-string">proxy-revalidate,</span> <span class="hljs-literal">no</span><span class="hljs-string">-transform</span><br><span class="hljs-attr">Connection:</span> <span class="hljs-string">keep-alive</span><br><span class="hljs-attr">Content-Length:</span> <span class="hljs-number">2381</span><br><span class="hljs-attr">Content-Type:</span> <span class="hljs-string">text/html</span><br><span class="hljs-attr">Date:</span> <span class="hljs-string">Thu,</span> <span class="hljs-number">02</span> <span class="hljs-string">Apr</span> <span class="hljs-number">2020 02:14:33 </span><span class="hljs-string">GMT</span><br><span class="hljs-attr">Etag:</span> <span class="hljs-string">&quot;588604c8-94d&quot;</span><br><span class="hljs-attr">Last-Modified:</span> <span class="hljs-string">Mon,</span> <span class="hljs-number">23</span> <span class="hljs-string">Jan</span> <span class="hljs-number">2017 13:27:36 </span><span class="hljs-string">GMT</span><br><span class="hljs-attr">Pragma:</span> <span class="hljs-literal">no</span><span class="hljs-string">-cache</span><br><span class="hljs-attr">Server:</span> <span class="hljs-string">bfe/1.0.8.18</span><br><span class="hljs-attr">Set-Cookie:</span> <span class="hljs-string">BDORZ=27315;</span> <span class="hljs-string">max-age=86400;</span> <span class="hljs-string">domain=.baidu.com;</span> <span class="hljs-string">path=/</span><br><br><span class="hljs-string">&lt;!DOCTYPE</span> <span class="hljs-string">html&gt;</span><br> <span class="hljs-string">xxx</span><br>  <span class="hljs-string">&lt;/html&gt;</span> <br></code></pre></td></tr></table></figure>
+
+<p>参数 -v可以显示通信的过程：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs yaml">[<span class="hljs-string">root@VM_0_11_centos</span> <span class="hljs-string">training</span>]<span class="hljs-comment"># curl -v www.baidu.com</span><br><span class="hljs-string">*</span> <span class="hljs-string">About</span> <span class="hljs-string">to</span> <span class="hljs-string">connect()</span> <span class="hljs-string">to</span> <span class="hljs-string">www.baidu.com</span> <span class="hljs-string">port</span> <span class="hljs-number">80</span> <span class="hljs-string">(#0)</span><br><span class="hljs-string">*</span>   <span class="hljs-string">Trying</span> <span class="hljs-number">180.101</span><span class="hljs-number">.49</span><span class="hljs-number">.11</span><span class="hljs-string">...</span><br><span class="hljs-string">*</span> <span class="hljs-string">Connected</span> <span class="hljs-string">to</span> <span class="hljs-string">www.baidu.com</span> <span class="hljs-string">(180.101.49.11)</span> <span class="hljs-string">port</span> <span class="hljs-number">80</span> <span class="hljs-string">(#0)</span><br><span class="hljs-string">&gt;</span> <span class="hljs-string">GET</span> <span class="hljs-string">/</span> <span class="hljs-string">HTTP/1.1</span><br><span class="hljs-string">&gt;</span> <span class="hljs-attr">User-Agent:</span> <span class="hljs-string">curl/7.29.0</span><br><span class="hljs-string">&gt;</span> <span class="hljs-attr">Host:</span> <span class="hljs-string">www.baidu.com</span><br><span class="hljs-string">&gt;</span> <span class="hljs-attr">Accept:</span> <span class="hljs-string">*/*</span><br><span class="hljs-string">&gt;</span> <br><span class="hljs-string">&lt;</span> <span class="hljs-string">HTTP/1.1</span> <span class="hljs-number">200</span> <span class="hljs-string">OK</span><br><span class="hljs-string">&lt;</span> <span class="hljs-attr">Accept-Ranges:</span> <span class="hljs-string">bytes</span><br><span class="hljs-string">&lt;</span> <span class="hljs-attr">Cache-Control:</span> <span class="hljs-string">private,</span> <span class="hljs-literal">no</span><span class="hljs-string">-cache,</span> <span class="hljs-literal">no</span><span class="hljs-string">-store,</span> <span class="hljs-string">proxy-revalidate,</span> <span class="hljs-literal">no</span><span class="hljs-string">-transform</span><br><span class="hljs-string">&lt;</span> <span class="hljs-attr">Connection:</span> <span class="hljs-string">keep-alive</span><br><span class="hljs-string">&lt;</span> <span class="hljs-attr">Content-Length:</span> <span class="hljs-number">2381</span><br><span class="hljs-string">&lt;</span> <span class="hljs-attr">Content-Type:</span> <span class="hljs-string">text/html</span><br><span class="hljs-string">&lt;</span> <span class="hljs-attr">Date:</span> <span class="hljs-string">Thu,</span> <span class="hljs-number">02</span> <span class="hljs-string">Apr</span> <span class="hljs-number">2020 02:16:36 </span><span class="hljs-string">GMT</span><br><span class="hljs-string">&lt;</span> <span class="hljs-attr">Etag:</span> <span class="hljs-string">&quot;588604c8-94d&quot;</span><br><span class="hljs-string">&lt;</span> <span class="hljs-attr">Last-Modified:</span> <span class="hljs-string">Mon,</span> <span class="hljs-number">23</span> <span class="hljs-string">Jan</span> <span class="hljs-number">2017 13:27:36 </span><span class="hljs-string">GMT</span><br><span class="hljs-string">&lt;</span> <span class="hljs-attr">Pragma:</span> <span class="hljs-literal">no</span><span class="hljs-string">-cache</span><br><span class="hljs-string">&lt;</span> <span class="hljs-attr">Server:</span> <span class="hljs-string">bfe/1.0.8.18</span><br><span class="hljs-string">&lt;</span> <span class="hljs-attr">Set-Cookie:</span> <span class="hljs-string">BDORZ=27315;</span> <span class="hljs-string">max-age=86400;</span> <span class="hljs-string">domain=.baidu.com;</span> <span class="hljs-string">path=/</span><br><span class="hljs-string">&lt;</span><br></code></pre></td></tr></table></figure>
+
+<p>更详细的通信信息可以用 参数 –trance 文件名 url,具体信息保存到单独的文件中</p>
+<figure class="highlight autoit"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs autoit">[root<span class="hljs-symbol">@VM_0_11_centos</span> training]<span class="hljs-meta"># curl --trace info.txt www.baidu.com</span><br></code></pre></td></tr></table></figure>
+
+<p>htpp的动词，例如GET POST，PUT，DELETE等,需要参数 -X</p>
+<p>curl默认的是get请求，如果发送POSt请求</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs nginx"><span class="hljs-attribute">curl</span> -X POST www.baidu.com<br></code></pre></td></tr></table></figure>
+
+<p>发送表单的时候，GET很简单 只需要把数据拼接到url后面就行</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs haskell"><span class="hljs-title">curl</span> www.baidu.com?<span class="hljs-class"><span class="hljs-keyword">data</span>=xxx&amp;data1=xxx</span><br></code></pre></td></tr></table></figure>
+
+<p>POST也不难</p>
+<figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs stata">curl -X <span class="hljs-keyword">POST</span> --data <span class="hljs-string">&quot;data=xxx&quot;</span> example.com/<span class="hljs-keyword">form</span>.cgi<br></code></pre></td></tr></table></figure>
+
+<p>POST发送请求的数据体可以用-d</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs awk">$ curl -d<span class="hljs-string">&#x27;login=emma＆password=123&#x27;</span>-X POST https:<span class="hljs-regexp">//g</span>oogle.com/login<br> 或者<br>$ curl -d <span class="hljs-string">&#x27;login=emma&#x27;</span> -d <span class="hljs-string">&#x27;password=123&#x27;</span> -X POST  https:<span class="hljs-regexp">//g</span>oogle.com/login<br></code></pre></td></tr></table></figure>
+
+<p>使用-d参数以后，HTTP 请求会自动加上标头Content-Type : application&#x2F;x-www-form-urlencoded。并且会自动将请求转为 POST 方法，因此可以省略-X POST。-d参数可以读取本地文本文件的数据，向服务器发送。</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs awk">$ curl -d <span class="hljs-string">&#x27;@data.txt&#x27;</span> https:<span class="hljs-regexp">//g</span>oogle.com/login<br></code></pre></td></tr></table></figure>
+
+<p>上面命令读取data.txt文件的内容，作为数据体向服务器发送。<br>文件上传： 假定文件上传的表单是下面这样：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs xml">　<span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">method</span>=<span class="hljs-string">&quot;POST&quot;</span> <span class="hljs-attr">enctype</span>=<span class="hljs-string">&#x27;multipart/form-data&#x27;</span> <span class="hljs-attr">action</span>=<span class="hljs-string">&quot;upload.cgi&quot;</span>&gt;</span><br>　　　　<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">file</span> <span class="hljs-attr">name</span>=<span class="hljs-string">upload</span>&gt;</span><br>　　　　<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">submit</span> <span class="hljs-attr">name</span>=<span class="hljs-string">press</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;OK&quot;</span>&gt;</span><br>　　<span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>curl上传就应该是：</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs routeros">curl --form <span class="hljs-attribute">upload</span>=@localfilename --form <span class="hljs-attribute">press</span>=OK [URL]<br></code></pre></td></tr></table></figure>
+
+<p>–referer参数表示的是你从哪个页面来的</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs angelscript"><span class="hljs-string">[root@VM_0_11_centos training]</span># curl --<span class="hljs-built_in">ref</span>erer www.baidu.com www.baidu.com<br></code></pre></td></tr></table></figure>
+
+<p>User Agent字段，这个字段表示的是客户端设备的信息，服务器可能会根据这个User Agent字段来判断是手机还是电脑</p>
+<figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs stata">curl --user-agent <span class="hljs-string">&quot; xx&quot;</span> url<br>比如IPhone <br>Mozilla/5.0 (iPhone; <span class="hljs-keyword">U</span>; CPU iPhone OS 4_3_3 like <span class="hljs-keyword">Mac</span> OS X; <span class="hljs-keyword">en</span>-<span class="hljs-keyword">us</span>) <br>AppleWebKit/533.17.9 (KHTML, like Gecko) <span class="hljs-keyword">Version</span>/5.0.2 Mobile/8J2 Safari/6533.18.5<br><br><br> curl --user-agent &quot;Mozilla/5.0 (iPhone; <span class="hljs-keyword">U</span>; CPU iPhone OS 4_3_3 like <span class="hljs-keyword">Mac</span> OS X; <span class="hljs-keyword">en</span>-<span class="hljs-keyword">us</span>) <br> AppleWebKit/533.17.9 (KHTML, like Gecko) <span class="hljs-keyword">Version</span>/5.0.2 Mobile/8J2 Safari/6533.18.5&quot;  www.baidu.com<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li>–user-agent 可以用-A或者-H来替代</li>
+<li>–cookie参数，使用–cookie可以携带cookie信息</li>
+</ul>
+<figure class="highlight autohotkey"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs autohotkey">curl --cookie <span class="hljs-string">&quot;name=xxx&quot;</span> URL<br> `-c cookie-file`可以保存服务器返回的cookie到文件，<br> `-b cookie-file`可以使用这个文件作为cookie信息，进行后续的请求。<br></code></pre></td></tr></table></figure>
+
+<p>增加头部信息 –header</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs awk">curl --header <span class="hljs-string">&quot;Content-Type:application/json&quot;</span> http:<span class="hljs-regexp">//</span>example.com<br></code></pre></td></tr></table></figure>
+
+
+<h1 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h1><p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/39b9d66c9dbf">https://www.jianshu.com/p/39b9d66c9dbf</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.toutiao.com/i6812988437512061452/">https://www.toutiao.com/i6812988437512061452/</a><br><a target="_blank" rel="noopener" href="https://www.toutiao.com/i6850221908475003405/">https://www.toutiao.com/i6850221908475003405/</a></p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/linux/" class="category-chain-item">linux</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/linux/">#linux</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>linux定位问题常用命令</div>
+      <div>https://www.niewx.cn/2020/08/28/2020-08-28-Common-commands-for-linux-positioning-problems/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>VashonNie</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2020年8月28日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by-nc/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by-nc/4.0/">
+              <span class="hint--top hint--rounded" aria-label="NC - 非商业性使用">
+                <i class="iconfont icon-nc"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2020/08/28/2020-08-28-Ip-masq-agent-of-Kubernetes-plug-in/" title="Kubernetes插件之ip-masq-agent">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Kubernetes插件之ip-masq-agent</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2020/08/27/2020-08-27-Use-of-Kubectl-command-line-jsonpath/" title="Kubectl命令行jsonpath的使用">
+                        <span class="hidden-mobile">Kubectl命令行jsonpath的使用</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <div id="valine"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#valine', function() {
+      Fluid.utils.createScript('https://lib.baomitu.com/valine/1.4.16/Valine.min.js', function() {
+        var options = Object.assign(
+          {"appId":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","appKey":"TuwIbmst7Q1N12V1EgEfVgDm","path":"window.location.pathname","placeholder":null,"avatar":"retro","meta":["nick","mail","link"],"requiredFields":[],"pageSize":10,"lang":"zh-CN","highlight":false,"recordIP":false,"serverURLs":"","emojiCDN":null,"emojiMaps":null,"enableQQ":false},
+          {
+            el: "#valine",
+            path: window.location.pathname
+          }
+        )
+        new Valine(options);
+        Fluid.utils.waitElementVisible('#valine .vcontent', () => {
+          var imgSelector = '#valine .vcontent img:not(.vemoji)';
+          Fluid.plugins.imageCaption(imgSelector);
+          Fluid.plugins.fancyBox(imgSelector);
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+   <div id="music_div" style="position: fixed; bottom: 0px; left: 30px;">
+    <iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=110 
+    	src="//music.163.com/outchain/player?type=0&id=919444742&auto=1&height=90">
+    </iframe>
+    <script src="https://cdn.staticfile.org/jquery/3.3.1/jquery.min.js"></script>
+    <script src="/js/musicshow.js"></script>
+</div>
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> </div>
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="leancloud-site-pv-container" style="display: none">
+        总访问量 
+        <span id="leancloud-site-pv"></span>
+         次
+      </span>
+    
+    
+      <span id="leancloud-site-uv-container" style="display: none">
+        总访客数 
+        <span id="leancloud-site-uv"></span>
+         人
+      </span>
+    
+    
+
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?bfe4709ccd8c5c9e559c89f4fd0866f3";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="/js/leancloud.js" ></script>
+
+
+
+
+  
+<script src="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/DynamicRibbon.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/runtime.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/love.min.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/z16.model.json"},"display":{"position":"right","width":180,"height":360},"mobile":{"show":true},"react":{"opacity":0.7},"log":false});</script></body>
+</html>

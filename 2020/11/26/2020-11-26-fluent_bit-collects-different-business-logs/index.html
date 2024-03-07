@@ -1,1 +1,969 @@
-<!DOCTYPE html><html lang="zh-CN" data-default-color-scheme="auto"><head><meta charset="UTF-8"><link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png"><link rel="icon" href="/img/fluid.png"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,shrink-to-fit=no"><meta http-equiv="x-ua-compatible" content="ie=edge"><meta name="theme-color" content="#2f4154"><meta name="author" content="VashonNie"><meta name="keywords" content=""><meta name="description" content="我们将服务部署在k8s中，通常需要收集业务日志进行分析，那么现在常用的日志采集是怎么做的呢，一般来说是搭建EFK系统来采集日志，今天我们来说说如何采集k8s中的不同业务日志然后投递到es不同的索引，然后通过kibana进行分析和查看。 对于EFK的搭建，我们这里不做具体的讲解，大家可参考 https:&#x2F;&#x2F;www.niewx.cn&#x2F;2020&#x2F;06&#x2F;10&#x2F;Build-EFK-log-collectio"><meta property="og:type" content="article"><meta property="og:title" content="fluent-bit收集不同业务日志"><meta property="og:url" content="https://www.niewx.cn/2020/11/26/2020-11-26-fluent_bit-collects-different-business-logs/index.html"><meta property="og:site_name" content="Hexo"><meta property="og:description" content="我们将服务部署在k8s中，通常需要收集业务日志进行分析，那么现在常用的日志采集是怎么做的呢，一般来说是搭建EFK系统来采集日志，今天我们来说说如何采集k8s中的不同业务日志然后投递到es不同的索引，然后通过kibana进行分析和查看。 对于EFK的搭建，我们这里不做具体的讲解，大家可参考 https:&#x2F;&#x2F;www.niewx.cn&#x2F;2020&#x2F;06&#x2F;10&#x2F;Build-EFK-log-collectio"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://www.niewx.cn/img/2020-11-26-fluent_bit-collects-different-business-logs/snail-bg.jpg"><meta property="article:published_time" content="2020-11-26T06:10:00.000Z"><meta property="article:modified_time" content="2020-11-26T06:10:00.000Z"><meta property="article:author" content="VashonNie"><meta property="article:tag" content="Kubernetes"><meta property="article:tag" content="EFK"><meta property="article:tag" content="Fluent"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://www.niewx.cn/img/2020-11-26-fluent_bit-collects-different-business-logs/snail-bg.jpg"><title>fluent-bit收集不同业务日志 - Hexo</title><link rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css"><link rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css"><link rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css"><link rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css"><link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css"><link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css"><link rel="stylesheet" href="/css/main.css"><link id="highlight-css" rel="stylesheet" href="/css/highlight.css"><link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/shubiao.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/scroll.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/gradient.css"><script id="fluid-configs">var Fluid=window.Fluid||{},CONFIG={hostname:"www.niewx.cn",root:"/",version:"1.8.14",typing:{enable:!0,typeSpeed:70,cursorChar:"_",loop:!1,scope:[]},anchorjs:{enable:!0,element:"h1,h2,h3,h4,h5,h6",placement:"left",visible:"hover",icon:""},progressbar:{enable:!0,height_px:3,color:"#29d",options:{showSpinner:!1,trickleSpeed:100}},code_language:{enable:!0,default:"TEXT"},copy_btn:!0,image_caption:{enable:!0},image_zoom:{enable:!0,img_url_replace:["",""]},toc:{enable:!0,placement:"right",headingSelector:"h1,h2,h3,h4,h5,h6",collapseDepth:0},lazyload:{enable:!0,loading_img:"/img/loading.gif",onlypost:!1,offset_factor:2},web_analytics:{enable:!0,baidu:"bfe4709ccd8c5c9e559c89f4fd0866f3",google:null,gtag:null,tencent:{sid:null,cid:null},woyaola:null,cnzz:null,leancloud:{app_id:"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz",app_key:"TuwIbmst7Q1N12V1EgEfVgDm",server_url:null,path:"window.location.pathname",ignore_local:!1}},search_path:"/local-search.xml"}</script><script src="/js/utils.js"></script><script src="/js/color-schema.js"></script><meta name="generator" content="Hexo 6.1.0"></head><body><header><div class="header-inner" style="height:70vh"><nav id="navbar" class="navbar fixed-top navbar-expand-lg navbar-dark scrolling-navbar"><div class="container"><a class="navbar-brand" href="/"><strong>聂伟星</strong> </a><button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><div class="animated-icon"><span></span><span></span><span></span></div></button><iframe width="350" scrolling="no" height="20" frameborder="0" allowtransparency="true" src="https://i.tianqi.com?c=code&id=40&color=%23FFFFFF&icon=1&site=12"></iframe><div class="collapse navbar-collapse" id="navbarSupportedContent"><ul class="navbar-nav ml-auto text-center"><li class="nav-item"><a class="nav-link" href="/"><i class="iconfont icon-home-fill"></i> 首页</a></li><li class="nav-item"><a class="nav-link" href="/archives/"><i class="iconfont icon-archive-fill"></i> 归档</a></li><li class="nav-item"><a class="nav-link" href="/categories/"><i class="iconfont icon-category-fill"></i> 分类</a></li><li class="nav-item"><a class="nav-link" href="/tags/"><i class="iconfont icon-tags-fill"></i> 标签</a></li><li class="nav-item"><a class="nav-link" href="/about/"><i class="iconfont icon-user-fill"></i> 关于</a></li><li class="nav-item"><a class="nav-link" href="/links/"><i class="iconfont icon-link-fill"></i> 友链</a></li><li class="nav-item dropdown"><a class="nav-link dropdown-toggle" target="_self" href="javascript:;" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="iconfont icon-books"></i> 文档</a><div class="dropdown-menu" aria-labelledby="navbarDropdown"><a class="dropdown-item" href="https://www.niewx.cn/mybook/"><i class="iconfont icon-notebook"></i> 运维笔记 </a><a class="dropdown-item" target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/column/87421"><i class="iconfont icon-addrbook"></i> 云+社区文档 </a><a class="dropdown-item" href="https://www.niewx.cn/question/"><i class="iconfont icon-notebook"></i> 运维问题集锦</a></div></li><li class="nav-item"><a class="nav-link" href="/playlist/"><i class="iconfont icon-music"></i> 音乐</a></li><li class="nav-item dropdown"><a class="nav-link dropdown-toggle" target="_self" href="javascript:;" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="iconfont icon-douban-fill"></i> 豆瓣</a><div class="dropdown-menu" aria-labelledby="navbarDropdown"><a class="dropdown-item" href="/books"><i class="iconfont icon-book"></i> 书籍 </a><a class="dropdown-item" href="/movies"><i class="iconfont icon-youtube-fill"></i> 电影 </a><a class="dropdown-item" href="/games"><i class="iconfont icon-switch-fill"></i> 游戏</a></div></li><li class="nav-item" id="search-btn"><a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">&nbsp;<i class="iconfont icon-search"></i>&nbsp;</a></li><li class="nav-item" id="color-toggle-btn"><a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a></li></ul></div></div></nav><div id="banner" class="banner" parallax="true" style="background:url(/img/default.png) no-repeat center center;background-size:cover"><div class="full-bg-img"><div class="mask flex-center" style="background-color:rgba(0,0,0,.3)"><div class="banner-text text-center fade-in-up"><div class="h2"><span id="subtitle" data-typed-text="fluent-bit收集不同业务日志"></span></div><div class="mt-3"><span class="post-meta mr-2"><i class="iconfont icon-author" aria-hidden="true"></i> VashonNie </span><span class="post-meta"><i class="iconfont icon-date-fill" aria-hidden="true"></i> <time datetime="2020-11-26 14:10" pubdate>2020年11月26日 下午</time></span></div><div class="mt-1"><span class="post-meta mr-2"><i class="iconfont icon-chart"></i>13k 字 </span><span class="post-meta mr-2"><i class="iconfont icon-clock-fill"></i>109 分钟 </span><span id="leancloud-page-views-container" class="post-meta" style="display:none"><i class="iconfont icon-eye" aria-hidden="true"></i> <span id="leancloud-page-views"></span> 次</span></div></div></div></div></div></div></header><main><div class="container-fluid nopadding-x"><div class="row nomargin-x"><div class="side-col d-none d-lg-block col-lg-2"></div><div class="col-lg-8 nopadding-x-md"><div class="container nopadding-x-md" id="board-ctn"><div id="board"><article class="post-content mx-auto"><h1 style="display:none">fluent-bit收集不同业务日志</h1><div class="markdown-body"><p>我们将服务部署在k8s中，通常需要收集业务日志进行分析，那么现在常用的日志采集是怎么做的呢，一般来说是搭建EFK系统来采集日志，今天我们来说说如何采集k8s中的不同业务日志然后投递到es不同的索引，然后通过kibana进行分析和查看。</p><p>对于EFK的搭建，我们这里不做具体的讲解，大家可参考 <a href="https://www.niewx.cn/2020/06/10/Build-EFK-log-collection-system-on-TKE/">https://www.niewx.cn/2020/06/10/Build-EFK-log-collection-system-on-TKE/</a> , 今天我们主要来讲一下如何采集不同业务日志进行分析。</p><p>这里我们一共采集3类日志，分别是nginx日志、golang的日志、以及k8s的系统日志，一般我们采集的业务日志都是将业务日志挂载到节点，然后fluent-bit去采集节点上的日志文件，输出到es，通过kibana展示和查询。</p><h1 id="fluent-bit的部署"><a href="#fluent-bit的部署" class="headerlink" title="fluent-bit的部署"></a>fluent-bit的部署</h1><p>我们这里简单说下fluent-bit的部署,我们通过helm部署。</p><figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs arduino">$ helm install --name my-release stable/fluent-bit<br></code></pre></td></tr></table></figure><h1 id="部署应用"><a href="#部署应用" class="headerlink" title="部署应用"></a>部署应用</h1><h2 id="部署nginx"><a href="#部署nginx" class="headerlink" title="部署nginx"></a>部署nginx</h2><p>我们将nginx的日志挂载到节点的&#x2F;data&#x2F;nginx目录下，对应的yaml如下</p><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">apps/v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Deployment</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">annotations:</span><br>    <span class="hljs-attr">deployment.kubernetes.io/revision:</span> <span class="hljs-string">&quot;1&quot;</span><br>  <span class="hljs-attr">creationTimestamp:</span> <span class="hljs-string">&quot;2020-11-24T02:08:08Z&quot;</span><br>  <span class="hljs-attr">generation:</span> <span class="hljs-number">1</span><br>  <span class="hljs-attr">labels:</span><br>    <span class="hljs-attr">k8s-app:</span> <span class="hljs-string">nginx-log</span><br>    <span class="hljs-attr">qcloud-app:</span> <span class="hljs-string">nginx-log</span><br>  <span class="hljs-attr">managedFields:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">apiVersion:</span> <span class="hljs-string">apps/v1</span><br>    <span class="hljs-attr">manager:</span> <span class="hljs-string">tke-apiserver</span><br>    <span class="hljs-attr">operation:</span> <span class="hljs-string">Update</span><br>    <span class="hljs-attr">time:</span> <span class="hljs-string">&quot;2020-11-24T02:08:08Z&quot;</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">apiVersion:</span> <span class="hljs-string">apps/v1</span><br>    <span class="hljs-attr">manager:</span> <span class="hljs-string">kube-controller-manager</span><br>    <span class="hljs-attr">operation:</span> <span class="hljs-string">Update</span><br>    <span class="hljs-attr">time:</span> <span class="hljs-string">&quot;2020-11-27T03:21:32Z&quot;</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">nginx-log</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">test</span><br>  <span class="hljs-attr">resourceVersion:</span> <span class="hljs-string">&quot;2156061896&quot;</span><br>  <span class="hljs-attr">selfLink:</span> <span class="hljs-string">/apis/apps/v1/namespaces/test/deployments/nginx-log</span><br>  <span class="hljs-attr">uid:</span> <span class="hljs-string">eb42b8f7-97f7-405b-a750-d46df6bcd8c6</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">progressDeadlineSeconds:</span> <span class="hljs-number">600</span><br>  <span class="hljs-attr">replicas:</span> <span class="hljs-number">1</span><br>  <span class="hljs-attr">revisionHistoryLimit:</span> <span class="hljs-number">10</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">matchLabels:</span><br>      <span class="hljs-attr">k8s-app:</span> <span class="hljs-string">nginx-log</span><br>      <span class="hljs-attr">qcloud-app:</span> <span class="hljs-string">nginx-log</span><br>  <span class="hljs-attr">strategy:</span><br>    <span class="hljs-attr">rollingUpdate:</span><br>      <span class="hljs-attr">maxSurge:</span> <span class="hljs-number">1</span><br>      <span class="hljs-attr">maxUnavailable:</span> <span class="hljs-number">0</span><br>    <span class="hljs-attr">type:</span> <span class="hljs-string">RollingUpdate</span><br>  <span class="hljs-attr">template:</span><br>    <span class="hljs-attr">metadata:</span><br>      <span class="hljs-attr">creationTimestamp:</span> <span class="hljs-literal">null</span><br>      <span class="hljs-attr">labels:</span><br>        <span class="hljs-attr">k8s-app:</span> <span class="hljs-string">nginx-log</span><br>        <span class="hljs-attr">qcloud-app:</span> <span class="hljs-string">nginx-log</span><br>    <span class="hljs-attr">spec:</span><br>      <span class="hljs-attr">containers:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">image:</span> <span class="hljs-string">nginx</span><br>        <span class="hljs-attr">imagePullPolicy:</span> <span class="hljs-string">Always</span><br>        <span class="hljs-attr">name:</span> <span class="hljs-string">nginx-log</span><br>        <span class="hljs-attr">resources:</span><br>          <span class="hljs-attr">limits:</span><br>            <span class="hljs-attr">cpu:</span> <span class="hljs-string">500m</span><br>            <span class="hljs-attr">memory:</span> <span class="hljs-string">1Gi</span><br>          <span class="hljs-attr">requests:</span><br>            <span class="hljs-attr">cpu:</span> <span class="hljs-string">250m</span><br>            <span class="hljs-attr">memory:</span> <span class="hljs-string">256Mi</span><br>        <span class="hljs-attr">securityContext:</span><br>          <span class="hljs-attr">privileged:</span> <span class="hljs-literal">false</span><br>        <span class="hljs-attr">terminationMessagePath:</span> <span class="hljs-string">/dev/termination-log</span><br>        <span class="hljs-attr">terminationMessagePolicy:</span> <span class="hljs-string">File</span><br>        <span class="hljs-attr">volumeMounts:</span><br>        <span class="hljs-bullet">-</span> <span class="hljs-attr">mountPath:</span> <span class="hljs-string">/etc/nginx/nginx.conf</span><br>          <span class="hljs-attr">name:</span> <span class="hljs-string">conf</span><br>          <span class="hljs-attr">subPath:</span> <span class="hljs-string">nginx.conf</span><br>        <span class="hljs-bullet">-</span> <span class="hljs-attr">mountPath:</span> <span class="hljs-string">/var/log/nginx</span><br>          <span class="hljs-attr">name:</span> <span class="hljs-string">log</span><br>      <span class="hljs-attr">dnsPolicy:</span> <span class="hljs-string">ClusterFirst</span><br>      <span class="hljs-attr">imagePullSecrets:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">qcloudregistrykey</span><br>      <span class="hljs-attr">restartPolicy:</span> <span class="hljs-string">Always</span><br>      <span class="hljs-attr">schedulerName:</span> <span class="hljs-string">default-scheduler</span><br>      <span class="hljs-attr">securityContext:</span> &#123;&#125;<br>      <span class="hljs-attr">terminationGracePeriodSeconds:</span> <span class="hljs-number">30</span><br>      <span class="hljs-attr">volumes:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">configMap:</span><br>          <span class="hljs-attr">defaultMode:</span> <span class="hljs-number">420</span><br>          <span class="hljs-attr">name:</span> <span class="hljs-string">nginx-conf</span><br>        <span class="hljs-attr">name:</span> <span class="hljs-string">conf</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">hostPath:</span><br>          <span class="hljs-attr">path:</span> <span class="hljs-string">/data/nginx</span><br>          <span class="hljs-attr">type:</span> <span class="hljs-string">DirectoryOrCreate</span><br>        <span class="hljs-attr">name:</span> <span class="hljs-string">log</span><br></code></pre></td></tr></table></figure><h2 id="部署golang"><a href="#部署golang" class="headerlink" title="部署golang"></a>部署golang</h2><p>我们将golang的日志文件挂载到节点的&#x2F;data&#x2F;go目录下，对应的yaml如下</p><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">apps/v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Deployment</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">annotations:</span><br>    <span class="hljs-attr">deployment.kubernetes.io/revision:</span> <span class="hljs-string">&quot;11&quot;</span><br>  <span class="hljs-attr">creationTimestamp:</span> <span class="hljs-string">&quot;2020-11-22T09:30:22Z&quot;</span><br>  <span class="hljs-attr">generation:</span> <span class="hljs-number">11</span><br>  <span class="hljs-attr">labels:</span><br>    <span class="hljs-attr">k8s-app:</span> <span class="hljs-string">go-test</span><br>    <span class="hljs-attr">qcloud-app:</span> <span class="hljs-string">go-test</span><br>  <span class="hljs-attr">managedFields:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">apiVersion:</span> <span class="hljs-string">apps/v1</span><br>    <span class="hljs-attr">manager:</span> <span class="hljs-string">tke-apiserver</span><br>    <span class="hljs-attr">operation:</span> <span class="hljs-string">Update</span><br>    <span class="hljs-attr">time:</span> <span class="hljs-string">&quot;2020-11-27T05:47:59Z&quot;</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">apiVersion:</span> <span class="hljs-string">apps/v1</span><br>    <span class="hljs-attr">manager:</span> <span class="hljs-string">kube-controller-manager</span><br>    <span class="hljs-attr">operation:</span> <span class="hljs-string">Update</span><br>    <span class="hljs-attr">time:</span> <span class="hljs-string">&quot;2020-11-27T05:59:13Z&quot;</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">go-test</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">test</span><br>  <span class="hljs-attr">resourceVersion:</span> <span class="hljs-string">&quot;2161865161&quot;</span><br>  <span class="hljs-attr">selfLink:</span> <span class="hljs-string">/apis/apps/v1/namespaces/test/deployments/go-test</span><br>  <span class="hljs-attr">uid:</span> <span class="hljs-string">b267fe91-c0c7-40a5-94e2-cd1d169576a3</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">progressDeadlineSeconds:</span> <span class="hljs-number">600</span><br>  <span class="hljs-attr">replicas:</span> <span class="hljs-number">1</span><br>  <span class="hljs-attr">revisionHistoryLimit:</span> <span class="hljs-number">10</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">matchLabels:</span><br>      <span class="hljs-attr">k8s-app:</span> <span class="hljs-string">go-test</span><br>      <span class="hljs-attr">qcloud-app:</span> <span class="hljs-string">go-test</span><br>  <span class="hljs-attr">strategy:</span><br>    <span class="hljs-attr">rollingUpdate:</span><br>      <span class="hljs-attr">maxSurge:</span> <span class="hljs-number">1</span><br>      <span class="hljs-attr">maxUnavailable:</span> <span class="hljs-number">0</span><br>    <span class="hljs-attr">type:</span> <span class="hljs-string">RollingUpdate</span><br>  <span class="hljs-attr">template:</span><br>    <span class="hljs-attr">metadata:</span><br>      <span class="hljs-attr">creationTimestamp:</span> <span class="hljs-literal">null</span><br>      <span class="hljs-attr">labels:</span><br>        <span class="hljs-attr">k8s-app:</span> <span class="hljs-string">go-test</span><br>        <span class="hljs-attr">qcloud-app:</span> <span class="hljs-string">go-test</span><br>    <span class="hljs-attr">spec:</span><br>      <span class="hljs-attr">containers:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">image:</span> <span class="hljs-string">nwx-test.tencentcloudcr.com/nwx/go-test:go-20201127</span><br>        <span class="hljs-attr">imagePullPolicy:</span> <span class="hljs-string">Always</span><br>        <span class="hljs-attr">name:</span> <span class="hljs-string">go-test</span><br>        <span class="hljs-attr">resources:</span><br>          <span class="hljs-attr">limits:</span><br>            <span class="hljs-attr">cpu:</span> <span class="hljs-string">100m</span><br>            <span class="hljs-attr">memory:</span> <span class="hljs-string">256Mi</span><br>          <span class="hljs-attr">requests:</span><br>            <span class="hljs-attr">cpu:</span> <span class="hljs-string">100m</span><br>            <span class="hljs-attr">memory:</span> <span class="hljs-string">256Mi</span><br>        <span class="hljs-attr">securityContext:</span><br>          <span class="hljs-attr">privileged:</span> <span class="hljs-literal">false</span><br>        <span class="hljs-attr">terminationMessagePath:</span> <span class="hljs-string">/dev/termination-log</span><br>        <span class="hljs-attr">terminationMessagePolicy:</span> <span class="hljs-string">File</span><br>        <span class="hljs-attr">volumeMounts:</span><br>        <span class="hljs-bullet">-</span> <span class="hljs-attr">mountPath:</span> <span class="hljs-string">/data/</span><br>          <span class="hljs-attr">name:</span> <span class="hljs-string">vol</span><br>      <span class="hljs-attr">dnsPolicy:</span> <span class="hljs-string">ClusterFirst</span><br>      <span class="hljs-attr">restartPolicy:</span> <span class="hljs-string">Always</span><br>      <span class="hljs-attr">schedulerName:</span> <span class="hljs-string">default-scheduler</span><br>      <span class="hljs-attr">securityContext:</span> &#123;&#125;<br>      <span class="hljs-attr">terminationGracePeriodSeconds:</span> <span class="hljs-number">30</span><br>      <span class="hljs-attr">volumes:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">hostPath:</span><br>          <span class="hljs-attr">path:</span> <span class="hljs-string">/data/go</span><br>          <span class="hljs-attr">type:</span> <span class="hljs-string">DirectoryOrCreate</span><br>        <span class="hljs-attr">name:</span> <span class="hljs-string">vol</span><br></code></pre></td></tr></table></figure><h1 id="修改fluent-bit的配置文件和yaml"><a href="#修改fluent-bit的配置文件和yaml" class="headerlink" title="修改fluent-bit的配置文件和yaml"></a>修改fluent-bit的配置文件和yaml</h1><h2 id="修改fluent-bit-conf"><a href="#修改fluent-bit-conf" class="headerlink" title="修改fluent-bit.conf"></a>修改fluent-bit.conf</h2><p>这里我们将fluent-bit.conf分成多个配置文件进行配置，你也可以配置到一个fluent-bit.conf</p><h3 id="fluent-bit-conf配置项介绍"><a href="#fluent-bit-conf配置项介绍" class="headerlink" title="fluent-bit.conf配置项介绍"></a>fluent-bit.conf配置项介绍</h3><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br></pre></td><td class="code"><pre><code class="hljs awk"><span class="hljs-comment">#1）fluent-bit-configmap.yaml修改部分（红字）：</span><br><span class="hljs-comment">#红色部分修改成自己想要的index名字</span><br>  output-elasticsearch.conf: |<br>   [OUTPUT]<br>       Name            es<br>       Match           *<br>       Host            <span class="hljs-variable">$&#123;FLUENT_ELASTICSEARCH_HOST&#125;</span><br>       Port            <span class="hljs-variable">$&#123;FLUENT_ELASTICSEARCH_PORT&#125;</span><br>       Logstash_Format On<br>       Replace_Dots    On<br>       Retry_Limit     False<br>       Logstash_Prefix test_k8s<br><span class="hljs-comment">#2）fluent-bit-ds.yaml修改部分：</span><br><span class="hljs-comment">#将FLUENT_ELASTICSEARCH_HOST修改成自己的Elasticsearch地址</span><br> env:<br> - name: FLUENT_ELASTICSEARCH_HOST<br>   value: <span class="hljs-string">&quot;es.haha.com&quot;</span><br> - name: FLUENT_ELASTICSEARCH_PORT<br>   value: <span class="hljs-string">&quot;80&quot;</span><br><br><span class="hljs-comment">#1）fluent-bit-configmap.yaml修改部分（红字）：</span><br><span class="hljs-comment">#红色部分修改成自己想要的index名字</span><br>  output-elasticsearch.conf: |<br>   [OUTPUT]<br>       Name            kafka<br>       Match           *<br>       Brokers         <span class="hljs-variable">$&#123;FLUENT_KAFKA_ADDR&#125;</span><br>       Topics          <span class="hljs-variable">$&#123;FLUENT_KAFKA_TOPIC&#125;</span><br>       Timestamp_Key  @timestamp<br>       Retry_Limit    false<br>       <span class="hljs-comment"># hides errors &quot;Receive failed: Disconnected&quot; when kafka kills idle connections</span><br>       rdkafka.log.connection.close false<br>       <span class="hljs-comment"># producer buffer is not included in http://fluentbit.io/documentation/0.12/configuration/memory_usage.html#estimating</span><br>       rdkafka.queue.buffering.max.kbytes <span class="hljs-number">10240</span><br>       <span class="hljs-comment"># for logs you&#x27;ll probably want this ot be 0 or 1, not more</span><br>       rdkafka.request.required.acks <span class="hljs-number">1</span><br><span class="hljs-comment">#2）fluent-bit-ds.yaml修改部分：</span><br><span class="hljs-comment">#将FLUENT_KAFKA_ADDR修改成自己的Kafka地址</span><br> env:<br> - name: FLUENT_KAFKA_ADDR<br>   value: <span class="hljs-string">&quot;es.haha.com&quot;</span><br> - name: FLUENT_KAFKA_TOPIC<br>   value: <span class="hljs-string">&quot;test_k8s&quot;</span>  <br><br>[SERVICE]<br>    Flush         <span class="hljs-number">1</span> <span class="hljs-comment">#buffer里的数据每隔1秒写到output插件里，这里写到ES里。</span><br>    Log_Level     info <span class="hljs-comment">#fluent-bit的日志级别</span><br>    Daemon        off<br>    Parsers_File  parsers.conf <span class="hljs-comment">#指向了另外一个配置文件，里面配置所有的parser。</span><br>    HTTP_Server   On<br>    HTTP_Listen   <span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span><br>    HTTP_Port     <span class="hljs-number">2020</span><br> <br>[INPUT]<br>    Name              tail <span class="hljs-comment">#指定了input插件的类型，这里是tail类型</span><br>    Tag              &#123;&#123;<span class="hljs-variable">$Host</span>&#125;&#125;_&#123;&#123;<span class="hljs-variable">$ESIndex</span>&#125;&#125;_&#123;&#123;.ContainerName&#125;&#125;_&#123;&#123;<span class="hljs-variable">$i</span>&#125;&#125; <span class="hljs-comment">#给采集的日志打个标签，后面filter和output根据这个标签选择数据源</span><br>    Path              <span class="hljs-regexp">/var/</span>log<span class="hljs-regexp">/pods/</span><span class="hljs-variable">$&#123;POD_UID&#125;</span><span class="hljs-regexp">/&#123;&#123;.ContainerName&#125;&#125;/</span>*.log<br>    Path_Key          filename<br>    Parser            docker<br>    DB                <span class="hljs-regexp">/var/</span>log<span class="hljs-regexp">/pods/</span><span class="hljs-variable">$&#123;POD_UID&#125;</span><span class="hljs-regexp">/&#123;&#123;.ContainerName&#125;&#125;/</span>flb_std.db<span class="hljs-comment">#记录哪个文件采集到哪一行</span><br>    DB.Sync           Full <span class="hljs-comment">#internal SQLite engine用哪种方法同步数据到磁盘，full为安全优先Key</span><br>    Mem_Buf_Limit     <span class="hljs-number">5</span>MB <span class="hljs-comment">#一旦buffer里的数据超过Mem_buf_limit，tail就会暂停采集，直到buffer数据被flush到output</span><br>    Skip_Long_Lines   Off <span class="hljs-comment">#跳过长度大于Buffer_Max_Size的行,默认On,不关闭会出现have long lines.Skipping long lines的错误      </span><br>    Buffer_Chunk_Size <span class="hljs-number">32</span>k <span class="hljs-comment">#tail命令的buffer初始大小，具体作用和对性能的影响还需进一步研究</span><br>    Buffer_Max_Size   <span class="hljs-number">32</span>k <span class="hljs-comment">#tail命令的buffer最大值，具体作用和对性能的影响还需进一步研究</span><br>    Refresh_Interval  <span class="hljs-number">10</span> <span class="hljs-comment">#定时扫描磁盘上的新文件的间隔</span><br>    Rotate_Wait        <span class="hljs-number">5</span> <span class="hljs-comment">#文件rotate后的等待一段时间后再继续监控这个文件，以防flush一些pending data</span><br>    Ignore_Older       <span class="hljs-number">10</span>d <span class="hljs-comment">#忽略近十天来未更改的文件</span><br>[FILTER]<br>    Name                modify <span class="hljs-comment">#插件的类型</span><br>    Match               * <span class="hljs-comment">#匹配到任何数据源</span><br>    Add node_name <span class="hljs-variable">$&#123;NODE_NAME&#125;</span><br>    Add node_ip <span class="hljs-variable">$&#123;NODE_IP&#125;</span><br>    Add pod_name <span class="hljs-variable">$&#123;POD_NAME&#125;</span><br> <br>[OUTPUT]<br>    Name   es <span class="hljs-comment">#插件的类型</span><br>    Match  &#123;&#123;.Host&#125;&#125;_&#123;&#123;.ESIndex&#125;&#125;* <span class="hljs-comment">#匹配到tag为&#123;&#123;.Host&#125;&#125;_&#123;&#123;.ESIndex&#125;&#125;*的数据源</span><br>    Host   &#123;&#123;.HostName&#125;&#125; <span class="hljs-comment">#es的hostname 可以是域名和ip</span><br>    Port   &#123;&#123;.Port&#125;&#125; <span class="hljs-comment">#es的端口</span><br>    Index &#123;&#123;.ESIndex&#125;&#125; <br>    HTTP_User &#123;&#123;.UserName&#125;&#125;<br>    HTTP_Passwd &#123;&#123;.Password&#125;&#125;<br>    Pipeline <span class="hljs-comment">#不要用</span><br>    Logstash_Format  On <span class="hljs-comment">#是否采用类似logstash的index，可以根据时间设置index名字</span><br>    Logstash_Prefix logstash <span class="hljs-comment">#索引名称的前缀</span><br>    Logstash_DateFormat %Y.%m.%d <span class="hljs-comment">#名称后缀格式</span><br>    Time_Key  tail-time <span class="hljs-comment">#Logstash_Format enabled的时候，每条记录会新产生一个时间戳</span><br>    Time_Key_Format %Y-%m-%dT%H:%M:%S <span class="hljs-comment">#新时间戳的格式</span><br>    Generate_ID  On <span class="hljs-comment">#对记录去重，可能有性能消耗。</span><br>    Trace_Output Off <span class="hljs-comment">#打印elasticsearch API calls 调试的时候用。</span><br>    Logstash_Prefix_Key ttt <span class="hljs-comment">#</span><br>    Retry_Limit     <span class="hljs-number">5</span> <span class="hljs-comment">#传输失败后重试次数，默认为2，设置为False时，无限次重试</span><br></code></pre></td></tr></table></figure><h3 id="fluent-bit-filter-conf"><a href="#fluent-bit-filter-conf" class="headerlink" title="fluent-bit-filter.conf"></a>fluent-bit-filter.conf</h3><p>日志过滤配置</p><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs awk">[FILTER]<br>    Name                kubernetes<br>    Match               kube.*<br>    Kube_Tag_Prefix     kube.var.log.containers.<br>    Kube_URL            https:<span class="hljs-regexp">//</span>kubernetes.default.svc:<span class="hljs-number">443</span><br>    Kube_CA_File        <span class="hljs-regexp">/var/</span>run<span class="hljs-regexp">/secrets/</span>kubernetes.io<span class="hljs-regexp">/serviceaccount/</span>ca.crt<br>    Kube_Token_File     <span class="hljs-regexp">/var/</span>run<span class="hljs-regexp">/secrets/</span>kubernetes.io<span class="hljs-regexp">/serviceaccount/</span>token<br>    Merge_Log           On<br>    K8S-Logging.Parser  On<br>    K8S-Logging.Exclude On  <br></code></pre></td></tr></table></figure><h3 id="fluent-bit-input-conf"><a href="#fluent-bit-input-conf" class="headerlink" title="fluent-bit-input.conf"></a>fluent-bit-input.conf</h3><p>日志源输入配置</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs bash">[INPUT]<br>    Name              <span class="hljs-built_in">tail</span><br>    Path              /var/log/containers/*.<span class="hljs-built_in">log</span><br>    Parser            docker<br>    Tag               kube.*<br>    Refresh_Interval  5<br>    Mem_Buf_Limit     5MB<br>    Skip_Long_Lines   On<br><br>[INPUT]<br>    Name              <span class="hljs-built_in">tail</span><br>    Path               /data/nginx/*.<span class="hljs-built_in">log</span><br>    Tag               nginx.*<br>    Refresh_Interval  5<br>    Mem_Buf_Limit     5MB<br>    Skip_Long_Lines   On<br><br>[INPUT]<br>    Name              <span class="hljs-built_in">tail</span><br>    Path               /data/go/*.<span class="hljs-built_in">log</span><br>    Tag               go.*<br>    Refresh_Interval  5<br>    Mem_Buf_Limit     5MB<br>    Skip_Long_Lines   On<br></code></pre></td></tr></table></figure><h3 id="fluent-bit-output-conf"><a href="#fluent-bit-output-conf" class="headerlink" title="fluent-bit-output.conf"></a>fluent-bit-output.conf</h3><p>日志投递输出配置</p><figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><code class="hljs crmsh">[OUTPUT]<br>     Name            es<br>     Match           nginx.*<br>     Host            elasticsearch-<span class="hljs-keyword">master</span><br>     <span class="hljs-title">Port</span>            <span class="hljs-number">9200</span><br>     Logstash_Format  On<br>     Logstash_Prefix  nginx<br>     Replace_Dots    On<br>     Retry_Limit     <span class="hljs-literal">False</span><br><br>[OUTPUT]<br>     Name            es<br>     Match           kube.*<br>     Host            elasticsearch-<span class="hljs-keyword">master</span><br>     <span class="hljs-title">Port</span>            <span class="hljs-number">9200</span><br>     Logstash_Format  On<br>     Logstash_Prefix  k8s<br>     Replace_Dots    On<br>     Retry_Limit     <span class="hljs-literal">False</span><br><br><br>[OUTPUT]<br>     Name            es<br>     Match           go.*<br>     Host            elasticsearch-<span class="hljs-keyword">master</span><br>     <span class="hljs-title">Port</span>            <span class="hljs-number">9200</span><br>     Logstash_Format  On<br>     Logstash_Prefix  go<br>     Replace_Dots    On<br>     Retry_Limit     <span class="hljs-literal">False</span><br></code></pre></td></tr></table></figure><h3 id="fluent-bit-service-conf"><a href="#fluent-bit-service-conf" class="headerlink" title="fluent-bit-service.conf"></a>fluent-bit-service.conf</h3><p>日志读取配置</p><figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs pgsql">[SERVICE]<br>    Flush        <span class="hljs-number">1</span><br>    Daemon       <span class="hljs-keyword">Off</span><br>    Log_Level    <span class="hljs-keyword">info</span><br>    Parsers_File parsers.conf<br></code></pre></td></tr></table></figure><h3 id="fluent-bit-conf"><a href="#fluent-bit-conf" class="headerlink" title="fluent-bit.conf"></a>fluent-bit.conf</h3><p>fluent-bit的配置</p><figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs less"><span class="hljs-variable">@INCLUDE</span> fluent-bit-service.conf<br><span class="hljs-variable">@INCLUDE</span> fluent-bit-input.conf<br><span class="hljs-variable">@INCLUDE</span> fluent-bit-filter.conf<br><span class="hljs-variable">@INCLUDE</span> fluent-bit-output.conf<br></code></pre></td></tr></table></figure><h3 id="parsers-conf"><a href="#parsers-conf" class="headerlink" title="parsers.conf"></a>parsers.conf</h3><p>日志转换配置,这里暂未配置</p><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs">空<br></code></pre></td></tr></table></figure><h2 id="修改fluent-bit的daemonset的yaml"><a href="#修改fluent-bit的daemonset的yaml" class="headerlink" title="修改fluent-bit的daemonset的yaml"></a>修改fluent-bit的daemonset的yaml</h2><p>我们在fluent-bit的配置文件中指定了日志源的的采集和输出，但是fluent-bit pod是无法获取节点的日志文件，我们需要将节点的文件挂载到pod进行采集。修改的挂载yaml文件如下,其实就是把&#x2F;data&#x2F;nginx和&#x2F;data&#x2F;go这2个目录挂载到fluent-bit的pod中，当然还有默认的k8s日志采集目录&#x2F;var&#x2F;lib&#x2F;docker&#x2F;containers和系统日志目录&#x2F;var&#x2F;log，只是这2个目录不用我们自己手动修改，默认yaml会配置这2个。</p><figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br></pre></td><td class="code"><pre><code class="hljs dts"><span class="hljs-symbol">apiVersion:</span> apps/v1<br><span class="hljs-symbol">kind:</span> DaemonSet<br><span class="hljs-symbol">metadata:</span><br><span class="hljs-symbol">  annotations:</span><br>    deprecated.daemonset.template.generation: <span class="hljs-string">&quot;3&quot;</span><br><span class="hljs-symbol">  creationTimestamp:</span> <span class="hljs-string">&quot;2020-11-24T05:12:12Z&quot;</span><br><span class="hljs-symbol">  generation:</span> <span class="hljs-number">3</span><br><span class="hljs-symbol">  labels:</span><br><span class="hljs-symbol">    app:</span> fluent-bit<br><span class="hljs-symbol">    chart:</span> fluent-bit<span class="hljs-number">-2.8</span><span class="hljs-number">.16</span><br><span class="hljs-symbol">    heritage:</span> Helm<br><span class="hljs-symbol">    release:</span> nwx-fluent<br><span class="hljs-symbol">  managedFields:</span><br>  - apiVersion: apps/v1<br><span class="hljs-symbol">    manager:</span> Go-http-client<br><span class="hljs-symbol">    operation:</span> Update<br><span class="hljs-symbol">    time:</span> <span class="hljs-string">&quot;2020-11-24T05:12:12Z&quot;</span><br>  - apiVersion: apps/v1<br><span class="hljs-symbol">    manager:</span> tke-apiserver<br><span class="hljs-symbol">    operation:</span> Update<br><span class="hljs-symbol">    time:</span> <span class="hljs-string">&quot;2020-11-27T06:28:28Z&quot;</span><br>  - apiVersion: apps/v1<br><span class="hljs-symbol">    manager:</span> kube-controller-manager<br><span class="hljs-symbol">    operation:</span> Update<br><span class="hljs-symbol">    time:</span> <span class="hljs-string">&quot;2020-11-27T06:29:01Z&quot;</span><br><span class="hljs-symbol">  name:</span> nwx-fluent-fluent-bit<br><span class="hljs-symbol">  namespace:</span> log<br><span class="hljs-symbol">  resourceVersion:</span> <span class="hljs-string">&quot;2162960999&quot;</span><br><span class="hljs-symbol">  selfLink:</span> <span class="hljs-keyword">/apis/</span>apps<span class="hljs-keyword">/v1/</span>namespaces<span class="hljs-keyword">/log/</span>daemonsets/nwx-fluent-fluent-bit<br><span class="hljs-symbol">  uid:</span> <span class="hljs-number">62891</span>a61<span class="hljs-number">-809</span>c<span class="hljs-number">-4045</span><span class="hljs-number">-9</span>f34<span class="hljs-number">-4</span>b742cd8cc7c<br><span class="hljs-symbol">spec:</span><br><span class="hljs-symbol">  revisionHistoryLimit:</span> <span class="hljs-number">10</span><br><span class="hljs-symbol">  selector:</span><br><span class="hljs-symbol">    matchLabels:</span><br><span class="hljs-symbol">      app:</span> fluent-bit<br><span class="hljs-symbol">      release:</span> nwx-fluent<br><span class="hljs-symbol">  template:</span><br><span class="hljs-symbol">    metadata:</span><br><span class="hljs-symbol">      annotations:</span><br>        checksum/config: a3e666db2b70ae3c1b8de003ce768a3ed14ff02dd643df16d2d6d2be111d3910<br><span class="hljs-symbol">      creationTimestamp:</span> null<br><span class="hljs-symbol">      labels:</span><br><span class="hljs-symbol">        app:</span> fluent-bit<br><span class="hljs-symbol">        release:</span> nwx-fluent<br><span class="hljs-symbol">    spec:</span><br><span class="hljs-symbol">      containers:</span><br>      - image: fluent/fluent-bit:<span class="hljs-number">1.3</span><span class="hljs-number">.7</span><br><span class="hljs-symbol">        imagePullPolicy:</span> Always<br><span class="hljs-symbol">        name:</span> fluent-bit<br><span class="hljs-symbol">        resources:</span> <span class="hljs-punctuation">&#123;</span><span class="hljs-punctuation">&#125;</span><br><span class="hljs-symbol">        securityContext:</span><br><span class="hljs-symbol">          privileged:</span> false<br><span class="hljs-symbol">        terminationMessagePath:</span> <span class="hljs-keyword">/dev/</span>termination-log<br><span class="hljs-symbol">        terminationMessagePolicy:</span> File<br><span class="hljs-symbol">        volumeMounts:</span><br>        - mountPath: <span class="hljs-keyword">/var/</span>log<br><span class="hljs-symbol">          name:</span> varlog<br>        - mountPath: <span class="hljs-keyword">/var/</span>lib<span class="hljs-keyword">/docker/</span>containers<br><span class="hljs-symbol">          name:</span> varlibdockercontainers<br><span class="hljs-symbol">          readOnly:</span> true<br>        - mountPath: <span class="hljs-keyword">/etc/</span>fluent-bit.conf<br><span class="hljs-symbol">          name:</span> config<br><span class="hljs-symbol">          subPath:</span> fluent-bit.conf<br>        - mountPath: <span class="hljs-keyword">/etc/</span>fluent-bit-service.conf<br><span class="hljs-symbol">          name:</span> config<br><span class="hljs-symbol">          subPath:</span> fluent-bit-service.conf<br>        - mountPath: <span class="hljs-keyword">/etc/</span>fluent-bit-input.conf<br><span class="hljs-symbol">          name:</span> config<br><span class="hljs-symbol">          subPath:</span> fluent-bit-input.conf<br>        - mountPath: <span class="hljs-keyword">/etc/</span>fluent-bit-filter.conf<br><span class="hljs-symbol">          name:</span> config<br><span class="hljs-symbol">          subPath:</span> fluent-bit-filter.conf<br>        - mountPath: <span class="hljs-keyword">/etc/</span>fluent-bit-output.conf<br><span class="hljs-symbol">          name:</span> config<br><span class="hljs-symbol">          subPath:</span> fluent-bit-output.conf<br>        - mountPath: <span class="hljs-keyword">/data/</span>nginx<br><span class="hljs-symbol">          name:</span> nginx<br>        - mountPath: <span class="hljs-keyword">/data/</span>go<br><span class="hljs-symbol">          name:</span> go<br><span class="hljs-symbol">      dnsPolicy:</span> ClusterFirst<br><span class="hljs-symbol">      restartPolicy:</span> Always<br><span class="hljs-symbol">      schedulerName:</span> default-scheduler<br><span class="hljs-symbol">      securityContext:</span> <span class="hljs-punctuation">&#123;</span><span class="hljs-punctuation">&#125;</span><br><span class="hljs-symbol">      serviceAccount:</span> nwx-fluent-fluent-bit<br><span class="hljs-symbol">      serviceAccountName:</span> nwx-fluent-fluent-bit<br><span class="hljs-symbol">      terminationGracePeriodSeconds:</span> <span class="hljs-number">10</span><br><span class="hljs-symbol">      volumes:</span><br>      - hostPath:<br><span class="hljs-symbol">          path:</span> <span class="hljs-keyword">/var/</span>log<br><span class="hljs-symbol">          type:</span> <span class="hljs-string">&quot;&quot;</span><br><span class="hljs-symbol">        name:</span> varlog<br>      - hostPath:<br><span class="hljs-symbol">          path:</span> <span class="hljs-keyword">/var/</span>lib<span class="hljs-keyword">/docker/</span>containers<br><span class="hljs-symbol">          type:</span> <span class="hljs-string">&quot;&quot;</span><br><span class="hljs-symbol">        name:</span> varlibdockercontainers<br>      - configMap:<br><span class="hljs-symbol">          defaultMode:</span> <span class="hljs-number">420</span><br><span class="hljs-symbol">          name:</span> nwx-fluent-fluent-bit-config<br><span class="hljs-symbol">        name:</span> config<br>      - hostPath:<br><span class="hljs-symbol">          path:</span> <span class="hljs-keyword">/data/</span>nginx<br><span class="hljs-symbol">          type:</span> DirectoryOrCreate<br><span class="hljs-symbol">        name:</span> nginx<br>      - hostPath:<br><span class="hljs-symbol">          path:</span> <span class="hljs-keyword">/data/</span>go<br><span class="hljs-symbol">          type:</span> DirectoryOrCreate<br><span class="hljs-symbol">        name:</span> go<br><span class="hljs-symbol">  updateStrategy:</span><br><span class="hljs-symbol">    rollingUpdate:</span><br><span class="hljs-symbol">      maxUnavailable:</span> <span class="hljs-number">1</span><br><span class="hljs-symbol">    type:</span> RollingUpdate<br></code></pre></td></tr></table></figure><h1 id="在kibana上创建索引检索日志"><a href="#在kibana上创建索引检索日志" class="headerlink" title="在kibana上创建索引检索日志"></a>在kibana上创建索引检索日志</h1><p>将上面的修改和部署都执行后，我们可以到对应的kibana上创建索引去搜索日志，这里我们已经对golang和nignx服务进行访问了，生成了一些日志</p><figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-comment"># 访问golang</span><br><span class="hljs-attribute">for</span> i in &#123;<span class="hljs-number">1</span>..<span class="hljs-number">100</span>&#125;; do curl <span class="hljs-number">172.16.46.161:3000</span>/api/v1; done<br><span class="hljs-attribute">for</span> i in &#123;<span class="hljs-number">1</span>..<span class="hljs-number">1000</span>&#125;; do curl <span class="hljs-number">172.16.46.161:3000</span>/; done<br><br><span class="hljs-comment"># 访问nginx</span><br><span class="hljs-attribute">for</span> i in &#123;<span class="hljs-number">1</span>..<span class="hljs-number">1000</span>&#125;; do curl <span class="hljs-number">106</span>.<span class="hljs-number">55</span>.<span class="hljs-number">216</span>.xx; done<br></code></pre></td></tr></table></figure><p>我们先查看下es的索引，看看nignx和golang的日志索引在不在</p><figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs tap">[root@VM-0-3-centos go]<span class="hljs-comment"># curl 172.16.111.218:9200/_cat/indices</span><br>green open k8s-2020.11.27   nOs7_AthSIGY6j_tODcdfA<span class="hljs-number"> 1 </span>1<span class="hljs-number"> 1393033 </span>0   632mb   316mb<br>green open k8s-2020.11.19   vUvvsjSSQy6r8VQeDSKZgw<span class="hljs-number"> 1 </span>1   <span class="hljs-number"> 6732 </span>0   5.6mb   2.8mb<br>green open nginx-2020.11.27 LGjCjAW4Q3yJnGd-Y-_E8w<span class="hljs-number"> 1 </span>1  <span class="hljs-number"> 12172 </span>0   4.4mb   2.2mb<br>green open k8s-2020.11.20   nQhDsyryS8aMfMwJCRAEKA<span class="hljs-number"> 1 </span>1 <span class="hljs-number"> 103524 </span>0    34mb    17mb<br>green open k8s-2020.11.21   GHlg75nhRYqZTF3Z3p-D2Q<span class="hljs-number"> 1 </span>1 <span class="hljs-number"> 121832 </span>0  37.5mb  18.9mb<br>green open go-2020.11.27    -jrQRrQOTGWxuiibaA-Fjg<span class="hljs-number"> 1 </span>1   <span class="hljs-number"> 5101 </span>0 404.3kb 203.2kb<br>green open k8s-2020.11.22   B0QA301jRsu-Vmc6N4AD3Q<span class="hljs-number"> 1 </span>1  <span class="hljs-number"> 95367 </span>0  29.1mb  14.5mb<br>green open k8s-2020.11.23   fPlbbGFBR3qiZGn4sAdDYQ<span class="hljs-number"> 1 </span>1  <span class="hljs-number"> 67689 </span>0  20.8mb  10.3mb<br>green open .kibana_1        6DW_R-VvTwOlEvp8gISckA<span class="hljs-number"> 1 </span>1      <span class="hljs-number"> 4 </span>0  71.2kb  35.6kb<br>green open k8s-2020.11.24   JHKRDHVWQqmIkvpxMFTa-w<span class="hljs-number"> 1 </span>1 <span class="hljs-number"> 124659 </span>0  43.2mb  21.7mb<br>green open k8s-2020.11.25   JZ8WQTFnSSeOJRcW6mDl8w<span class="hljs-number"> 1 </span>1  <span class="hljs-number"> 66867 </span>0  21.3mb  10.6mb<br>green open k8s-2020.11.26   FEvX7ZJlRammlS3xrqnqTQ<span class="hljs-number"> 1 </span>1 <span class="hljs-number"> 259974 </span>0 175.9mb  87.9mb<br><br></code></pre></td></tr></table></figure><p>这里查看到是有nginx和golang的日志索引的，下面我们去kibana创建一下index</p><p><img src="/img/2020-11-26-fluent_bit-collects-different-business-logs/1.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><p>我们分别创建nginx-*、go-*、k8s-*分配来查询对应的业务日志</p><p>我们golang日志主要是存在2条类型日志“我访问了&#x2F;api&#x2F;v1这个路径”和“我访问了Hello World这个路径”，下面我们去检索下，看看能不能搜到</p><p><img src="/img/2020-11-26-fluent_bit-collects-different-business-logs/2.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><p><img src="/img/2020-11-26-fluent_bit-collects-different-business-logs/3.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><p>生成的日志我们都是可以搜索到的。</p><p>下面我们在49.235.179.157这个机器上对nginx的service进行访问，看看我们在日志能不能获取到49.235.179.157个客户端ip</p><figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">for</span> i in &#123;<span class="hljs-number">1</span>..<span class="hljs-number">1000</span>&#125;; do curl <span class="hljs-number">106</span>.<span class="hljs-number">55</span>.<span class="hljs-number">216</span>.xx; done<br></code></pre></td></tr></table></figure><p><img src="/img/2020-11-26-fluent_bit-collects-different-business-logs/4.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><p>刚刚访问的记录我们也可以早上面搜索到</p><p>k8s的一些系统日志和其他pod日志，我们可以在k8s-*这个索引下进行检索，这里我们搜一下我们部署的es的pod日志</p><p><img src="/img/2020-11-26-fluent_bit-collects-different-business-logs/5.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><p>es的日志我们也可以在kibana上查找到</p><p>到这里，对于日志的采集，我们基本上就结束了，这里我们只要按照上面步骤进行挂载和配置，你就可以通过EFK采集到不同的业务日志，然后可以在kibana进行图标的制作和展示。</p></div><hr><div><div class="post-metas my-3"><div class="post-meta mr-3 d-flex align-items-center"><i class="iconfont icon-category"></i> <span class="category-chains"><span class="category-chain"><a href="/categories/Kubernetes/" class="category-chain-item">Kubernetes</a> <span>></span> <a href="/categories/Kubernetes/Log/" class="category-chain-item">Log</a></span></span></div><div class="post-meta"><i class="iconfont icon-tags"></i> <a href="/tags/Kubernetes/">#Kubernetes</a> <a href="/tags/EFK/">#EFK</a> <a href="/tags/Fluent/">#Fluent</a></div></div><div class="license-box my-3"><div class="license-title"><div>fluent-bit收集不同业务日志</div><div>https://www.niewx.cn/2020/11/26/2020-11-26-fluent_bit-collects-different-business-logs/</div></div><div class="license-meta"><div class="license-meta-item"><div>作者</div><div>VashonNie</div></div><div class="license-meta-item license-meta-date"><div>发布于</div><div>2020年11月26日</div></div><div class="license-meta-item"><div>许可协议</div><div><a target="_blank" href="https://creativecommons.org/licenses/by-nc/4.0/"><span class="hint--top hint--rounded" aria-label="BY - 署名"><i class="iconfont icon-by"></i> </span></a><a target="_blank" href="https://creativecommons.org/licenses/by-nc/4.0/"><span class="hint--top hint--rounded" aria-label="NC - 非商业性使用"><i class="iconfont icon-nc"></i></span></a></div></div></div><div class="license-icon iconfont"></div></div><div class="post-prevnext my-3"><article class="post-prev col-6"><a href="/2020/11/26/2020-11-26-The-externaltrafficpolicy-of-k8s-retains-the-client-source-ip/" title="k8s之externalTrafficPolicy保留客户端源IP"><i class="iconfont icon-arrowleft"></i> <span class="hidden-mobile">k8s之externalTrafficPolicy保留客户端源IP</span> <span class="visible-mobile">上一篇</span></a></article><article class="post-next col-6"><a href="/2020/11/25/2020-11-25-kubectl-access-to-many-clusters/" title="Kubernetes之多集群的访问"><span class="hidden-mobile">Kubernetes之多集群的访问</span> <span class="visible-mobile">下一篇</span> <i class="iconfont icon-arrowright"></i></a></article></div></div><article id="comments" lazyload><div id="valine"></div><script type="text/javascript">Fluid.utils.loadComments("#valine",(function(){Fluid.utils.createScript("https://lib.baomitu.com/valine/1.4.16/Valine.min.js",(function(){var i=Object.assign({appId:"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz",appKey:"TuwIbmst7Q1N12V1EgEfVgDm",path:"window.location.pathname",placeholder:null,avatar:"retro",meta:["nick","mail","link"],requiredFields:[],pageSize:10,lang:"zh-CN",highlight:!1,recordIP:!1,serverURLs:"",emojiCDN:null,emojiMaps:null,enableQQ:!1},{el:"#valine",path:window.location.pathname});new Valine(i),Fluid.utils.waitElementVisible("#valine .vcontent",()=>{var i="#valine .vcontent img:not(.vemoji)";Fluid.plugins.imageCaption(i),Fluid.plugins.fancyBox(i)})}))}))</script><noscript>Please enable JavaScript to view the comments</noscript></article></article></div></div></div><div class="side-col d-none d-lg-block col-lg-2"><aside class="sidebar" style="margin-left:-1rem"><div id="toc"><p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p><div class="toc-body" id="toc-body"></div></div></aside></div></div></div><a id="scroll-top-button" aria-label="TOP" href="#" role="button"><i class="iconfont icon-arrowup" aria-hidden="true"></i></a><div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable modal-lg" role="document"><div class="modal-content"><div class="modal-header text-center"><h4 class="modal-title w-100 font-weight-bold">搜索</h4><button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button></div><div class="modal-body mx-3"><div class="md-form mb-5"><input type="text" id="local-search-input" class="form-control validate"> <label data-error="x" data-success="v" for="local-search-input">关键词</label></div><div class="list-group" id="local-search-result"></div></div></div></div></div></main><footer><div class="footer-inner"><div id="music_div" style="position:fixed;bottom:0;left:30px"><iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width="330" height="110" src="//music.163.com/outchain/player?type=0&id=919444742&auto=1&height=90"></iframe><script src="https://cdn.staticfile.org/jquery/3.3.1/jquery.min.js"></script><script src="/js/musicshow.js"></script></div><div class="footer-content"><a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a><div><span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span><script src="/js/duration.js"></script></div></div><div class="statistics"><span id="leancloud-site-pv-container" style="display:none">总访问量 <span id="leancloud-site-pv"></span> 次 </span><span id="leancloud-site-uv-container" style="display:none">总访客数 <span id="leancloud-site-uv"></span> 人</span></div></div></footer><script src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js"></script><link rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css"><script>NProgress.configure({showSpinner:!1,trickleSpeed:100}),NProgress.start(),window.addEventListener("load",(function(){NProgress.done()}))</script><script src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js"></script><script src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js"></script><script src="/js/events.js"></script><script src="/js/plugins.js"></script><script src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js"></script><script>!function(t,e){var i=Fluid.plugins.typing,n=e.getElementById("subtitle");n&&i&&i(n.getAttribute("data-typed-text"))}(window,document)</script><script defer>var _hmt=_hmt||[];!function(){var e=document.createElement("script");e.src="https://hm.baidu.com/hm.js?bfe4709ccd8c5c9e559c89f4fd0866f3";var t=document.getElementsByTagName("script")[0];t.parentNode.insertBefore(e,t)}()</script><script src="/js/img-lazyload.js"></script><script>Fluid.utils.createScript("https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js",(function(){var t=jQuery("#toc");if(0!==t.length&&window.tocbot){var o=jQuery("#board-ctn").offset().top;window.tocbot.init({tocSelector:"#toc-body",contentSelector:".markdown-body",headingSelector:CONFIG.toc.headingSelector||"h1,h2,h3,h4,h5,h6",linkClass:"tocbot-link",activeLinkClass:"tocbot-active-link",listClass:"tocbot-list",isCollapsedClass:"tocbot-is-collapsed",collapsibleClass:"tocbot-is-collapsible",collapseDepth:CONFIG.toc.collapseDepth||0,scrollSmooth:!0,headingsOffset:-o}),t.find(".toc-list-item").length>0&&t.css("visibility","visible")}}))</script><script>!function(){var e=CONFIG.code_language.enable&&CONFIG.code_language.default,a=CONFIG.copy_btn;if(e||a){var i="";i+='<div class="code-widget">',i+="LANG",i+="</div>",jQuery(".markdown-body pre").each((function(){var n=jQuery(this);if(!(n.find("code.mermaid").length>0||n.find("span.line").length>0)){var t,c="";e&&(c=CONFIG.code_language.default,n[0].children.length>0&&n[0].children[0].classList.length>=2&&n.children().hasClass("hljs")?c=n[0].children[0].classList[1]:n[0].getAttribute("data-language")?c=n[0].getAttribute("data-language"):n.parent().hasClass("sourceCode")&&n[0].children.length>0&&n[0].children[0].classList.length>=2?(c=n[0].children[0].classList[1],n.parent().addClass("code-wrapper")):n.parent().hasClass("markdown-body")&&0===n[0].classList.length&&n.wrap('<div class="code-wrapper"></div>'),c=c.toUpperCase().replace("NONE",CONFIG.code_language.default)),n.append(i.replace("LANG",c).replace('code-widget">',(t=n[0],(Fluid.utils.getBackgroundLightness(t)>=0?"code-widget-light":"code-widget-dark")+(a?' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>':' code-widget">')))),a&&Fluid.utils.createScript("https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js",(function(){new window.ClipboardJS(".copy-btn",{target:function(e){for(var a=e.parentNode.childNodes,i=0;i<a.length;i++)if("CODE"===a[i].tagName)return a[i]}}).on("success",(function(e){e.clearSelection(),e.trigger.innerHTML=e.trigger.innerHTML.replace("icon-copy","icon-success"),setTimeout((function(){e.trigger.innerHTML=e.trigger.innerHTML.replace("icon-success","icon-copy")}),2e3)}))}))}}))}}()</script><script>Fluid.utils.createScript("https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js",(function(){window.anchors.options={placement:CONFIG.anchorjs.placement,visible:CONFIG.anchorjs.visible},CONFIG.anchorjs.icon&&(window.anchors.options.icon=CONFIG.anchorjs.icon);var o=(CONFIG.anchorjs.element||"h1,h2,h3,h4,h5,h6").split(","),n=[];for(var i of o)n.push(".markdown-body > "+i.trim());"left"===CONFIG.anchorjs.placement&&(window.anchors.options.class="anchorjs-link-left"),window.anchors.add(n.join(", "))}))</script><script>Fluid.utils.createScript("https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js",(function(){Fluid.plugins.fancyBox()}))</script><script>Fluid.plugins.imageCaption()</script><script src="/js/local-search.js"></script><script defer src="/js/leancloud.js"></script><script src="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/DynamicRibbon.min.js"></script><script src="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/runtime.min.js"></script><script src="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/love.min.js"></script><script src="/js/boot.js"></script><noscript><div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div></noscript><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/z16.model.json"},"display":{"position":"right","width":180,"height":360},"mobile":{"show":true},"react":{"opacity":0.7},"log":false});</script></body></html>
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="VashonNie">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="我们将服务部署在k8s中，通常需要收集业务日志进行分析，那么现在常用的日志采集是怎么做的呢，一般来说是搭建EFK系统来采集日志，今天我们来说说如何采集k8s中的不同业务日志然后投递到es不同的索引，然后通过kibana进行分析和查看。 对于EFK的搭建，我们这里不做具体的讲解，大家可参考 https:&#x2F;&#x2F;www.niewx.cn&#x2F;2020&#x2F;06&#x2F;10&#x2F;Build-EFK-log-collectio">
+<meta property="og:type" content="article">
+<meta property="og:title" content="fluent-bit收集不同业务日志">
+<meta property="og:url" content="https://www.niewx.cn/2020/11/26/2020-11-26-fluent_bit-collects-different-business-logs/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="我们将服务部署在k8s中，通常需要收集业务日志进行分析，那么现在常用的日志采集是怎么做的呢，一般来说是搭建EFK系统来采集日志，今天我们来说说如何采集k8s中的不同业务日志然后投递到es不同的索引，然后通过kibana进行分析和查看。 对于EFK的搭建，我们这里不做具体的讲解，大家可参考 https:&#x2F;&#x2F;www.niewx.cn&#x2F;2020&#x2F;06&#x2F;10&#x2F;Build-EFK-log-collectio">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-11-26-fluent_bit-collects-different-business-logs/snail-bg.jpg">
+<meta property="article:published_time" content="2020-11-26T06:10:00.000Z">
+<meta property="article:modified_time" content="2020-11-26T06:10:00.000Z">
+<meta property="article:author" content="VashonNie">
+<meta property="article:tag" content="Kubernetes">
+<meta property="article:tag" content="EFK">
+<meta property="article:tag" content="Fluent">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.niewx.cn/img/2020-11-26-fluent_bit-collects-different-business-logs/snail-bg.jpg">
+  
+  
+  <title>fluent-bit收集不同业务日志 - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/shubiao.css">
+<link rel="stylesheet" href="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/scroll.css">
+<link rel="stylesheet" href="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/gradient.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"www.niewx.cn","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>聂伟星</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+	
+	<iframe width="350" scrolling="no" height="20" frameborder="0" allowtransparency="true" src="https://i.tianqi.com?c=code&id=40&color=%23FFFFFF&icon=1&site=12"></iframe>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" target="_self" href="javascript:;" role="button"
+                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="iconfont icon-books"></i>
+                文档
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="https://www.niewx.cn/mybook/">
+                    <i class="iconfont icon-notebook"></i>
+                    运维笔记
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/column/87421">
+                    <i class="iconfont icon-addrbook"></i>
+                    云+社区文档
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="https://www.niewx.cn/question/">
+                    <i class="iconfont icon-notebook"></i>
+                    运维问题集锦
+                  </a>
+                
+              </div>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/playlist/">
+                <i class="iconfont icon-music"></i>
+                音乐
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" target="_self" href="javascript:;" role="button"
+                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="iconfont icon-douban-fill"></i>
+                豆瓣
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="/books">
+                    <i class="iconfont icon-book"></i>
+                    书籍
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="/movies">
+                    <i class="iconfont icon-youtube-fill"></i>
+                    电影
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="/games">
+                    <i class="iconfont icon-switch-fill"></i>
+                    游戏
+                  </a>
+                
+              </div>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="fluent-bit收集不同业务日志"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-author" aria-hidden="true"></i>
+        VashonNie
+      </span>
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2020-11-26 14:10" pubdate>
+          2020年11月26日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          13k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          109 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="leancloud-page-views-container" class="post-meta" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="leancloud-page-views"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">fluent-bit收集不同业务日志</h1>
+            
+            <div class="markdown-body">
+              
+              <p>我们将服务部署在k8s中，通常需要收集业务日志进行分析，那么现在常用的日志采集是怎么做的呢，一般来说是搭建EFK系统来采集日志，今天我们来说说如何采集k8s中的不同业务日志然后投递到es不同的索引，然后通过kibana进行分析和查看。</p>
+<p>对于EFK的搭建，我们这里不做具体的讲解，大家可参考 <a href="https://www.niewx.cn/2020/06/10/Build-EFK-log-collection-system-on-TKE/">https://www.niewx.cn/2020/06/10/Build-EFK-log-collection-system-on-TKE/</a> , 今天我们主要来讲一下如何采集不同业务日志进行分析。</p>
+<p>这里我们一共采集3类日志，分别是nginx日志、golang的日志、以及k8s的系统日志，一般我们采集的业务日志都是将业务日志挂载到节点，然后fluent-bit去采集节点上的日志文件，输出到es，通过kibana展示和查询。</p>
+<h1 id="fluent-bit的部署"><a href="#fluent-bit的部署" class="headerlink" title="fluent-bit的部署"></a>fluent-bit的部署</h1><p>我们这里简单说下fluent-bit的部署,我们通过helm部署。</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs arduino">$ helm install --name my-release stable/fluent-bit<br></code></pre></td></tr></table></figure>
+
+<h1 id="部署应用"><a href="#部署应用" class="headerlink" title="部署应用"></a>部署应用</h1><h2 id="部署nginx"><a href="#部署nginx" class="headerlink" title="部署nginx"></a>部署nginx</h2><p>我们将nginx的日志挂载到节点的&#x2F;data&#x2F;nginx目录下，对应的yaml如下</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">apps/v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Deployment</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">annotations:</span><br>    <span class="hljs-attr">deployment.kubernetes.io/revision:</span> <span class="hljs-string">&quot;1&quot;</span><br>  <span class="hljs-attr">creationTimestamp:</span> <span class="hljs-string">&quot;2020-11-24T02:08:08Z&quot;</span><br>  <span class="hljs-attr">generation:</span> <span class="hljs-number">1</span><br>  <span class="hljs-attr">labels:</span><br>    <span class="hljs-attr">k8s-app:</span> <span class="hljs-string">nginx-log</span><br>    <span class="hljs-attr">qcloud-app:</span> <span class="hljs-string">nginx-log</span><br>  <span class="hljs-attr">managedFields:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">apiVersion:</span> <span class="hljs-string">apps/v1</span><br>    <span class="hljs-attr">manager:</span> <span class="hljs-string">tke-apiserver</span><br>    <span class="hljs-attr">operation:</span> <span class="hljs-string">Update</span><br>    <span class="hljs-attr">time:</span> <span class="hljs-string">&quot;2020-11-24T02:08:08Z&quot;</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">apiVersion:</span> <span class="hljs-string">apps/v1</span><br>    <span class="hljs-attr">manager:</span> <span class="hljs-string">kube-controller-manager</span><br>    <span class="hljs-attr">operation:</span> <span class="hljs-string">Update</span><br>    <span class="hljs-attr">time:</span> <span class="hljs-string">&quot;2020-11-27T03:21:32Z&quot;</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">nginx-log</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">test</span><br>  <span class="hljs-attr">resourceVersion:</span> <span class="hljs-string">&quot;2156061896&quot;</span><br>  <span class="hljs-attr">selfLink:</span> <span class="hljs-string">/apis/apps/v1/namespaces/test/deployments/nginx-log</span><br>  <span class="hljs-attr">uid:</span> <span class="hljs-string">eb42b8f7-97f7-405b-a750-d46df6bcd8c6</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">progressDeadlineSeconds:</span> <span class="hljs-number">600</span><br>  <span class="hljs-attr">replicas:</span> <span class="hljs-number">1</span><br>  <span class="hljs-attr">revisionHistoryLimit:</span> <span class="hljs-number">10</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">matchLabels:</span><br>      <span class="hljs-attr">k8s-app:</span> <span class="hljs-string">nginx-log</span><br>      <span class="hljs-attr">qcloud-app:</span> <span class="hljs-string">nginx-log</span><br>  <span class="hljs-attr">strategy:</span><br>    <span class="hljs-attr">rollingUpdate:</span><br>      <span class="hljs-attr">maxSurge:</span> <span class="hljs-number">1</span><br>      <span class="hljs-attr">maxUnavailable:</span> <span class="hljs-number">0</span><br>    <span class="hljs-attr">type:</span> <span class="hljs-string">RollingUpdate</span><br>  <span class="hljs-attr">template:</span><br>    <span class="hljs-attr">metadata:</span><br>      <span class="hljs-attr">creationTimestamp:</span> <span class="hljs-literal">null</span><br>      <span class="hljs-attr">labels:</span><br>        <span class="hljs-attr">k8s-app:</span> <span class="hljs-string">nginx-log</span><br>        <span class="hljs-attr">qcloud-app:</span> <span class="hljs-string">nginx-log</span><br>    <span class="hljs-attr">spec:</span><br>      <span class="hljs-attr">containers:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">image:</span> <span class="hljs-string">nginx</span><br>        <span class="hljs-attr">imagePullPolicy:</span> <span class="hljs-string">Always</span><br>        <span class="hljs-attr">name:</span> <span class="hljs-string">nginx-log</span><br>        <span class="hljs-attr">resources:</span><br>          <span class="hljs-attr">limits:</span><br>            <span class="hljs-attr">cpu:</span> <span class="hljs-string">500m</span><br>            <span class="hljs-attr">memory:</span> <span class="hljs-string">1Gi</span><br>          <span class="hljs-attr">requests:</span><br>            <span class="hljs-attr">cpu:</span> <span class="hljs-string">250m</span><br>            <span class="hljs-attr">memory:</span> <span class="hljs-string">256Mi</span><br>        <span class="hljs-attr">securityContext:</span><br>          <span class="hljs-attr">privileged:</span> <span class="hljs-literal">false</span><br>        <span class="hljs-attr">terminationMessagePath:</span> <span class="hljs-string">/dev/termination-log</span><br>        <span class="hljs-attr">terminationMessagePolicy:</span> <span class="hljs-string">File</span><br>        <span class="hljs-attr">volumeMounts:</span><br>        <span class="hljs-bullet">-</span> <span class="hljs-attr">mountPath:</span> <span class="hljs-string">/etc/nginx/nginx.conf</span><br>          <span class="hljs-attr">name:</span> <span class="hljs-string">conf</span><br>          <span class="hljs-attr">subPath:</span> <span class="hljs-string">nginx.conf</span><br>        <span class="hljs-bullet">-</span> <span class="hljs-attr">mountPath:</span> <span class="hljs-string">/var/log/nginx</span><br>          <span class="hljs-attr">name:</span> <span class="hljs-string">log</span><br>      <span class="hljs-attr">dnsPolicy:</span> <span class="hljs-string">ClusterFirst</span><br>      <span class="hljs-attr">imagePullSecrets:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">qcloudregistrykey</span><br>      <span class="hljs-attr">restartPolicy:</span> <span class="hljs-string">Always</span><br>      <span class="hljs-attr">schedulerName:</span> <span class="hljs-string">default-scheduler</span><br>      <span class="hljs-attr">securityContext:</span> &#123;&#125;<br>      <span class="hljs-attr">terminationGracePeriodSeconds:</span> <span class="hljs-number">30</span><br>      <span class="hljs-attr">volumes:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">configMap:</span><br>          <span class="hljs-attr">defaultMode:</span> <span class="hljs-number">420</span><br>          <span class="hljs-attr">name:</span> <span class="hljs-string">nginx-conf</span><br>        <span class="hljs-attr">name:</span> <span class="hljs-string">conf</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">hostPath:</span><br>          <span class="hljs-attr">path:</span> <span class="hljs-string">/data/nginx</span><br>          <span class="hljs-attr">type:</span> <span class="hljs-string">DirectoryOrCreate</span><br>        <span class="hljs-attr">name:</span> <span class="hljs-string">log</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="部署golang"><a href="#部署golang" class="headerlink" title="部署golang"></a>部署golang</h2><p>我们将golang的日志文件挂载到节点的&#x2F;data&#x2F;go目录下，对应的yaml如下</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">apps/v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Deployment</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">annotations:</span><br>    <span class="hljs-attr">deployment.kubernetes.io/revision:</span> <span class="hljs-string">&quot;11&quot;</span><br>  <span class="hljs-attr">creationTimestamp:</span> <span class="hljs-string">&quot;2020-11-22T09:30:22Z&quot;</span><br>  <span class="hljs-attr">generation:</span> <span class="hljs-number">11</span><br>  <span class="hljs-attr">labels:</span><br>    <span class="hljs-attr">k8s-app:</span> <span class="hljs-string">go-test</span><br>    <span class="hljs-attr">qcloud-app:</span> <span class="hljs-string">go-test</span><br>  <span class="hljs-attr">managedFields:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">apiVersion:</span> <span class="hljs-string">apps/v1</span><br>    <span class="hljs-attr">manager:</span> <span class="hljs-string">tke-apiserver</span><br>    <span class="hljs-attr">operation:</span> <span class="hljs-string">Update</span><br>    <span class="hljs-attr">time:</span> <span class="hljs-string">&quot;2020-11-27T05:47:59Z&quot;</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">apiVersion:</span> <span class="hljs-string">apps/v1</span><br>    <span class="hljs-attr">manager:</span> <span class="hljs-string">kube-controller-manager</span><br>    <span class="hljs-attr">operation:</span> <span class="hljs-string">Update</span><br>    <span class="hljs-attr">time:</span> <span class="hljs-string">&quot;2020-11-27T05:59:13Z&quot;</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">go-test</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">test</span><br>  <span class="hljs-attr">resourceVersion:</span> <span class="hljs-string">&quot;2161865161&quot;</span><br>  <span class="hljs-attr">selfLink:</span> <span class="hljs-string">/apis/apps/v1/namespaces/test/deployments/go-test</span><br>  <span class="hljs-attr">uid:</span> <span class="hljs-string">b267fe91-c0c7-40a5-94e2-cd1d169576a3</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">progressDeadlineSeconds:</span> <span class="hljs-number">600</span><br>  <span class="hljs-attr">replicas:</span> <span class="hljs-number">1</span><br>  <span class="hljs-attr">revisionHistoryLimit:</span> <span class="hljs-number">10</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">matchLabels:</span><br>      <span class="hljs-attr">k8s-app:</span> <span class="hljs-string">go-test</span><br>      <span class="hljs-attr">qcloud-app:</span> <span class="hljs-string">go-test</span><br>  <span class="hljs-attr">strategy:</span><br>    <span class="hljs-attr">rollingUpdate:</span><br>      <span class="hljs-attr">maxSurge:</span> <span class="hljs-number">1</span><br>      <span class="hljs-attr">maxUnavailable:</span> <span class="hljs-number">0</span><br>    <span class="hljs-attr">type:</span> <span class="hljs-string">RollingUpdate</span><br>  <span class="hljs-attr">template:</span><br>    <span class="hljs-attr">metadata:</span><br>      <span class="hljs-attr">creationTimestamp:</span> <span class="hljs-literal">null</span><br>      <span class="hljs-attr">labels:</span><br>        <span class="hljs-attr">k8s-app:</span> <span class="hljs-string">go-test</span><br>        <span class="hljs-attr">qcloud-app:</span> <span class="hljs-string">go-test</span><br>    <span class="hljs-attr">spec:</span><br>      <span class="hljs-attr">containers:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">image:</span> <span class="hljs-string">nwx-test.tencentcloudcr.com/nwx/go-test:go-20201127</span><br>        <span class="hljs-attr">imagePullPolicy:</span> <span class="hljs-string">Always</span><br>        <span class="hljs-attr">name:</span> <span class="hljs-string">go-test</span><br>        <span class="hljs-attr">resources:</span><br>          <span class="hljs-attr">limits:</span><br>            <span class="hljs-attr">cpu:</span> <span class="hljs-string">100m</span><br>            <span class="hljs-attr">memory:</span> <span class="hljs-string">256Mi</span><br>          <span class="hljs-attr">requests:</span><br>            <span class="hljs-attr">cpu:</span> <span class="hljs-string">100m</span><br>            <span class="hljs-attr">memory:</span> <span class="hljs-string">256Mi</span><br>        <span class="hljs-attr">securityContext:</span><br>          <span class="hljs-attr">privileged:</span> <span class="hljs-literal">false</span><br>        <span class="hljs-attr">terminationMessagePath:</span> <span class="hljs-string">/dev/termination-log</span><br>        <span class="hljs-attr">terminationMessagePolicy:</span> <span class="hljs-string">File</span><br>        <span class="hljs-attr">volumeMounts:</span><br>        <span class="hljs-bullet">-</span> <span class="hljs-attr">mountPath:</span> <span class="hljs-string">/data/</span><br>          <span class="hljs-attr">name:</span> <span class="hljs-string">vol</span><br>      <span class="hljs-attr">dnsPolicy:</span> <span class="hljs-string">ClusterFirst</span><br>      <span class="hljs-attr">restartPolicy:</span> <span class="hljs-string">Always</span><br>      <span class="hljs-attr">schedulerName:</span> <span class="hljs-string">default-scheduler</span><br>      <span class="hljs-attr">securityContext:</span> &#123;&#125;<br>      <span class="hljs-attr">terminationGracePeriodSeconds:</span> <span class="hljs-number">30</span><br>      <span class="hljs-attr">volumes:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">hostPath:</span><br>          <span class="hljs-attr">path:</span> <span class="hljs-string">/data/go</span><br>          <span class="hljs-attr">type:</span> <span class="hljs-string">DirectoryOrCreate</span><br>        <span class="hljs-attr">name:</span> <span class="hljs-string">vol</span><br></code></pre></td></tr></table></figure>
+
+<h1 id="修改fluent-bit的配置文件和yaml"><a href="#修改fluent-bit的配置文件和yaml" class="headerlink" title="修改fluent-bit的配置文件和yaml"></a>修改fluent-bit的配置文件和yaml</h1><h2 id="修改fluent-bit-conf"><a href="#修改fluent-bit-conf" class="headerlink" title="修改fluent-bit.conf"></a>修改fluent-bit.conf</h2><p>这里我们将fluent-bit.conf分成多个配置文件进行配置，你也可以配置到一个fluent-bit.conf</p>
+<h3 id="fluent-bit-conf配置项介绍"><a href="#fluent-bit-conf配置项介绍" class="headerlink" title="fluent-bit.conf配置项介绍"></a>fluent-bit.conf配置项介绍</h3><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br></pre></td><td class="code"><pre><code class="hljs awk"><span class="hljs-comment">#1）fluent-bit-configmap.yaml修改部分（红字）：</span><br><span class="hljs-comment">#红色部分修改成自己想要的index名字</span><br>  output-elasticsearch.conf: |<br>   [OUTPUT]<br>       Name            es<br>       Match           *<br>       Host            <span class="hljs-variable">$&#123;FLUENT_ELASTICSEARCH_HOST&#125;</span><br>       Port            <span class="hljs-variable">$&#123;FLUENT_ELASTICSEARCH_PORT&#125;</span><br>       Logstash_Format On<br>       Replace_Dots    On<br>       Retry_Limit     False<br>       Logstash_Prefix test_k8s<br><span class="hljs-comment">#2）fluent-bit-ds.yaml修改部分：</span><br><span class="hljs-comment">#将FLUENT_ELASTICSEARCH_HOST修改成自己的Elasticsearch地址</span><br> env:<br> - name: FLUENT_ELASTICSEARCH_HOST<br>   value: <span class="hljs-string">&quot;es.haha.com&quot;</span><br> - name: FLUENT_ELASTICSEARCH_PORT<br>   value: <span class="hljs-string">&quot;80&quot;</span><br><br><span class="hljs-comment">#1）fluent-bit-configmap.yaml修改部分（红字）：</span><br><span class="hljs-comment">#红色部分修改成自己想要的index名字</span><br>  output-elasticsearch.conf: |<br>   [OUTPUT]<br>       Name            kafka<br>       Match           *<br>       Brokers         <span class="hljs-variable">$&#123;FLUENT_KAFKA_ADDR&#125;</span><br>       Topics          <span class="hljs-variable">$&#123;FLUENT_KAFKA_TOPIC&#125;</span><br>       Timestamp_Key  @timestamp<br>       Retry_Limit    false<br>       <span class="hljs-comment"># hides errors &quot;Receive failed: Disconnected&quot; when kafka kills idle connections</span><br>       rdkafka.log.connection.close false<br>       <span class="hljs-comment"># producer buffer is not included in http://fluentbit.io/documentation/0.12/configuration/memory_usage.html#estimating</span><br>       rdkafka.queue.buffering.max.kbytes <span class="hljs-number">10240</span><br>       <span class="hljs-comment"># for logs you&#x27;ll probably want this ot be 0 or 1, not more</span><br>       rdkafka.request.required.acks <span class="hljs-number">1</span><br><span class="hljs-comment">#2）fluent-bit-ds.yaml修改部分：</span><br><span class="hljs-comment">#将FLUENT_KAFKA_ADDR修改成自己的Kafka地址</span><br> env:<br> - name: FLUENT_KAFKA_ADDR<br>   value: <span class="hljs-string">&quot;es.haha.com&quot;</span><br> - name: FLUENT_KAFKA_TOPIC<br>   value: <span class="hljs-string">&quot;test_k8s&quot;</span>  <br><br>[SERVICE]<br>    Flush         <span class="hljs-number">1</span> <span class="hljs-comment">#buffer里的数据每隔1秒写到output插件里，这里写到ES里。</span><br>    Log_Level     info <span class="hljs-comment">#fluent-bit的日志级别</span><br>    Daemon        off<br>    Parsers_File  parsers.conf <span class="hljs-comment">#指向了另外一个配置文件，里面配置所有的parser。</span><br>    HTTP_Server   On<br>    HTTP_Listen   <span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span><br>    HTTP_Port     <span class="hljs-number">2020</span><br> <br>[INPUT]<br>    Name              tail <span class="hljs-comment">#指定了input插件的类型，这里是tail类型</span><br>    Tag              &#123;&#123;<span class="hljs-variable">$Host</span>&#125;&#125;_&#123;&#123;<span class="hljs-variable">$ESIndex</span>&#125;&#125;_&#123;&#123;.ContainerName&#125;&#125;_&#123;&#123;<span class="hljs-variable">$i</span>&#125;&#125; <span class="hljs-comment">#给采集的日志打个标签，后面filter和output根据这个标签选择数据源</span><br>    Path              <span class="hljs-regexp">/var/</span>log<span class="hljs-regexp">/pods/</span><span class="hljs-variable">$&#123;POD_UID&#125;</span><span class="hljs-regexp">/&#123;&#123;.ContainerName&#125;&#125;/</span>*.log<br>    Path_Key          filename<br>    Parser            docker<br>    DB                <span class="hljs-regexp">/var/</span>log<span class="hljs-regexp">/pods/</span><span class="hljs-variable">$&#123;POD_UID&#125;</span><span class="hljs-regexp">/&#123;&#123;.ContainerName&#125;&#125;/</span>flb_std.db<span class="hljs-comment">#记录哪个文件采集到哪一行</span><br>    DB.Sync           Full <span class="hljs-comment">#internal SQLite engine用哪种方法同步数据到磁盘，full为安全优先Key</span><br>    Mem_Buf_Limit     <span class="hljs-number">5</span>MB <span class="hljs-comment">#一旦buffer里的数据超过Mem_buf_limit，tail就会暂停采集，直到buffer数据被flush到output</span><br>    Skip_Long_Lines   Off <span class="hljs-comment">#跳过长度大于Buffer_Max_Size的行,默认On,不关闭会出现have long lines.Skipping long lines的错误      </span><br>    Buffer_Chunk_Size <span class="hljs-number">32</span>k <span class="hljs-comment">#tail命令的buffer初始大小，具体作用和对性能的影响还需进一步研究</span><br>    Buffer_Max_Size   <span class="hljs-number">32</span>k <span class="hljs-comment">#tail命令的buffer最大值，具体作用和对性能的影响还需进一步研究</span><br>    Refresh_Interval  <span class="hljs-number">10</span> <span class="hljs-comment">#定时扫描磁盘上的新文件的间隔</span><br>    Rotate_Wait        <span class="hljs-number">5</span> <span class="hljs-comment">#文件rotate后的等待一段时间后再继续监控这个文件，以防flush一些pending data</span><br>    Ignore_Older       <span class="hljs-number">10</span>d <span class="hljs-comment">#忽略近十天来未更改的文件</span><br>[FILTER]<br>    Name                modify <span class="hljs-comment">#插件的类型</span><br>    Match               * <span class="hljs-comment">#匹配到任何数据源</span><br>    Add node_name <span class="hljs-variable">$&#123;NODE_NAME&#125;</span><br>    Add node_ip <span class="hljs-variable">$&#123;NODE_IP&#125;</span><br>    Add pod_name <span class="hljs-variable">$&#123;POD_NAME&#125;</span><br> <br>[OUTPUT]<br>    Name   es <span class="hljs-comment">#插件的类型</span><br>    Match  &#123;&#123;.Host&#125;&#125;_&#123;&#123;.ESIndex&#125;&#125;* <span class="hljs-comment">#匹配到tag为&#123;&#123;.Host&#125;&#125;_&#123;&#123;.ESIndex&#125;&#125;*的数据源</span><br>    Host   &#123;&#123;.HostName&#125;&#125; <span class="hljs-comment">#es的hostname 可以是域名和ip</span><br>    Port   &#123;&#123;.Port&#125;&#125; <span class="hljs-comment">#es的端口</span><br>    Index &#123;&#123;.ESIndex&#125;&#125; <br>    HTTP_User &#123;&#123;.UserName&#125;&#125;<br>    HTTP_Passwd &#123;&#123;.Password&#125;&#125;<br>    Pipeline <span class="hljs-comment">#不要用</span><br>    Logstash_Format  On <span class="hljs-comment">#是否采用类似logstash的index，可以根据时间设置index名字</span><br>    Logstash_Prefix logstash <span class="hljs-comment">#索引名称的前缀</span><br>    Logstash_DateFormat %Y.%m.%d <span class="hljs-comment">#名称后缀格式</span><br>    Time_Key  tail-time <span class="hljs-comment">#Logstash_Format enabled的时候，每条记录会新产生一个时间戳</span><br>    Time_Key_Format %Y-%m-%dT%H:%M:%S <span class="hljs-comment">#新时间戳的格式</span><br>    Generate_ID  On <span class="hljs-comment">#对记录去重，可能有性能消耗。</span><br>    Trace_Output Off <span class="hljs-comment">#打印elasticsearch API calls 调试的时候用。</span><br>    Logstash_Prefix_Key ttt <span class="hljs-comment">#</span><br>    Retry_Limit     <span class="hljs-number">5</span> <span class="hljs-comment">#传输失败后重试次数，默认为2，设置为False时，无限次重试</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="fluent-bit-filter-conf"><a href="#fluent-bit-filter-conf" class="headerlink" title="fluent-bit-filter.conf"></a>fluent-bit-filter.conf</h3><p>日志过滤配置</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs awk">[FILTER]<br>    Name                kubernetes<br>    Match               kube.*<br>    Kube_Tag_Prefix     kube.var.log.containers.<br>    Kube_URL            https:<span class="hljs-regexp">//</span>kubernetes.default.svc:<span class="hljs-number">443</span><br>    Kube_CA_File        <span class="hljs-regexp">/var/</span>run<span class="hljs-regexp">/secrets/</span>kubernetes.io<span class="hljs-regexp">/serviceaccount/</span>ca.crt<br>    Kube_Token_File     <span class="hljs-regexp">/var/</span>run<span class="hljs-regexp">/secrets/</span>kubernetes.io<span class="hljs-regexp">/serviceaccount/</span>token<br>    Merge_Log           On<br>    K8S-Logging.Parser  On<br>    K8S-Logging.Exclude On  <br></code></pre></td></tr></table></figure>
+
+<h3 id="fluent-bit-input-conf"><a href="#fluent-bit-input-conf" class="headerlink" title="fluent-bit-input.conf"></a>fluent-bit-input.conf</h3><p>日志源输入配置</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs bash">[INPUT]<br>    Name              <span class="hljs-built_in">tail</span><br>    Path              /var/log/containers/*.<span class="hljs-built_in">log</span><br>    Parser            docker<br>    Tag               kube.*<br>    Refresh_Interval  5<br>    Mem_Buf_Limit     5MB<br>    Skip_Long_Lines   On<br><br>[INPUT]<br>    Name              <span class="hljs-built_in">tail</span><br>    Path               /data/nginx/*.<span class="hljs-built_in">log</span><br>    Tag               nginx.*<br>    Refresh_Interval  5<br>    Mem_Buf_Limit     5MB<br>    Skip_Long_Lines   On<br><br>[INPUT]<br>    Name              <span class="hljs-built_in">tail</span><br>    Path               /data/go/*.<span class="hljs-built_in">log</span><br>    Tag               go.*<br>    Refresh_Interval  5<br>    Mem_Buf_Limit     5MB<br>    Skip_Long_Lines   On<br></code></pre></td></tr></table></figure>
+<h3 id="fluent-bit-output-conf"><a href="#fluent-bit-output-conf" class="headerlink" title="fluent-bit-output.conf"></a>fluent-bit-output.conf</h3><p>日志投递输出配置</p>
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><code class="hljs crmsh">[OUTPUT]<br>     Name            es<br>     Match           nginx.*<br>     Host            elasticsearch-<span class="hljs-keyword">master</span><br>     <span class="hljs-title">Port</span>            <span class="hljs-number">9200</span><br>     Logstash_Format  On<br>     Logstash_Prefix  nginx<br>     Replace_Dots    On<br>     Retry_Limit     <span class="hljs-literal">False</span><br><br>[OUTPUT]<br>     Name            es<br>     Match           kube.*<br>     Host            elasticsearch-<span class="hljs-keyword">master</span><br>     <span class="hljs-title">Port</span>            <span class="hljs-number">9200</span><br>     Logstash_Format  On<br>     Logstash_Prefix  k8s<br>     Replace_Dots    On<br>     Retry_Limit     <span class="hljs-literal">False</span><br><br><br>[OUTPUT]<br>     Name            es<br>     Match           go.*<br>     Host            elasticsearch-<span class="hljs-keyword">master</span><br>     <span class="hljs-title">Port</span>            <span class="hljs-number">9200</span><br>     Logstash_Format  On<br>     Logstash_Prefix  go<br>     Replace_Dots    On<br>     Retry_Limit     <span class="hljs-literal">False</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="fluent-bit-service-conf"><a href="#fluent-bit-service-conf" class="headerlink" title="fluent-bit-service.conf"></a>fluent-bit-service.conf</h3><p>日志读取配置</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs pgsql">[SERVICE]<br>    Flush        <span class="hljs-number">1</span><br>    Daemon       <span class="hljs-keyword">Off</span><br>    Log_Level    <span class="hljs-keyword">info</span><br>    Parsers_File parsers.conf<br></code></pre></td></tr></table></figure>
+
+<h3 id="fluent-bit-conf"><a href="#fluent-bit-conf" class="headerlink" title="fluent-bit.conf"></a>fluent-bit.conf</h3><p>fluent-bit的配置</p>
+<figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs less"><span class="hljs-variable">@INCLUDE</span> fluent-bit-service.conf<br><span class="hljs-variable">@INCLUDE</span> fluent-bit-input.conf<br><span class="hljs-variable">@INCLUDE</span> fluent-bit-filter.conf<br><span class="hljs-variable">@INCLUDE</span> fluent-bit-output.conf<br></code></pre></td></tr></table></figure>
+
+<h3 id="parsers-conf"><a href="#parsers-conf" class="headerlink" title="parsers.conf"></a>parsers.conf</h3><p>日志转换配置,这里暂未配置</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs">空<br></code></pre></td></tr></table></figure>
+
+<h2 id="修改fluent-bit的daemonset的yaml"><a href="#修改fluent-bit的daemonset的yaml" class="headerlink" title="修改fluent-bit的daemonset的yaml"></a>修改fluent-bit的daemonset的yaml</h2><p>我们在fluent-bit的配置文件中指定了日志源的的采集和输出，但是fluent-bit pod是无法获取节点的日志文件，我们需要将节点的文件挂载到pod进行采集。修改的挂载yaml文件如下,其实就是把&#x2F;data&#x2F;nginx和&#x2F;data&#x2F;go这2个目录挂载到fluent-bit的pod中，当然还有默认的k8s日志采集目录&#x2F;var&#x2F;lib&#x2F;docker&#x2F;containers和系统日志目录&#x2F;var&#x2F;log，只是这2个目录不用我们自己手动修改，默认yaml会配置这2个。</p>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br></pre></td><td class="code"><pre><code class="hljs dts"><span class="hljs-symbol">apiVersion:</span> apps/v1<br><span class="hljs-symbol">kind:</span> DaemonSet<br><span class="hljs-symbol">metadata:</span><br><span class="hljs-symbol">  annotations:</span><br>    deprecated.daemonset.template.generation: <span class="hljs-string">&quot;3&quot;</span><br><span class="hljs-symbol">  creationTimestamp:</span> <span class="hljs-string">&quot;2020-11-24T05:12:12Z&quot;</span><br><span class="hljs-symbol">  generation:</span> <span class="hljs-number">3</span><br><span class="hljs-symbol">  labels:</span><br><span class="hljs-symbol">    app:</span> fluent-bit<br><span class="hljs-symbol">    chart:</span> fluent-bit<span class="hljs-number">-2.8</span><span class="hljs-number">.16</span><br><span class="hljs-symbol">    heritage:</span> Helm<br><span class="hljs-symbol">    release:</span> nwx-fluent<br><span class="hljs-symbol">  managedFields:</span><br>  - apiVersion: apps/v1<br><span class="hljs-symbol">    manager:</span> Go-http-client<br><span class="hljs-symbol">    operation:</span> Update<br><span class="hljs-symbol">    time:</span> <span class="hljs-string">&quot;2020-11-24T05:12:12Z&quot;</span><br>  - apiVersion: apps/v1<br><span class="hljs-symbol">    manager:</span> tke-apiserver<br><span class="hljs-symbol">    operation:</span> Update<br><span class="hljs-symbol">    time:</span> <span class="hljs-string">&quot;2020-11-27T06:28:28Z&quot;</span><br>  - apiVersion: apps/v1<br><span class="hljs-symbol">    manager:</span> kube-controller-manager<br><span class="hljs-symbol">    operation:</span> Update<br><span class="hljs-symbol">    time:</span> <span class="hljs-string">&quot;2020-11-27T06:29:01Z&quot;</span><br><span class="hljs-symbol">  name:</span> nwx-fluent-fluent-bit<br><span class="hljs-symbol">  namespace:</span> log<br><span class="hljs-symbol">  resourceVersion:</span> <span class="hljs-string">&quot;2162960999&quot;</span><br><span class="hljs-symbol">  selfLink:</span> <span class="hljs-keyword">/apis/</span>apps<span class="hljs-keyword">/v1/</span>namespaces<span class="hljs-keyword">/log/</span>daemonsets/nwx-fluent-fluent-bit<br><span class="hljs-symbol">  uid:</span> <span class="hljs-number">62891</span>a61<span class="hljs-number">-809</span>c<span class="hljs-number">-4045</span><span class="hljs-number">-9</span>f34<span class="hljs-number">-4</span>b742cd8cc7c<br><span class="hljs-symbol">spec:</span><br><span class="hljs-symbol">  revisionHistoryLimit:</span> <span class="hljs-number">10</span><br><span class="hljs-symbol">  selector:</span><br><span class="hljs-symbol">    matchLabels:</span><br><span class="hljs-symbol">      app:</span> fluent-bit<br><span class="hljs-symbol">      release:</span> nwx-fluent<br><span class="hljs-symbol">  template:</span><br><span class="hljs-symbol">    metadata:</span><br><span class="hljs-symbol">      annotations:</span><br>        checksum/config: a3e666db2b70ae3c1b8de003ce768a3ed14ff02dd643df16d2d6d2be111d3910<br><span class="hljs-symbol">      creationTimestamp:</span> null<br><span class="hljs-symbol">      labels:</span><br><span class="hljs-symbol">        app:</span> fluent-bit<br><span class="hljs-symbol">        release:</span> nwx-fluent<br><span class="hljs-symbol">    spec:</span><br><span class="hljs-symbol">      containers:</span><br>      - image: fluent/fluent-bit:<span class="hljs-number">1.3</span><span class="hljs-number">.7</span><br><span class="hljs-symbol">        imagePullPolicy:</span> Always<br><span class="hljs-symbol">        name:</span> fluent-bit<br><span class="hljs-symbol">        resources:</span> <span class="hljs-punctuation">&#123;</span><span class="hljs-punctuation">&#125;</span><br><span class="hljs-symbol">        securityContext:</span><br><span class="hljs-symbol">          privileged:</span> false<br><span class="hljs-symbol">        terminationMessagePath:</span> <span class="hljs-keyword">/dev/</span>termination-log<br><span class="hljs-symbol">        terminationMessagePolicy:</span> File<br><span class="hljs-symbol">        volumeMounts:</span><br>        - mountPath: <span class="hljs-keyword">/var/</span>log<br><span class="hljs-symbol">          name:</span> varlog<br>        - mountPath: <span class="hljs-keyword">/var/</span>lib<span class="hljs-keyword">/docker/</span>containers<br><span class="hljs-symbol">          name:</span> varlibdockercontainers<br><span class="hljs-symbol">          readOnly:</span> true<br>        - mountPath: <span class="hljs-keyword">/etc/</span>fluent-bit.conf<br><span class="hljs-symbol">          name:</span> config<br><span class="hljs-symbol">          subPath:</span> fluent-bit.conf<br>        - mountPath: <span class="hljs-keyword">/etc/</span>fluent-bit-service.conf<br><span class="hljs-symbol">          name:</span> config<br><span class="hljs-symbol">          subPath:</span> fluent-bit-service.conf<br>        - mountPath: <span class="hljs-keyword">/etc/</span>fluent-bit-input.conf<br><span class="hljs-symbol">          name:</span> config<br><span class="hljs-symbol">          subPath:</span> fluent-bit-input.conf<br>        - mountPath: <span class="hljs-keyword">/etc/</span>fluent-bit-filter.conf<br><span class="hljs-symbol">          name:</span> config<br><span class="hljs-symbol">          subPath:</span> fluent-bit-filter.conf<br>        - mountPath: <span class="hljs-keyword">/etc/</span>fluent-bit-output.conf<br><span class="hljs-symbol">          name:</span> config<br><span class="hljs-symbol">          subPath:</span> fluent-bit-output.conf<br>        - mountPath: <span class="hljs-keyword">/data/</span>nginx<br><span class="hljs-symbol">          name:</span> nginx<br>        - mountPath: <span class="hljs-keyword">/data/</span>go<br><span class="hljs-symbol">          name:</span> go<br><span class="hljs-symbol">      dnsPolicy:</span> ClusterFirst<br><span class="hljs-symbol">      restartPolicy:</span> Always<br><span class="hljs-symbol">      schedulerName:</span> default-scheduler<br><span class="hljs-symbol">      securityContext:</span> <span class="hljs-punctuation">&#123;</span><span class="hljs-punctuation">&#125;</span><br><span class="hljs-symbol">      serviceAccount:</span> nwx-fluent-fluent-bit<br><span class="hljs-symbol">      serviceAccountName:</span> nwx-fluent-fluent-bit<br><span class="hljs-symbol">      terminationGracePeriodSeconds:</span> <span class="hljs-number">10</span><br><span class="hljs-symbol">      volumes:</span><br>      - hostPath:<br><span class="hljs-symbol">          path:</span> <span class="hljs-keyword">/var/</span>log<br><span class="hljs-symbol">          type:</span> <span class="hljs-string">&quot;&quot;</span><br><span class="hljs-symbol">        name:</span> varlog<br>      - hostPath:<br><span class="hljs-symbol">          path:</span> <span class="hljs-keyword">/var/</span>lib<span class="hljs-keyword">/docker/</span>containers<br><span class="hljs-symbol">          type:</span> <span class="hljs-string">&quot;&quot;</span><br><span class="hljs-symbol">        name:</span> varlibdockercontainers<br>      - configMap:<br><span class="hljs-symbol">          defaultMode:</span> <span class="hljs-number">420</span><br><span class="hljs-symbol">          name:</span> nwx-fluent-fluent-bit-config<br><span class="hljs-symbol">        name:</span> config<br>      - hostPath:<br><span class="hljs-symbol">          path:</span> <span class="hljs-keyword">/data/</span>nginx<br><span class="hljs-symbol">          type:</span> DirectoryOrCreate<br><span class="hljs-symbol">        name:</span> nginx<br>      - hostPath:<br><span class="hljs-symbol">          path:</span> <span class="hljs-keyword">/data/</span>go<br><span class="hljs-symbol">          type:</span> DirectoryOrCreate<br><span class="hljs-symbol">        name:</span> go<br><span class="hljs-symbol">  updateStrategy:</span><br><span class="hljs-symbol">    rollingUpdate:</span><br><span class="hljs-symbol">      maxUnavailable:</span> <span class="hljs-number">1</span><br><span class="hljs-symbol">    type:</span> RollingUpdate<br></code></pre></td></tr></table></figure>
+
+<h1 id="在kibana上创建索引检索日志"><a href="#在kibana上创建索引检索日志" class="headerlink" title="在kibana上创建索引检索日志"></a>在kibana上创建索引检索日志</h1><p>将上面的修改和部署都执行后，我们可以到对应的kibana上创建索引去搜索日志，这里我们已经对golang和nignx服务进行访问了，生成了一些日志</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-comment"># 访问golang</span><br><span class="hljs-attribute">for</span> i in &#123;<span class="hljs-number">1</span>..<span class="hljs-number">100</span>&#125;; do curl <span class="hljs-number">172.16.46.161:3000</span>/api/v1; done<br><span class="hljs-attribute">for</span> i in &#123;<span class="hljs-number">1</span>..<span class="hljs-number">1000</span>&#125;; do curl <span class="hljs-number">172.16.46.161:3000</span>/; done<br><br><span class="hljs-comment"># 访问nginx</span><br><span class="hljs-attribute">for</span> i in &#123;<span class="hljs-number">1</span>..<span class="hljs-number">1000</span>&#125;; do curl <span class="hljs-number">106</span>.<span class="hljs-number">55</span>.<span class="hljs-number">216</span>.xx; done<br></code></pre></td></tr></table></figure>
+
+<p>我们先查看下es的索引，看看nignx和golang的日志索引在不在</p>
+<figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs tap">[root@VM-0-3-centos go]<span class="hljs-comment"># curl 172.16.111.218:9200/_cat/indices</span><br>green open k8s-2020.11.27   nOs7_AthSIGY6j_tODcdfA<span class="hljs-number"> 1 </span>1<span class="hljs-number"> 1393033 </span>0   632mb   316mb<br>green open k8s-2020.11.19   vUvvsjSSQy6r8VQeDSKZgw<span class="hljs-number"> 1 </span>1   <span class="hljs-number"> 6732 </span>0   5.6mb   2.8mb<br>green open nginx-2020.11.27 LGjCjAW4Q3yJnGd-Y-_E8w<span class="hljs-number"> 1 </span>1  <span class="hljs-number"> 12172 </span>0   4.4mb   2.2mb<br>green open k8s-2020.11.20   nQhDsyryS8aMfMwJCRAEKA<span class="hljs-number"> 1 </span>1 <span class="hljs-number"> 103524 </span>0    34mb    17mb<br>green open k8s-2020.11.21   GHlg75nhRYqZTF3Z3p-D2Q<span class="hljs-number"> 1 </span>1 <span class="hljs-number"> 121832 </span>0  37.5mb  18.9mb<br>green open go-2020.11.27    -jrQRrQOTGWxuiibaA-Fjg<span class="hljs-number"> 1 </span>1   <span class="hljs-number"> 5101 </span>0 404.3kb 203.2kb<br>green open k8s-2020.11.22   B0QA301jRsu-Vmc6N4AD3Q<span class="hljs-number"> 1 </span>1  <span class="hljs-number"> 95367 </span>0  29.1mb  14.5mb<br>green open k8s-2020.11.23   fPlbbGFBR3qiZGn4sAdDYQ<span class="hljs-number"> 1 </span>1  <span class="hljs-number"> 67689 </span>0  20.8mb  10.3mb<br>green open .kibana_1        6DW_R-VvTwOlEvp8gISckA<span class="hljs-number"> 1 </span>1      <span class="hljs-number"> 4 </span>0  71.2kb  35.6kb<br>green open k8s-2020.11.24   JHKRDHVWQqmIkvpxMFTa-w<span class="hljs-number"> 1 </span>1 <span class="hljs-number"> 124659 </span>0  43.2mb  21.7mb<br>green open k8s-2020.11.25   JZ8WQTFnSSeOJRcW6mDl8w<span class="hljs-number"> 1 </span>1  <span class="hljs-number"> 66867 </span>0  21.3mb  10.6mb<br>green open k8s-2020.11.26   FEvX7ZJlRammlS3xrqnqTQ<span class="hljs-number"> 1 </span>1 <span class="hljs-number"> 259974 </span>0 175.9mb  87.9mb<br><br></code></pre></td></tr></table></figure>
+
+<p>这里查看到是有nginx和golang的日志索引的，下面我们去kibana创建一下index</p>
+<p><img src="/img/2020-11-26-fluent_bit-collects-different-business-logs/1.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>我们分别创建nginx-*、go-*、k8s-*分配来查询对应的业务日志</p>
+<p>我们golang日志主要是存在2条类型日志“我访问了&#x2F;api&#x2F;v1这个路径”和“我访问了Hello World这个路径”，下面我们去检索下，看看能不能搜到</p>
+<p><img src="/img/2020-11-26-fluent_bit-collects-different-business-logs/2.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2020-11-26-fluent_bit-collects-different-business-logs/3.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>生成的日志我们都是可以搜索到的。</p>
+<p>下面我们在49.235.179.157这个机器上对nginx的service进行访问，看看我们在日志能不能获取到49.235.179.157个客户端ip</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">for</span> i in &#123;<span class="hljs-number">1</span>..<span class="hljs-number">1000</span>&#125;; do curl <span class="hljs-number">106</span>.<span class="hljs-number">55</span>.<span class="hljs-number">216</span>.xx; done<br></code></pre></td></tr></table></figure>
+
+<p><img src="/img/2020-11-26-fluent_bit-collects-different-business-logs/4.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>刚刚访问的记录我们也可以早上面搜索到</p>
+<p>k8s的一些系统日志和其他pod日志，我们可以在k8s-*这个索引下进行检索，这里我们搜一下我们部署的es的pod日志</p>
+<p><img src="/img/2020-11-26-fluent_bit-collects-different-business-logs/5.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>es的日志我们也可以在kibana上查找到</p>
+<p>到这里，对于日志的采集，我们基本上就结束了，这里我们只要按照上面步骤进行挂载和配置，你就可以通过EFK采集到不同的业务日志，然后可以在kibana进行图标的制作和展示。</p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Kubernetes/" class="category-chain-item">Kubernetes</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/Kubernetes/Log/" class="category-chain-item">Log</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Kubernetes/">#Kubernetes</a>
+      
+        <a href="/tags/EFK/">#EFK</a>
+      
+        <a href="/tags/Fluent/">#Fluent</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>fluent-bit收集不同业务日志</div>
+      <div>https://www.niewx.cn/2020/11/26/2020-11-26-fluent_bit-collects-different-business-logs/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>VashonNie</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2020年11月26日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by-nc/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by-nc/4.0/">
+              <span class="hint--top hint--rounded" aria-label="NC - 非商业性使用">
+                <i class="iconfont icon-nc"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2020/11/26/2020-11-26-The-externaltrafficpolicy-of-k8s-retains-the-client-source-ip/" title="k8s之externalTrafficPolicy保留客户端源IP">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">k8s之externalTrafficPolicy保留客户端源IP</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2020/11/25/2020-11-25-kubectl-access-to-many-clusters/" title="Kubernetes之多集群的访问">
+                        <span class="hidden-mobile">Kubernetes之多集群的访问</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <div id="valine"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#valine', function() {
+      Fluid.utils.createScript('https://lib.baomitu.com/valine/1.4.16/Valine.min.js', function() {
+        var options = Object.assign(
+          {"appId":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","appKey":"TuwIbmst7Q1N12V1EgEfVgDm","path":"window.location.pathname","placeholder":null,"avatar":"retro","meta":["nick","mail","link"],"requiredFields":[],"pageSize":10,"lang":"zh-CN","highlight":false,"recordIP":false,"serverURLs":"","emojiCDN":null,"emojiMaps":null,"enableQQ":false},
+          {
+            el: "#valine",
+            path: window.location.pathname
+          }
+        )
+        new Valine(options);
+        Fluid.utils.waitElementVisible('#valine .vcontent', () => {
+          var imgSelector = '#valine .vcontent img:not(.vemoji)';
+          Fluid.plugins.imageCaption(imgSelector);
+          Fluid.plugins.fancyBox(imgSelector);
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+   <div id="music_div" style="position: fixed; bottom: 0px; left: 30px;">
+    <iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=110 
+    	src="//music.163.com/outchain/player?type=0&id=919444742&auto=1&height=90">
+    </iframe>
+    <script src="https://cdn.staticfile.org/jquery/3.3.1/jquery.min.js"></script>
+    <script src="/js/musicshow.js"></script>
+</div>
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> </div>
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="leancloud-site-pv-container" style="display: none">
+        总访问量 
+        <span id="leancloud-site-pv"></span>
+         次
+      </span>
+    
+    
+      <span id="leancloud-site-uv-container" style="display: none">
+        总访客数 
+        <span id="leancloud-site-uv"></span>
+         人
+      </span>
+    
+    
+
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?bfe4709ccd8c5c9e559c89f4fd0866f3";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="/js/leancloud.js" ></script>
+
+
+
+
+  
+<script src="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/DynamicRibbon.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/runtime.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/love.min.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/z16.model.json"},"display":{"position":"right","width":180,"height":360},"mobile":{"show":true},"react":{"opacity":0.7},"log":false});</script></body>
+</html>

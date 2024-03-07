@@ -1,1 +1,961 @@
-<!DOCTYPE html><html lang="zh-CN" data-default-color-scheme="auto"><head><meta charset="UTF-8"><link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png"><link rel="icon" href="/img/fluid.png"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,shrink-to-fit=no"><meta http-equiv="x-ua-compatible" content="ie=edge"><meta name="theme-color" content="#2f4154"><meta name="author" content="VashonNie"><meta name="keywords" content=""><meta name="description" content="本章我们来讲一下如何在TKE上搭建jenkins这个CI&#x2F;CD工具，这边我们在进行构建的时候可以自动生成一个slave pod来进行走流水线，流水线跑完之后会自动销毁。 部署jenkins的rbac权限12345678910111213141516171819202122232425262728293031323334353637383940414243444546[root@VM_0_"><meta property="og:type" content="article"><meta property="og:title" content="TKE上动态部署jenkins slaves"><meta property="og:url" content="https://www.niewx.cn/2020/08/18/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/index.html"><meta property="og:site_name" content="Hexo"><meta property="og:description" content="本章我们来讲一下如何在TKE上搭建jenkins这个CI&#x2F;CD工具，这边我们在进行构建的时候可以自动生成一个slave pod来进行走流水线，流水线跑完之后会自动销毁。 部署jenkins的rbac权限12345678910111213141516171819202122232425262728293031323334353637383940414243444546[root@VM_0_"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://www.niewx.cn/img/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/snail-bg.jpg"><meta property="article:published_time" content="2020-08-18T06:10:00.000Z"><meta property="article:modified_time" content="2020-08-18T06:10:00.000Z"><meta property="article:author" content="VashonNie"><meta property="article:tag" content="Kubernetes"><meta property="article:tag" content="TKE"><meta property="article:tag" content="Jenkins"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://www.niewx.cn/img/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/snail-bg.jpg"><title>TKE上动态部署jenkins slaves - Hexo</title><link rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css"><link rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css"><link rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css"><link rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css"><link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css"><link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css"><link rel="stylesheet" href="/css/main.css"><link id="highlight-css" rel="stylesheet" href="/css/highlight.css"><link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/shubiao.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/scroll.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/gradient.css"><script id="fluid-configs">var Fluid=window.Fluid||{},CONFIG={hostname:"www.niewx.cn",root:"/",version:"1.8.14",typing:{enable:!0,typeSpeed:70,cursorChar:"_",loop:!1,scope:[]},anchorjs:{enable:!0,element:"h1,h2,h3,h4,h5,h6",placement:"left",visible:"hover",icon:""},progressbar:{enable:!0,height_px:3,color:"#29d",options:{showSpinner:!1,trickleSpeed:100}},code_language:{enable:!0,default:"TEXT"},copy_btn:!0,image_caption:{enable:!0},image_zoom:{enable:!0,img_url_replace:["",""]},toc:{enable:!0,placement:"right",headingSelector:"h1,h2,h3,h4,h5,h6",collapseDepth:0},lazyload:{enable:!0,loading_img:"/img/loading.gif",onlypost:!1,offset_factor:2},web_analytics:{enable:!0,baidu:"bfe4709ccd8c5c9e559c89f4fd0866f3",google:null,gtag:null,tencent:{sid:null,cid:null},woyaola:null,cnzz:null,leancloud:{app_id:"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz",app_key:"TuwIbmst7Q1N12V1EgEfVgDm",server_url:null,path:"window.location.pathname",ignore_local:!1}},search_path:"/local-search.xml"}</script><script src="/js/utils.js"></script><script src="/js/color-schema.js"></script><meta name="generator" content="Hexo 6.1.0"></head><body><header><div class="header-inner" style="height:70vh"><nav id="navbar" class="navbar fixed-top navbar-expand-lg navbar-dark scrolling-navbar"><div class="container"><a class="navbar-brand" href="/"><strong>聂伟星</strong> </a><button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><div class="animated-icon"><span></span><span></span><span></span></div></button><iframe width="350" scrolling="no" height="20" frameborder="0" allowtransparency="true" src="https://i.tianqi.com?c=code&id=40&color=%23FFFFFF&icon=1&site=12"></iframe><div class="collapse navbar-collapse" id="navbarSupportedContent"><ul class="navbar-nav ml-auto text-center"><li class="nav-item"><a class="nav-link" href="/"><i class="iconfont icon-home-fill"></i> 首页</a></li><li class="nav-item"><a class="nav-link" href="/archives/"><i class="iconfont icon-archive-fill"></i> 归档</a></li><li class="nav-item"><a class="nav-link" href="/categories/"><i class="iconfont icon-category-fill"></i> 分类</a></li><li class="nav-item"><a class="nav-link" href="/tags/"><i class="iconfont icon-tags-fill"></i> 标签</a></li><li class="nav-item"><a class="nav-link" href="/about/"><i class="iconfont icon-user-fill"></i> 关于</a></li><li class="nav-item"><a class="nav-link" href="/links/"><i class="iconfont icon-link-fill"></i> 友链</a></li><li class="nav-item dropdown"><a class="nav-link dropdown-toggle" target="_self" href="javascript:;" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="iconfont icon-books"></i> 文档</a><div class="dropdown-menu" aria-labelledby="navbarDropdown"><a class="dropdown-item" href="https://www.niewx.cn/mybook/"><i class="iconfont icon-notebook"></i> 运维笔记 </a><a class="dropdown-item" target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/column/87421"><i class="iconfont icon-addrbook"></i> 云+社区文档 </a><a class="dropdown-item" href="https://www.niewx.cn/question/"><i class="iconfont icon-notebook"></i> 运维问题集锦</a></div></li><li class="nav-item"><a class="nav-link" href="/playlist/"><i class="iconfont icon-music"></i> 音乐</a></li><li class="nav-item dropdown"><a class="nav-link dropdown-toggle" target="_self" href="javascript:;" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="iconfont icon-douban-fill"></i> 豆瓣</a><div class="dropdown-menu" aria-labelledby="navbarDropdown"><a class="dropdown-item" href="/books"><i class="iconfont icon-book"></i> 书籍 </a><a class="dropdown-item" href="/movies"><i class="iconfont icon-youtube-fill"></i> 电影 </a><a class="dropdown-item" href="/games"><i class="iconfont icon-switch-fill"></i> 游戏</a></div></li><li class="nav-item" id="search-btn"><a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">&nbsp;<i class="iconfont icon-search"></i>&nbsp;</a></li><li class="nav-item" id="color-toggle-btn"><a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a></li></ul></div></div></nav><div id="banner" class="banner" parallax="true" style="background:url(/img/default.png) no-repeat center center;background-size:cover"><div class="full-bg-img"><div class="mask flex-center" style="background-color:rgba(0,0,0,.3)"><div class="banner-text text-center fade-in-up"><div class="h2"><span id="subtitle" data-typed-text="TKE上动态部署jenkins slaves"></span></div><div class="mt-3"><span class="post-meta mr-2"><i class="iconfont icon-author" aria-hidden="true"></i> VashonNie </span><span class="post-meta"><i class="iconfont icon-date-fill" aria-hidden="true"></i> <time datetime="2020-08-18 14:10" pubdate>2020年8月18日 下午</time></span></div><div class="mt-1"><span class="post-meta mr-2"><i class="iconfont icon-chart"></i>5.2k 字 </span><span class="post-meta mr-2"><i class="iconfont icon-clock-fill"></i>44 分钟 </span><span id="leancloud-page-views-container" class="post-meta" style="display:none"><i class="iconfont icon-eye" aria-hidden="true"></i> <span id="leancloud-page-views"></span> 次</span></div></div></div></div></div></div></header><main><div class="container-fluid nopadding-x"><div class="row nomargin-x"><div class="side-col d-none d-lg-block col-lg-2"></div><div class="col-lg-8 nopadding-x-md"><div class="container nopadding-x-md" id="board-ctn"><div id="board"><article class="post-content mx-auto"><h1 style="display:none">TKE上动态部署jenkins slaves</h1><div class="markdown-body"><p>本章我们来讲一下如何在TKE上搭建jenkins这个CI&#x2F;CD工具，这边我们在进行构建的时候可以自动生成一个slave pod来进行走流水线，流水线跑完之后会自动销毁。</p><h1 id="部署jenkins的rbac权限"><a href="#部署jenkins的rbac权限" class="headerlink" title="部署jenkins的rbac权限"></a>部署jenkins的rbac权限</h1><figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><code class="hljs dts">[root@VM_0_13_centos jenkins]<span class="hljs-meta"># cat rbac.yaml</span><br><span class="hljs-symbol">apiVersion:</span> v1<br><span class="hljs-symbol">kind:</span> ServiceAccount<br><span class="hljs-symbol">metadata:</span><br><span class="hljs-symbol">  name:</span> jenkins2<br><span class="hljs-symbol">  namespace:</span> jenkins<br><br>---<br><span class="hljs-symbol"></span><br><span class="hljs-symbol">kind:</span> ClusterRole<br><span class="hljs-symbol">apiVersion:</span> rbac.authorization.k8s.io/v1beta1<br><span class="hljs-symbol">metadata:</span><br><span class="hljs-symbol">  name:</span> jenkins2<br><span class="hljs-symbol">rules:</span><br>  - apiGroups: [<span class="hljs-string">&quot;extensions&quot;</span>, <span class="hljs-string">&quot;apps&quot;</span>]<br><span class="hljs-symbol">    resources:</span> [<span class="hljs-string">&quot;deployments&quot;</span>]<br><span class="hljs-symbol">    verbs:</span> [<span class="hljs-string">&quot;create&quot;</span>, <span class="hljs-string">&quot;delete&quot;</span>, <span class="hljs-string">&quot;get&quot;</span>, <span class="hljs-string">&quot;list&quot;</span>, <span class="hljs-string">&quot;watch&quot;</span>, <span class="hljs-string">&quot;patch&quot;</span>, <span class="hljs-string">&quot;update&quot;</span>]<br>  - apiGroups: [<span class="hljs-string">&quot;&quot;</span>]<br><span class="hljs-symbol">    resources:</span> [<span class="hljs-string">&quot;services&quot;</span>]<br><span class="hljs-symbol">    verbs:</span> [<span class="hljs-string">&quot;create&quot;</span>, <span class="hljs-string">&quot;delete&quot;</span>, <span class="hljs-string">&quot;get&quot;</span>, <span class="hljs-string">&quot;list&quot;</span>, <span class="hljs-string">&quot;watch&quot;</span>, <span class="hljs-string">&quot;patch&quot;</span>, <span class="hljs-string">&quot;update&quot;</span>]<br>  - apiGroups: [<span class="hljs-string">&quot;&quot;</span>]<br><span class="hljs-symbol">    resources:</span> [<span class="hljs-string">&quot;pods&quot;</span>]<br><span class="hljs-symbol">    verbs:</span> [<span class="hljs-string">&quot;create&quot;</span>,<span class="hljs-string">&quot;delete&quot;</span>,<span class="hljs-string">&quot;get&quot;</span>,<span class="hljs-string">&quot;list&quot;</span>,<span class="hljs-string">&quot;patch&quot;</span>,<span class="hljs-string">&quot;update&quot;</span>,<span class="hljs-string">&quot;watch&quot;</span>]<br>  - apiGroups: [<span class="hljs-string">&quot;&quot;</span>]<br><span class="hljs-symbol">    resources:</span> [<span class="hljs-string">&quot;pods/exec&quot;</span>]<br><span class="hljs-symbol">    verbs:</span> [<span class="hljs-string">&quot;create&quot;</span>,<span class="hljs-string">&quot;delete&quot;</span>,<span class="hljs-string">&quot;get&quot;</span>,<span class="hljs-string">&quot;list&quot;</span>,<span class="hljs-string">&quot;patch&quot;</span>,<span class="hljs-string">&quot;update&quot;</span>,<span class="hljs-string">&quot;watch&quot;</span>]<br>  - apiGroups: [<span class="hljs-string">&quot;&quot;</span>]<br><span class="hljs-symbol">    resources:</span> [<span class="hljs-string">&quot;pods/log&quot;</span>]<br><span class="hljs-symbol">    verbs:</span> [<span class="hljs-string">&quot;get&quot;</span>,<span class="hljs-string">&quot;list&quot;</span>,<span class="hljs-string">&quot;watch&quot;</span>]<br>  - apiGroups: [<span class="hljs-string">&quot;&quot;</span>]<br><span class="hljs-symbol">    resources:</span> [<span class="hljs-string">&quot;secrets&quot;</span>]<br><span class="hljs-symbol">    verbs:</span> [<span class="hljs-string">&quot;get&quot;</span>]<br><br>---<br><span class="hljs-symbol">apiVersion:</span> rbac.authorization.k8s.io/v1beta1<br><span class="hljs-symbol">kind:</span> ClusterRoleBinding<br><span class="hljs-symbol">metadata:</span><br><span class="hljs-symbol">  name:</span> jenkins2<br><span class="hljs-symbol">roleRef:</span><br><span class="hljs-symbol">  apiGroup:</span> rbac.authorization.k8s.io<br><span class="hljs-symbol">  kind:</span> ClusterRole<br><span class="hljs-symbol">  name:</span> jenkins2<br><span class="hljs-symbol">subjects:</span><br>  - kind: ServiceAccount<br><span class="hljs-symbol">    name:</span> jenkins2<br><span class="hljs-symbol">    namespace:</span> jenkins<br></code></pre></td></tr></table></figure><h1 id="创建pvc进行jenkins的数据持久化"><a href="#创建pvc进行jenkins的数据持久化" class="headerlink" title="创建pvc进行jenkins的数据持久化"></a>创建pvc进行jenkins的数据持久化</h1><p>这边通过cbs卷挂载jenkins的数据</p><p><img src="/img/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/1.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><h1 id="部署jenkins的应用"><a href="#部署jenkins的应用" class="headerlink" title="部署jenkins的应用"></a>部署jenkins的应用</h1><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-meta">---</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">extensions/v1beta1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Deployment</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">jenkins2</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">kube-ops</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">template:</span><br>    <span class="hljs-attr">metadata:</span><br>      <span class="hljs-attr">labels:</span><br>        <span class="hljs-attr">app:</span> <span class="hljs-string">jenkins2</span><br>    <span class="hljs-attr">spec:</span><br>      <span class="hljs-attr">terminationGracePeriodSeconds:</span> <span class="hljs-number">10</span><br>      <span class="hljs-attr">serviceAccountName:</span> <span class="hljs-string">jenkins2</span><br>      <span class="hljs-attr">containers:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">jenkins</span><br>        <span class="hljs-attr">image:</span> <span class="hljs-string">jenkins/jenkins:lts</span><br>        <span class="hljs-attr">imagePullPolicy:</span> <span class="hljs-string">IfNotPresent</span><br>        <span class="hljs-attr">ports:</span><br>        <span class="hljs-bullet">-</span> <span class="hljs-attr">containerPort:</span> <span class="hljs-number">8080</span><br>          <span class="hljs-attr">name:</span> <span class="hljs-string">web</span><br>          <span class="hljs-attr">protocol:</span> <span class="hljs-string">TCP</span><br>        <span class="hljs-bullet">-</span> <span class="hljs-attr">containerPort:</span> <span class="hljs-number">50000</span><br>          <span class="hljs-attr">name:</span> <span class="hljs-string">agent</span><br>          <span class="hljs-attr">protocol:</span> <span class="hljs-string">TCP</span><br>        <span class="hljs-attr">resources:</span><br>          <span class="hljs-attr">limits:</span><br>            <span class="hljs-attr">cpu:</span> <span class="hljs-string">1000m</span><br>            <span class="hljs-attr">memory:</span> <span class="hljs-string">1Gi</span><br>          <span class="hljs-attr">requests:</span><br>            <span class="hljs-attr">cpu:</span> <span class="hljs-string">500m</span><br>            <span class="hljs-attr">memory:</span> <span class="hljs-string">512Mi</span><br>        <span class="hljs-attr">livenessProbe:</span><br>          <span class="hljs-attr">httpGet:</span><br>            <span class="hljs-attr">path:</span> <span class="hljs-string">/login</span><br>            <span class="hljs-attr">port:</span> <span class="hljs-number">8080</span><br>          <span class="hljs-attr">initialDelaySeconds:</span> <span class="hljs-number">60</span><br>          <span class="hljs-attr">timeoutSeconds:</span> <span class="hljs-number">5</span><br>          <span class="hljs-attr">failureThreshold:</span> <span class="hljs-number">12</span><br>        <span class="hljs-attr">readinessProbe:</span><br>          <span class="hljs-attr">httpGet:</span><br>            <span class="hljs-attr">path:</span> <span class="hljs-string">/login</span><br>            <span class="hljs-attr">port:</span> <span class="hljs-number">8080</span><br>          <span class="hljs-attr">initialDelaySeconds:</span> <span class="hljs-number">60</span><br>          <span class="hljs-attr">timeoutSeconds:</span> <span class="hljs-number">5</span><br>          <span class="hljs-attr">failureThreshold:</span> <span class="hljs-number">12</span><br>        <span class="hljs-attr">volumeMounts:</span><br>        <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">jenkinshome</span><br>          <span class="hljs-attr">subPath:</span> <span class="hljs-string">jenkins2</span><br>          <span class="hljs-attr">mountPath:</span> <span class="hljs-string">/var/jenkins_home</span><br>      <span class="hljs-attr">securityContext:</span><br>        <span class="hljs-attr">fsGroup:</span> <span class="hljs-number">1000</span><br>      <span class="hljs-attr">volumes:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">jenkinshome</span><br>        <span class="hljs-attr">persistentVolumeClaim:</span><br>          <span class="hljs-attr">claimName:</span> <span class="hljs-string">opspvc</span><br><br><span class="hljs-meta">---</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Service</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">jenkins2</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">kube-ops</span><br>  <span class="hljs-attr">labels:</span><br>    <span class="hljs-attr">app:</span> <span class="hljs-string">jenkins2</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">app:</span> <span class="hljs-string">jenkins2</span><br>  <span class="hljs-attr">type:</span> <span class="hljs-string">NodePort</span><br>  <span class="hljs-attr">ports:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">web</span><br>    <span class="hljs-attr">port:</span> <span class="hljs-number">8080</span><br>    <span class="hljs-attr">targetPort:</span> <span class="hljs-string">web</span><br>    <span class="hljs-attr">nodePort:</span> <span class="hljs-number">30002</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">agent</span><br>    <span class="hljs-attr">port:</span> <span class="hljs-number">50000</span><br>    <span class="hljs-attr">targetPort:</span> <span class="hljs-string">agent</span><br></code></pre></td></tr></table></figure><h1 id="采用treafik暴露域名给jenkins"><a href="#采用treafik暴露域名给jenkins" class="headerlink" title="采用treafik暴露域名给jenkins"></a>采用treafik暴露域名给jenkins</h1><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-meta">---</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">traefik.containo.us/v1alpha1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">IngressRoute</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">jenkins</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">jenkins</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">entryPoints:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-string">web</span><br>  <span class="hljs-attr">routes:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">match:</span> <span class="hljs-string">Host(`jenkins.tx.niewx.club`)</span><br>    <span class="hljs-attr">kind:</span> <span class="hljs-string">Rule</span><br>    <span class="hljs-attr">services:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">jenkins2</span><br>      <span class="hljs-attr">port:</span> <span class="hljs-number">8080</span><br></code></pre></td></tr></table></figure><h1 id="访问初始化jenkins"><a href="#访问初始化jenkins" class="headerlink" title="访问初始化jenkins"></a>访问初始化jenkins</h1><p>查看登录的初始密码，然后安装好推荐的插件，安装好之后配置账号，直接登录即可。</p><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs awk">cat <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/jenkins/</span>secrets/initialAdminPassword<br></code></pre></td></tr></table></figure><p><img src="/img/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/2.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><h1 id="安装Kubernetes-plugin-插件"><a href="#安装Kubernetes-plugin-插件" class="headerlink" title="安装Kubernetes-plugin 插件"></a>安装Kubernetes-plugin 插件</h1><p>我这边已经安装好了，可以选择可选插件输入Kubernetes搜索找到插件进行安装</p><p><img src="/img/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/3.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><h1 id="连接TKE集群"><a href="#连接TKE集群" class="headerlink" title="连接TKE集群"></a>连接TKE集群</h1><p>在“系统配置”面板最下方，选择“云”模块下的【新增一个云】&gt;【Kubernetes】。如下图所示</p><p>对应的证书文件和token以及api地址可以从TKE集群中节点上的下面文件获取</p><p>集群证书获取</p><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs awk">[root@VM_1_4_centos ~]<span class="hljs-comment"># cat /etc/kubernetes/cluster-ca.crt</span><br>-----<span class="hljs-keyword">BEGIN</span> CERTIFICATE-----<br>MIICyDCCAbCgAwIBAgIBADANBgkqhkiG9w0BAQsFADAVMRMwEQYDVQQDEwprdWJl<br>cm5ldGVzMB4XDTIwMDYwMjAzMTYzNVoXDTMwMDUzMTAzMTYzNVowFTETMBEGA1UE<br>AxMKa3ViZXJuZXRlczCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANmh<br>Z<span class="hljs-regexp">/tm6Ej66vNgkcRk4zirSGpoLpHaofq/</span>q9eOE8zLr+QfzwNlDImeNfpX<span class="hljs-regexp">/OG/</span>atz2<br>bl6DY4kAt7CsHUVs60leCIs1PZHY212vevlL/nWceLHqVeskynwT4xwJKI48DnwM<br>UgABoXTqm3S2k02CRJcm0Ucx1pw+E0l0Cy/hJcEwa8kFaqsskHqL1jHhRGB4ENGO<br><span class="hljs-number">6</span>ocjEzZstZdjv1Ab1WoOmHhvvI3mT4Gqb1BSd3BFqlu0id1wJvIXuood0bYDTXSD<br>KHHKZFOnrxwFFAg3ZxmrFDkfqfmILV0dcA4KKW/<span class="hljs-number">1</span>q0g7+XepM2gZrrbwMAjVaOpH<br>vPUEaLn<span class="hljs-regexp">/kJ1LSUNz09UCAwEAAaMjMCEwDgYDVR0PAQH/</span>BAQDAgKUMA8GA1UdEwEB<br>/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBAC6jddY1Y5ofHZkthZu8Hj2Op36q<br>kY9pv1fpexcPXtcRuxgw6+mQjEzKraEDoDYdX/DkHkuYVulWl6Sqv+P9WRY+hLzH<br>/K+GHh4uuuIlL+C6Uk1nV0clrznv+CqXKY9AZ8sY+x6l9d3hIxaDxwKWDfzJe2sU<br>zMJZsbxyy4wIkwlG5+<span class="hljs-number">1</span>lSD3YYRo1TooYGeFELD0OdGMrH9XRP0E/<span class="hljs-number">6</span>Q5XdRBecH54<br>JA6Tj4vXI2SgOX4MWR47FFI7agBgATiOLLYGVcRqzf6rK/QFbOnT1R1JAR4=<br>-----<span class="hljs-keyword">END</span> CERTIFICATE-----<br></code></pre></td></tr></table></figure><p>apiserver地址和token</p><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs yaml">[<span class="hljs-string">root@VM_1_4_centos</span> <span class="hljs-string">~</span>]<span class="hljs-comment"># cat .kube/config</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span><br><span class="hljs-attr">clusters:</span><br><span class="hljs-bullet">-</span> <span class="hljs-attr">cluster:</span><br>    <span class="hljs-attr">certificate-authority-data:</span> <span class="hljs-string">LS0tLS1CRUdJNDQWJD....</span><br>    <span class="hljs-attr">server:</span> <span class="hljs-string">https://169.xx.xx.xx:60002</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">local</span><br><span class="hljs-attr">contexts:</span><br><span class="hljs-bullet">-</span> <span class="hljs-attr">context:</span><br>    <span class="hljs-attr">cluster:</span> <span class="hljs-string">local</span><br>    <span class="hljs-attr">user:</span> <span class="hljs-string">admin</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">master</span><br><span class="hljs-attr">current-context:</span> <span class="hljs-string">master</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Config</span><br><span class="hljs-attr">preferences:</span> &#123;&#125;<br><span class="hljs-attr">users:</span><br><span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">admin</span><br>  <span class="hljs-attr">user:</span><br>    <span class="hljs-attr">token:</span> <span class="hljs-string">MUrM6Aj4qwgKKjwF....</span><br></code></pre></td></tr></table></figure><p>将上述获取的填入集群配置</p><p><img src="/img/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/4.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><p>其他配置如下图所示，我们jenkins的master采用的hosts模式，所以这边直接用节点的8080端口</p><p><img src="/img/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/5.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><p>slave 的 pod的配置如下</p><p><img src="/img/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/6.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><p><img src="/img/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/7.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><h1 id="创建测试项目进行构建"><a href="#创建测试项目进行构建" class="headerlink" title="创建测试项目进行构建"></a>创建测试项目进行构建</h1><p><img src="/img/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/8.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><p><img src="/img/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/9.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs routeros">echo <span class="hljs-string">&quot;测试 Kubernetes 动态生成 jenkins slave&quot;</span><br>echo <span class="hljs-string">&quot;==============docker in docker===========&quot;</span><br>docker <span class="hljs-built_in">info</span><br><br>echo <span class="hljs-string">&quot;=============kubectl=============&quot;</span><br>kubectl <span class="hljs-built_in">get</span> pods<br></code></pre></td></tr></table></figure><h1 id="执行任务构建"><a href="#执行任务构建" class="headerlink" title="执行任务构建"></a>执行任务构建</h1><p>执行构建会自动生成一个slave pod，执行任务结束后会自动删除掉</p><p><img src="/img/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/10.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs sql">[root<span class="hljs-variable">@VM</span>_1_4_centos <span class="hljs-operator">~</span>]# kubectl <span class="hljs-keyword">get</span> pod <span class="hljs-operator">-</span>n jenkins<br>NAME                        READY   STATUS    RESTARTS   AGE<br>jenkins2<span class="hljs-number">-574678</span>b486<span class="hljs-number">-8</span>r4qz   <span class="hljs-number">1</span><span class="hljs-operator">/</span><span class="hljs-number">1</span>     <span class="hljs-keyword">Running</span>   <span class="hljs-number">0</span>          <span class="hljs-number">2</span>d5h<br>jnlp<span class="hljs-number">-7</span>zv3k                  <span class="hljs-number">1</span><span class="hljs-operator">/</span><span class="hljs-number">1</span>     <span class="hljs-keyword">Running</span>   <span class="hljs-number">0</span>          <span class="hljs-number">14</span>s<br></code></pre></td></tr></table></figure><p><img src="/img/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/11.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><p><img src="/img/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/12.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><h1 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h1><p><a target="_blank" rel="noopener" href="https://www.qikqiak.com/post/kubernetes-jenkins1/">https://www.qikqiak.com/post/kubernetes-jenkins1/</a></p><p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/document/product/457/41396">https://cloud.tencent.com/document/product/457/41396</a></p></div><hr><div><div class="post-metas my-3"><div class="post-meta mr-3 d-flex align-items-center"><i class="iconfont icon-category"></i> <span class="category-chains"><span class="category-chain"><a href="/categories/TKE/" class="category-chain-item">TKE</a> <span>></span> <a href="/categories/TKE/Kubernetes/" class="category-chain-item">Kubernetes</a> <span>></span> <a href="/categories/TKE/Kubernetes/Devops/" class="category-chain-item">Devops</a></span></span></div><div class="post-meta"><i class="iconfont icon-tags"></i> <a href="/tags/Kubernetes/">#Kubernetes</a> <a href="/tags/TKE/">#TKE</a> <a href="/tags/Jenkins/">#Jenkins</a></div></div><div class="license-box my-3"><div class="license-title"><div>TKE上动态部署jenkins slaves</div><div>https://www.niewx.cn/2020/08/18/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/</div></div><div class="license-meta"><div class="license-meta-item"><div>作者</div><div>VashonNie</div></div><div class="license-meta-item license-meta-date"><div>发布于</div><div>2020年8月18日</div></div><div class="license-meta-item"><div>许可协议</div><div><a target="_blank" href="https://creativecommons.org/licenses/by-nc/4.0/"><span class="hint--top hint--rounded" aria-label="BY - 署名"><i class="iconfont icon-by"></i> </span></a><a target="_blank" href="https://creativecommons.org/licenses/by-nc/4.0/"><span class="hint--top hint--rounded" aria-label="NC - 非商业性使用"><i class="iconfont icon-nc"></i></span></a></div></div></div><div class="license-icon iconfont"></div></div><div class="post-prevnext my-3"><article class="post-prev col-6"><a href="/2020/08/23/2020-08-23-RBAC-permission-management-of-Kubernetes/" title="Kubernetes之RBAC权限管理"><i class="iconfont icon-arrowleft"></i> <span class="hidden-mobile">Kubernetes之RBAC权限管理</span> <span class="visible-mobile">上一篇</span></a></article><article class="post-next col-6"><a href="/2020/08/14/2020-08-14-Self-made-CA-certificate-set-ssl-certificate/" title="自制CA证书设置ssl证书"><span class="hidden-mobile">自制CA证书设置ssl证书</span> <span class="visible-mobile">下一篇</span> <i class="iconfont icon-arrowright"></i></a></article></div></div><article id="comments" lazyload><div id="valine"></div><script type="text/javascript">Fluid.utils.loadComments("#valine",(function(){Fluid.utils.createScript("https://lib.baomitu.com/valine/1.4.16/Valine.min.js",(function(){var i=Object.assign({appId:"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz",appKey:"TuwIbmst7Q1N12V1EgEfVgDm",path:"window.location.pathname",placeholder:null,avatar:"retro",meta:["nick","mail","link"],requiredFields:[],pageSize:10,lang:"zh-CN",highlight:!1,recordIP:!1,serverURLs:"",emojiCDN:null,emojiMaps:null,enableQQ:!1},{el:"#valine",path:window.location.pathname});new Valine(i),Fluid.utils.waitElementVisible("#valine .vcontent",()=>{var i="#valine .vcontent img:not(.vemoji)";Fluid.plugins.imageCaption(i),Fluid.plugins.fancyBox(i)})}))}))</script><noscript>Please enable JavaScript to view the comments</noscript></article></article></div></div></div><div class="side-col d-none d-lg-block col-lg-2"><aside class="sidebar" style="margin-left:-1rem"><div id="toc"><p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p><div class="toc-body" id="toc-body"></div></div></aside></div></div></div><a id="scroll-top-button" aria-label="TOP" href="#" role="button"><i class="iconfont icon-arrowup" aria-hidden="true"></i></a><div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable modal-lg" role="document"><div class="modal-content"><div class="modal-header text-center"><h4 class="modal-title w-100 font-weight-bold">搜索</h4><button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button></div><div class="modal-body mx-3"><div class="md-form mb-5"><input type="text" id="local-search-input" class="form-control validate"> <label data-error="x" data-success="v" for="local-search-input">关键词</label></div><div class="list-group" id="local-search-result"></div></div></div></div></div></main><footer><div class="footer-inner"><div id="music_div" style="position:fixed;bottom:0;left:30px"><iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width="330" height="110" src="//music.163.com/outchain/player?type=0&id=919444742&auto=1&height=90"></iframe><script src="https://cdn.staticfile.org/jquery/3.3.1/jquery.min.js"></script><script src="/js/musicshow.js"></script></div><div class="footer-content"><a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a><div><span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span><script src="/js/duration.js"></script></div></div><div class="statistics"><span id="leancloud-site-pv-container" style="display:none">总访问量 <span id="leancloud-site-pv"></span> 次 </span><span id="leancloud-site-uv-container" style="display:none">总访客数 <span id="leancloud-site-uv"></span> 人</span></div></div></footer><script src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js"></script><link rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css"><script>NProgress.configure({showSpinner:!1,trickleSpeed:100}),NProgress.start(),window.addEventListener("load",(function(){NProgress.done()}))</script><script src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js"></script><script src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js"></script><script src="/js/events.js"></script><script src="/js/plugins.js"></script><script src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js"></script><script>!function(t,e){var i=Fluid.plugins.typing,n=e.getElementById("subtitle");n&&i&&i(n.getAttribute("data-typed-text"))}(window,document)</script><script defer>var _hmt=_hmt||[];!function(){var e=document.createElement("script");e.src="https://hm.baidu.com/hm.js?bfe4709ccd8c5c9e559c89f4fd0866f3";var t=document.getElementsByTagName("script")[0];t.parentNode.insertBefore(e,t)}()</script><script src="/js/img-lazyload.js"></script><script>Fluid.utils.createScript("https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js",(function(){var t=jQuery("#toc");if(0!==t.length&&window.tocbot){var o=jQuery("#board-ctn").offset().top;window.tocbot.init({tocSelector:"#toc-body",contentSelector:".markdown-body",headingSelector:CONFIG.toc.headingSelector||"h1,h2,h3,h4,h5,h6",linkClass:"tocbot-link",activeLinkClass:"tocbot-active-link",listClass:"tocbot-list",isCollapsedClass:"tocbot-is-collapsed",collapsibleClass:"tocbot-is-collapsible",collapseDepth:CONFIG.toc.collapseDepth||0,scrollSmooth:!0,headingsOffset:-o}),t.find(".toc-list-item").length>0&&t.css("visibility","visible")}}))</script><script>!function(){var e=CONFIG.code_language.enable&&CONFIG.code_language.default,a=CONFIG.copy_btn;if(e||a){var i="";i+='<div class="code-widget">',i+="LANG",i+="</div>",jQuery(".markdown-body pre").each((function(){var n=jQuery(this);if(!(n.find("code.mermaid").length>0||n.find("span.line").length>0)){var t,c="";e&&(c=CONFIG.code_language.default,n[0].children.length>0&&n[0].children[0].classList.length>=2&&n.children().hasClass("hljs")?c=n[0].children[0].classList[1]:n[0].getAttribute("data-language")?c=n[0].getAttribute("data-language"):n.parent().hasClass("sourceCode")&&n[0].children.length>0&&n[0].children[0].classList.length>=2?(c=n[0].children[0].classList[1],n.parent().addClass("code-wrapper")):n.parent().hasClass("markdown-body")&&0===n[0].classList.length&&n.wrap('<div class="code-wrapper"></div>'),c=c.toUpperCase().replace("NONE",CONFIG.code_language.default)),n.append(i.replace("LANG",c).replace('code-widget">',(t=n[0],(Fluid.utils.getBackgroundLightness(t)>=0?"code-widget-light":"code-widget-dark")+(a?' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>':' code-widget">')))),a&&Fluid.utils.createScript("https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js",(function(){new window.ClipboardJS(".copy-btn",{target:function(e){for(var a=e.parentNode.childNodes,i=0;i<a.length;i++)if("CODE"===a[i].tagName)return a[i]}}).on("success",(function(e){e.clearSelection(),e.trigger.innerHTML=e.trigger.innerHTML.replace("icon-copy","icon-success"),setTimeout((function(){e.trigger.innerHTML=e.trigger.innerHTML.replace("icon-success","icon-copy")}),2e3)}))}))}}))}}()</script><script>Fluid.utils.createScript("https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js",(function(){window.anchors.options={placement:CONFIG.anchorjs.placement,visible:CONFIG.anchorjs.visible},CONFIG.anchorjs.icon&&(window.anchors.options.icon=CONFIG.anchorjs.icon);var o=(CONFIG.anchorjs.element||"h1,h2,h3,h4,h5,h6").split(","),n=[];for(var i of o)n.push(".markdown-body > "+i.trim());"left"===CONFIG.anchorjs.placement&&(window.anchors.options.class="anchorjs-link-left"),window.anchors.add(n.join(", "))}))</script><script>Fluid.utils.createScript("https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js",(function(){Fluid.plugins.fancyBox()}))</script><script>Fluid.plugins.imageCaption()</script><script src="/js/local-search.js"></script><script defer src="/js/leancloud.js"></script><script src="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/DynamicRibbon.min.js"></script><script src="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/runtime.min.js"></script><script src="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/love.min.js"></script><script src="/js/boot.js"></script><noscript><div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div></noscript><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/z16.model.json"},"display":{"position":"right","width":180,"height":360},"mobile":{"show":true},"react":{"opacity":0.7},"log":false});</script></body></html>
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="VashonNie">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="本章我们来讲一下如何在TKE上搭建jenkins这个CI&#x2F;CD工具，这边我们在进行构建的时候可以自动生成一个slave pod来进行走流水线，流水线跑完之后会自动销毁。 部署jenkins的rbac权限12345678910111213141516171819202122232425262728293031323334353637383940414243444546[root@VM_0_">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TKE上动态部署jenkins slaves">
+<meta property="og:url" content="https://www.niewx.cn/2020/08/18/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="本章我们来讲一下如何在TKE上搭建jenkins这个CI&#x2F;CD工具，这边我们在进行构建的时候可以自动生成一个slave pod来进行走流水线，流水线跑完之后会自动销毁。 部署jenkins的rbac权限12345678910111213141516171819202122232425262728293031323334353637383940414243444546[root@VM_0_">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/snail-bg.jpg">
+<meta property="article:published_time" content="2020-08-18T06:10:00.000Z">
+<meta property="article:modified_time" content="2020-08-18T06:10:00.000Z">
+<meta property="article:author" content="VashonNie">
+<meta property="article:tag" content="Kubernetes">
+<meta property="article:tag" content="TKE">
+<meta property="article:tag" content="Jenkins">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.niewx.cn/img/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/snail-bg.jpg">
+  
+  
+  <title>TKE上动态部署jenkins slaves - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/shubiao.css">
+<link rel="stylesheet" href="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/scroll.css">
+<link rel="stylesheet" href="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/gradient.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"www.niewx.cn","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>聂伟星</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+	
+	<iframe width="350" scrolling="no" height="20" frameborder="0" allowtransparency="true" src="https://i.tianqi.com?c=code&id=40&color=%23FFFFFF&icon=1&site=12"></iframe>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" target="_self" href="javascript:;" role="button"
+                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="iconfont icon-books"></i>
+                文档
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="https://www.niewx.cn/mybook/">
+                    <i class="iconfont icon-notebook"></i>
+                    运维笔记
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/column/87421">
+                    <i class="iconfont icon-addrbook"></i>
+                    云+社区文档
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="https://www.niewx.cn/question/">
+                    <i class="iconfont icon-notebook"></i>
+                    运维问题集锦
+                  </a>
+                
+              </div>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/playlist/">
+                <i class="iconfont icon-music"></i>
+                音乐
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" target="_self" href="javascript:;" role="button"
+                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="iconfont icon-douban-fill"></i>
+                豆瓣
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="/books">
+                    <i class="iconfont icon-book"></i>
+                    书籍
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="/movies">
+                    <i class="iconfont icon-youtube-fill"></i>
+                    电影
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="/games">
+                    <i class="iconfont icon-switch-fill"></i>
+                    游戏
+                  </a>
+                
+              </div>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="TKE上动态部署jenkins slaves"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-author" aria-hidden="true"></i>
+        VashonNie
+      </span>
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2020-08-18 14:10" pubdate>
+          2020年8月18日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          5.2k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          44 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="leancloud-page-views-container" class="post-meta" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="leancloud-page-views"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">TKE上动态部署jenkins slaves</h1>
+            
+            <div class="markdown-body">
+              
+              <p>本章我们来讲一下如何在TKE上搭建jenkins这个CI&#x2F;CD工具，这边我们在进行构建的时候可以自动生成一个slave pod来进行走流水线，流水线跑完之后会自动销毁。</p>
+<h1 id="部署jenkins的rbac权限"><a href="#部署jenkins的rbac权限" class="headerlink" title="部署jenkins的rbac权限"></a>部署jenkins的rbac权限</h1><figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><code class="hljs dts">[root@VM_0_13_centos jenkins]<span class="hljs-meta"># cat rbac.yaml</span><br><span class="hljs-symbol">apiVersion:</span> v1<br><span class="hljs-symbol">kind:</span> ServiceAccount<br><span class="hljs-symbol">metadata:</span><br><span class="hljs-symbol">  name:</span> jenkins2<br><span class="hljs-symbol">  namespace:</span> jenkins<br><br>---<br><span class="hljs-symbol"></span><br><span class="hljs-symbol">kind:</span> ClusterRole<br><span class="hljs-symbol">apiVersion:</span> rbac.authorization.k8s.io/v1beta1<br><span class="hljs-symbol">metadata:</span><br><span class="hljs-symbol">  name:</span> jenkins2<br><span class="hljs-symbol">rules:</span><br>  - apiGroups: [<span class="hljs-string">&quot;extensions&quot;</span>, <span class="hljs-string">&quot;apps&quot;</span>]<br><span class="hljs-symbol">    resources:</span> [<span class="hljs-string">&quot;deployments&quot;</span>]<br><span class="hljs-symbol">    verbs:</span> [<span class="hljs-string">&quot;create&quot;</span>, <span class="hljs-string">&quot;delete&quot;</span>, <span class="hljs-string">&quot;get&quot;</span>, <span class="hljs-string">&quot;list&quot;</span>, <span class="hljs-string">&quot;watch&quot;</span>, <span class="hljs-string">&quot;patch&quot;</span>, <span class="hljs-string">&quot;update&quot;</span>]<br>  - apiGroups: [<span class="hljs-string">&quot;&quot;</span>]<br><span class="hljs-symbol">    resources:</span> [<span class="hljs-string">&quot;services&quot;</span>]<br><span class="hljs-symbol">    verbs:</span> [<span class="hljs-string">&quot;create&quot;</span>, <span class="hljs-string">&quot;delete&quot;</span>, <span class="hljs-string">&quot;get&quot;</span>, <span class="hljs-string">&quot;list&quot;</span>, <span class="hljs-string">&quot;watch&quot;</span>, <span class="hljs-string">&quot;patch&quot;</span>, <span class="hljs-string">&quot;update&quot;</span>]<br>  - apiGroups: [<span class="hljs-string">&quot;&quot;</span>]<br><span class="hljs-symbol">    resources:</span> [<span class="hljs-string">&quot;pods&quot;</span>]<br><span class="hljs-symbol">    verbs:</span> [<span class="hljs-string">&quot;create&quot;</span>,<span class="hljs-string">&quot;delete&quot;</span>,<span class="hljs-string">&quot;get&quot;</span>,<span class="hljs-string">&quot;list&quot;</span>,<span class="hljs-string">&quot;patch&quot;</span>,<span class="hljs-string">&quot;update&quot;</span>,<span class="hljs-string">&quot;watch&quot;</span>]<br>  - apiGroups: [<span class="hljs-string">&quot;&quot;</span>]<br><span class="hljs-symbol">    resources:</span> [<span class="hljs-string">&quot;pods/exec&quot;</span>]<br><span class="hljs-symbol">    verbs:</span> [<span class="hljs-string">&quot;create&quot;</span>,<span class="hljs-string">&quot;delete&quot;</span>,<span class="hljs-string">&quot;get&quot;</span>,<span class="hljs-string">&quot;list&quot;</span>,<span class="hljs-string">&quot;patch&quot;</span>,<span class="hljs-string">&quot;update&quot;</span>,<span class="hljs-string">&quot;watch&quot;</span>]<br>  - apiGroups: [<span class="hljs-string">&quot;&quot;</span>]<br><span class="hljs-symbol">    resources:</span> [<span class="hljs-string">&quot;pods/log&quot;</span>]<br><span class="hljs-symbol">    verbs:</span> [<span class="hljs-string">&quot;get&quot;</span>,<span class="hljs-string">&quot;list&quot;</span>,<span class="hljs-string">&quot;watch&quot;</span>]<br>  - apiGroups: [<span class="hljs-string">&quot;&quot;</span>]<br><span class="hljs-symbol">    resources:</span> [<span class="hljs-string">&quot;secrets&quot;</span>]<br><span class="hljs-symbol">    verbs:</span> [<span class="hljs-string">&quot;get&quot;</span>]<br><br>---<br><span class="hljs-symbol">apiVersion:</span> rbac.authorization.k8s.io/v1beta1<br><span class="hljs-symbol">kind:</span> ClusterRoleBinding<br><span class="hljs-symbol">metadata:</span><br><span class="hljs-symbol">  name:</span> jenkins2<br><span class="hljs-symbol">roleRef:</span><br><span class="hljs-symbol">  apiGroup:</span> rbac.authorization.k8s.io<br><span class="hljs-symbol">  kind:</span> ClusterRole<br><span class="hljs-symbol">  name:</span> jenkins2<br><span class="hljs-symbol">subjects:</span><br>  - kind: ServiceAccount<br><span class="hljs-symbol">    name:</span> jenkins2<br><span class="hljs-symbol">    namespace:</span> jenkins<br></code></pre></td></tr></table></figure>
+
+<h1 id="创建pvc进行jenkins的数据持久化"><a href="#创建pvc进行jenkins的数据持久化" class="headerlink" title="创建pvc进行jenkins的数据持久化"></a>创建pvc进行jenkins的数据持久化</h1><p>这边通过cbs卷挂载jenkins的数据</p>
+<p><img src="/img/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/1.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<h1 id="部署jenkins的应用"><a href="#部署jenkins的应用" class="headerlink" title="部署jenkins的应用"></a>部署jenkins的应用</h1><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-meta">---</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">extensions/v1beta1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Deployment</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">jenkins2</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">kube-ops</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">template:</span><br>    <span class="hljs-attr">metadata:</span><br>      <span class="hljs-attr">labels:</span><br>        <span class="hljs-attr">app:</span> <span class="hljs-string">jenkins2</span><br>    <span class="hljs-attr">spec:</span><br>      <span class="hljs-attr">terminationGracePeriodSeconds:</span> <span class="hljs-number">10</span><br>      <span class="hljs-attr">serviceAccountName:</span> <span class="hljs-string">jenkins2</span><br>      <span class="hljs-attr">containers:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">jenkins</span><br>        <span class="hljs-attr">image:</span> <span class="hljs-string">jenkins/jenkins:lts</span><br>        <span class="hljs-attr">imagePullPolicy:</span> <span class="hljs-string">IfNotPresent</span><br>        <span class="hljs-attr">ports:</span><br>        <span class="hljs-bullet">-</span> <span class="hljs-attr">containerPort:</span> <span class="hljs-number">8080</span><br>          <span class="hljs-attr">name:</span> <span class="hljs-string">web</span><br>          <span class="hljs-attr">protocol:</span> <span class="hljs-string">TCP</span><br>        <span class="hljs-bullet">-</span> <span class="hljs-attr">containerPort:</span> <span class="hljs-number">50000</span><br>          <span class="hljs-attr">name:</span> <span class="hljs-string">agent</span><br>          <span class="hljs-attr">protocol:</span> <span class="hljs-string">TCP</span><br>        <span class="hljs-attr">resources:</span><br>          <span class="hljs-attr">limits:</span><br>            <span class="hljs-attr">cpu:</span> <span class="hljs-string">1000m</span><br>            <span class="hljs-attr">memory:</span> <span class="hljs-string">1Gi</span><br>          <span class="hljs-attr">requests:</span><br>            <span class="hljs-attr">cpu:</span> <span class="hljs-string">500m</span><br>            <span class="hljs-attr">memory:</span> <span class="hljs-string">512Mi</span><br>        <span class="hljs-attr">livenessProbe:</span><br>          <span class="hljs-attr">httpGet:</span><br>            <span class="hljs-attr">path:</span> <span class="hljs-string">/login</span><br>            <span class="hljs-attr">port:</span> <span class="hljs-number">8080</span><br>          <span class="hljs-attr">initialDelaySeconds:</span> <span class="hljs-number">60</span><br>          <span class="hljs-attr">timeoutSeconds:</span> <span class="hljs-number">5</span><br>          <span class="hljs-attr">failureThreshold:</span> <span class="hljs-number">12</span><br>        <span class="hljs-attr">readinessProbe:</span><br>          <span class="hljs-attr">httpGet:</span><br>            <span class="hljs-attr">path:</span> <span class="hljs-string">/login</span><br>            <span class="hljs-attr">port:</span> <span class="hljs-number">8080</span><br>          <span class="hljs-attr">initialDelaySeconds:</span> <span class="hljs-number">60</span><br>          <span class="hljs-attr">timeoutSeconds:</span> <span class="hljs-number">5</span><br>          <span class="hljs-attr">failureThreshold:</span> <span class="hljs-number">12</span><br>        <span class="hljs-attr">volumeMounts:</span><br>        <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">jenkinshome</span><br>          <span class="hljs-attr">subPath:</span> <span class="hljs-string">jenkins2</span><br>          <span class="hljs-attr">mountPath:</span> <span class="hljs-string">/var/jenkins_home</span><br>      <span class="hljs-attr">securityContext:</span><br>        <span class="hljs-attr">fsGroup:</span> <span class="hljs-number">1000</span><br>      <span class="hljs-attr">volumes:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">jenkinshome</span><br>        <span class="hljs-attr">persistentVolumeClaim:</span><br>          <span class="hljs-attr">claimName:</span> <span class="hljs-string">opspvc</span><br><br><span class="hljs-meta">---</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Service</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">jenkins2</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">kube-ops</span><br>  <span class="hljs-attr">labels:</span><br>    <span class="hljs-attr">app:</span> <span class="hljs-string">jenkins2</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">app:</span> <span class="hljs-string">jenkins2</span><br>  <span class="hljs-attr">type:</span> <span class="hljs-string">NodePort</span><br>  <span class="hljs-attr">ports:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">web</span><br>    <span class="hljs-attr">port:</span> <span class="hljs-number">8080</span><br>    <span class="hljs-attr">targetPort:</span> <span class="hljs-string">web</span><br>    <span class="hljs-attr">nodePort:</span> <span class="hljs-number">30002</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">agent</span><br>    <span class="hljs-attr">port:</span> <span class="hljs-number">50000</span><br>    <span class="hljs-attr">targetPort:</span> <span class="hljs-string">agent</span><br></code></pre></td></tr></table></figure>
+
+<h1 id="采用treafik暴露域名给jenkins"><a href="#采用treafik暴露域名给jenkins" class="headerlink" title="采用treafik暴露域名给jenkins"></a>采用treafik暴露域名给jenkins</h1><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-meta">---</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">traefik.containo.us/v1alpha1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">IngressRoute</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">jenkins</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">jenkins</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">entryPoints:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-string">web</span><br>  <span class="hljs-attr">routes:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">match:</span> <span class="hljs-string">Host(`jenkins.tx.niewx.club`)</span><br>    <span class="hljs-attr">kind:</span> <span class="hljs-string">Rule</span><br>    <span class="hljs-attr">services:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">jenkins2</span><br>      <span class="hljs-attr">port:</span> <span class="hljs-number">8080</span><br></code></pre></td></tr></table></figure>
+
+<h1 id="访问初始化jenkins"><a href="#访问初始化jenkins" class="headerlink" title="访问初始化jenkins"></a>访问初始化jenkins</h1><p>查看登录的初始密码，然后安装好推荐的插件，安装好之后配置账号，直接登录即可。</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs awk">cat <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/jenkins/</span>secrets/initialAdminPassword<br></code></pre></td></tr></table></figure>
+
+<p><img src="/img/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/2.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<h1 id="安装Kubernetes-plugin-插件"><a href="#安装Kubernetes-plugin-插件" class="headerlink" title="安装Kubernetes-plugin 插件"></a>安装Kubernetes-plugin 插件</h1><p>我这边已经安装好了，可以选择可选插件输入Kubernetes搜索找到插件进行安装</p>
+<p><img src="/img/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/3.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<h1 id="连接TKE集群"><a href="#连接TKE集群" class="headerlink" title="连接TKE集群"></a>连接TKE集群</h1><p>在“系统配置”面板最下方，选择“云”模块下的【新增一个云】&gt;【Kubernetes】。如下图所示</p>
+<p>对应的证书文件和token以及api地址可以从TKE集群中节点上的下面文件获取</p>
+<p>集群证书获取</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs awk">[root@VM_1_4_centos ~]<span class="hljs-comment"># cat /etc/kubernetes/cluster-ca.crt</span><br>-----<span class="hljs-keyword">BEGIN</span> CERTIFICATE-----<br>MIICyDCCAbCgAwIBAgIBADANBgkqhkiG9w0BAQsFADAVMRMwEQYDVQQDEwprdWJl<br>cm5ldGVzMB4XDTIwMDYwMjAzMTYzNVoXDTMwMDUzMTAzMTYzNVowFTETMBEGA1UE<br>AxMKa3ViZXJuZXRlczCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANmh<br>Z<span class="hljs-regexp">/tm6Ej66vNgkcRk4zirSGpoLpHaofq/</span>q9eOE8zLr+QfzwNlDImeNfpX<span class="hljs-regexp">/OG/</span>atz2<br>bl6DY4kAt7CsHUVs60leCIs1PZHY212vevlL/nWceLHqVeskynwT4xwJKI48DnwM<br>UgABoXTqm3S2k02CRJcm0Ucx1pw+E0l0Cy/hJcEwa8kFaqsskHqL1jHhRGB4ENGO<br><span class="hljs-number">6</span>ocjEzZstZdjv1Ab1WoOmHhvvI3mT4Gqb1BSd3BFqlu0id1wJvIXuood0bYDTXSD<br>KHHKZFOnrxwFFAg3ZxmrFDkfqfmILV0dcA4KKW/<span class="hljs-number">1</span>q0g7+XepM2gZrrbwMAjVaOpH<br>vPUEaLn<span class="hljs-regexp">/kJ1LSUNz09UCAwEAAaMjMCEwDgYDVR0PAQH/</span>BAQDAgKUMA8GA1UdEwEB<br>/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBAC6jddY1Y5ofHZkthZu8Hj2Op36q<br>kY9pv1fpexcPXtcRuxgw6+mQjEzKraEDoDYdX/DkHkuYVulWl6Sqv+P9WRY+hLzH<br>/K+GHh4uuuIlL+C6Uk1nV0clrznv+CqXKY9AZ8sY+x6l9d3hIxaDxwKWDfzJe2sU<br>zMJZsbxyy4wIkwlG5+<span class="hljs-number">1</span>lSD3YYRo1TooYGeFELD0OdGMrH9XRP0E/<span class="hljs-number">6</span>Q5XdRBecH54<br>JA6Tj4vXI2SgOX4MWR47FFI7agBgATiOLLYGVcRqzf6rK/QFbOnT1R1JAR4=<br>-----<span class="hljs-keyword">END</span> CERTIFICATE-----<br></code></pre></td></tr></table></figure>
+
+<p>apiserver地址和token</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs yaml">[<span class="hljs-string">root@VM_1_4_centos</span> <span class="hljs-string">~</span>]<span class="hljs-comment"># cat .kube/config</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span><br><span class="hljs-attr">clusters:</span><br><span class="hljs-bullet">-</span> <span class="hljs-attr">cluster:</span><br>    <span class="hljs-attr">certificate-authority-data:</span> <span class="hljs-string">LS0tLS1CRUdJNDQWJD....</span><br>    <span class="hljs-attr">server:</span> <span class="hljs-string">https://169.xx.xx.xx:60002</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">local</span><br><span class="hljs-attr">contexts:</span><br><span class="hljs-bullet">-</span> <span class="hljs-attr">context:</span><br>    <span class="hljs-attr">cluster:</span> <span class="hljs-string">local</span><br>    <span class="hljs-attr">user:</span> <span class="hljs-string">admin</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">master</span><br><span class="hljs-attr">current-context:</span> <span class="hljs-string">master</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Config</span><br><span class="hljs-attr">preferences:</span> &#123;&#125;<br><span class="hljs-attr">users:</span><br><span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">admin</span><br>  <span class="hljs-attr">user:</span><br>    <span class="hljs-attr">token:</span> <span class="hljs-string">MUrM6Aj4qwgKKjwF....</span><br></code></pre></td></tr></table></figure>
+
+<p>将上述获取的填入集群配置</p>
+<p><img src="/img/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/4.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>其他配置如下图所示，我们jenkins的master采用的hosts模式，所以这边直接用节点的8080端口</p>
+<p><img src="/img/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/5.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>slave 的 pod的配置如下</p>
+<p><img src="/img/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/6.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/7.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<h1 id="创建测试项目进行构建"><a href="#创建测试项目进行构建" class="headerlink" title="创建测试项目进行构建"></a>创建测试项目进行构建</h1><p><img src="/img/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/8.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/9.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs routeros">echo <span class="hljs-string">&quot;测试 Kubernetes 动态生成 jenkins slave&quot;</span><br>echo <span class="hljs-string">&quot;==============docker in docker===========&quot;</span><br>docker <span class="hljs-built_in">info</span><br><br>echo <span class="hljs-string">&quot;=============kubectl=============&quot;</span><br>kubectl <span class="hljs-built_in">get</span> pods<br></code></pre></td></tr></table></figure>
+
+<h1 id="执行任务构建"><a href="#执行任务构建" class="headerlink" title="执行任务构建"></a>执行任务构建</h1><p>执行构建会自动生成一个slave pod，执行任务结束后会自动删除掉</p>
+<p><img src="/img/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/10.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs sql">[root<span class="hljs-variable">@VM</span>_1_4_centos <span class="hljs-operator">~</span>]# kubectl <span class="hljs-keyword">get</span> pod <span class="hljs-operator">-</span>n jenkins<br>NAME                        READY   STATUS    RESTARTS   AGE<br>jenkins2<span class="hljs-number">-574678</span>b486<span class="hljs-number">-8</span>r4qz   <span class="hljs-number">1</span><span class="hljs-operator">/</span><span class="hljs-number">1</span>     <span class="hljs-keyword">Running</span>   <span class="hljs-number">0</span>          <span class="hljs-number">2</span>d5h<br>jnlp<span class="hljs-number">-7</span>zv3k                  <span class="hljs-number">1</span><span class="hljs-operator">/</span><span class="hljs-number">1</span>     <span class="hljs-keyword">Running</span>   <span class="hljs-number">0</span>          <span class="hljs-number">14</span>s<br></code></pre></td></tr></table></figure>
+
+<p><img src="/img/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/11.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/12.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<h1 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h1><p><a target="_blank" rel="noopener" href="https://www.qikqiak.com/post/kubernetes-jenkins1/">https://www.qikqiak.com/post/kubernetes-jenkins1/</a></p>
+<p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/document/product/457/41396">https://cloud.tencent.com/document/product/457/41396</a></p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/TKE/" class="category-chain-item">TKE</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/TKE/Kubernetes/" class="category-chain-item">Kubernetes</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/TKE/Kubernetes/Devops/" class="category-chain-item">Devops</a>
+  
+  
+
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Kubernetes/">#Kubernetes</a>
+      
+        <a href="/tags/TKE/">#TKE</a>
+      
+        <a href="/tags/Jenkins/">#Jenkins</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>TKE上动态部署jenkins slaves</div>
+      <div>https://www.niewx.cn/2020/08/18/2020-08-18-Dynamic-deployment-of-jenkins-slaves-on-TKE/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>VashonNie</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2020年8月18日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by-nc/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by-nc/4.0/">
+              <span class="hint--top hint--rounded" aria-label="NC - 非商业性使用">
+                <i class="iconfont icon-nc"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2020/08/23/2020-08-23-RBAC-permission-management-of-Kubernetes/" title="Kubernetes之RBAC权限管理">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Kubernetes之RBAC权限管理</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2020/08/14/2020-08-14-TKE&#39;s-first-knowledge-of-container-detectors/" title="Kubernetes之初识容器探测器">
+                        <span class="hidden-mobile">Kubernetes之初识容器探测器</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <div id="valine"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#valine', function() {
+      Fluid.utils.createScript('https://lib.baomitu.com/valine/1.4.16/Valine.min.js', function() {
+        var options = Object.assign(
+          {"appId":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","appKey":"TuwIbmst7Q1N12V1EgEfVgDm","path":"window.location.pathname","placeholder":null,"avatar":"retro","meta":["nick","mail","link"],"requiredFields":[],"pageSize":10,"lang":"zh-CN","highlight":false,"recordIP":false,"serverURLs":"","emojiCDN":null,"emojiMaps":null,"enableQQ":false},
+          {
+            el: "#valine",
+            path: window.location.pathname
+          }
+        )
+        new Valine(options);
+        Fluid.utils.waitElementVisible('#valine .vcontent', () => {
+          var imgSelector = '#valine .vcontent img:not(.vemoji)';
+          Fluid.plugins.imageCaption(imgSelector);
+          Fluid.plugins.fancyBox(imgSelector);
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+   <div id="music_div" style="position: fixed; bottom: 0px; left: 30px;">
+    <iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=110 
+    	src="//music.163.com/outchain/player?type=0&id=919444742&auto=1&height=90">
+    </iframe>
+    <script src="https://cdn.staticfile.org/jquery/3.3.1/jquery.min.js"></script>
+    <script src="/js/musicshow.js"></script>
+</div>
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> </div>
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="leancloud-site-pv-container" style="display: none">
+        总访问量 
+        <span id="leancloud-site-pv"></span>
+         次
+      </span>
+    
+    
+      <span id="leancloud-site-uv-container" style="display: none">
+        总访客数 
+        <span id="leancloud-site-uv"></span>
+         人
+      </span>
+    
+    
+
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?bfe4709ccd8c5c9e559c89f4fd0866f3";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="/js/leancloud.js" ></script>
+
+
+
+
+  
+<script src="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/DynamicRibbon.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/runtime.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/love.min.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/z16.model.json"},"display":{"position":"right","width":180,"height":360},"mobile":{"show":true},"react":{"opacity":0.7},"log":false});</script></body>
+</html>

@@ -1,1 +1,1017 @@
-<!DOCTYPE html><html lang="zh-CN" data-default-color-scheme="auto"><head><meta charset="UTF-8"><link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png"><link rel="icon" href="/img/fluid.png"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,shrink-to-fit=no"><meta http-equiv="x-ua-compatible" content="ie=edge"><meta name="theme-color" content="#2f4154"><meta name="author" content="VashonNie"><meta name="keywords" content=""><meta name="description" content="本文章简要介绍了如何在腾讯云的TKE集群中搭建Loki日志采集工具。 Loki日志系统介绍Loki是受Prometheus启发的水平可扩展，高度可用的多租户日志聚合系统。它的设计具有很高的成本效益，并且易于操作。它不索引日志的内容，而是为每个日志流设置一组标签。 与其他日志聚合系统相比，Loki的特点  不对日志进行全文本索引。通过存储压缩的，非结构化的日志以及仅索引元数据，Loki更加易于操作且"><meta property="og:type" content="article"><meta property="og:title" content="TKE集群部署日志聚合工具Loki"><meta property="og:url" content="https://www.niewx.cn/2020/11/05/2020-11-05-Log-aggregation-tool-Loki/index.html"><meta property="og:site_name" content="Hexo"><meta property="og:description" content="本文章简要介绍了如何在腾讯云的TKE集群中搭建Loki日志采集工具。 Loki日志系统介绍Loki是受Prometheus启发的水平可扩展，高度可用的多租户日志聚合系统。它的设计具有很高的成本效益，并且易于操作。它不索引日志的内容，而是为每个日志流设置一组标签。 与其他日志聚合系统相比，Loki的特点  不对日志进行全文本索引。通过存储压缩的，非结构化的日志以及仅索引元数据，Loki更加易于操作且"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://www.niewx.cn/img/2020-11-05-Log-aggregation-tool-Loki/snail-bg.jpg"><meta property="article:published_time" content="2020-11-05T06:10:00.000Z"><meta property="article:modified_time" content="2020-11-05T06:10:00.000Z"><meta property="article:author" content="VashonNie"><meta property="article:tag" content="Kubernetes"><meta property="article:tag" content="TKE"><meta property="article:tag" content="Loki"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://www.niewx.cn/img/2020-11-05-Log-aggregation-tool-Loki/snail-bg.jpg"><title>TKE集群部署日志聚合工具Loki - Hexo</title><link rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css"><link rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css"><link rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css"><link rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css"><link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css"><link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css"><link rel="stylesheet" href="/css/main.css"><link id="highlight-css" rel="stylesheet" href="/css/highlight.css"><link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/shubiao.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/scroll.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/gradient.css"><script id="fluid-configs">var Fluid=window.Fluid||{},CONFIG={hostname:"www.niewx.cn",root:"/",version:"1.8.14",typing:{enable:!0,typeSpeed:70,cursorChar:"_",loop:!1,scope:[]},anchorjs:{enable:!0,element:"h1,h2,h3,h4,h5,h6",placement:"left",visible:"hover",icon:""},progressbar:{enable:!0,height_px:3,color:"#29d",options:{showSpinner:!1,trickleSpeed:100}},code_language:{enable:!0,default:"TEXT"},copy_btn:!0,image_caption:{enable:!0},image_zoom:{enable:!0,img_url_replace:["",""]},toc:{enable:!0,placement:"right",headingSelector:"h1,h2,h3,h4,h5,h6",collapseDepth:0},lazyload:{enable:!0,loading_img:"/img/loading.gif",onlypost:!1,offset_factor:2},web_analytics:{enable:!0,baidu:"bfe4709ccd8c5c9e559c89f4fd0866f3",google:null,gtag:null,tencent:{sid:null,cid:null},woyaola:null,cnzz:null,leancloud:{app_id:"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz",app_key:"TuwIbmst7Q1N12V1EgEfVgDm",server_url:null,path:"window.location.pathname",ignore_local:!1}},search_path:"/local-search.xml"}</script><script src="/js/utils.js"></script><script src="/js/color-schema.js"></script><meta name="generator" content="Hexo 6.1.0"></head><body><header><div class="header-inner" style="height:70vh"><nav id="navbar" class="navbar fixed-top navbar-expand-lg navbar-dark scrolling-navbar"><div class="container"><a class="navbar-brand" href="/"><strong>聂伟星</strong> </a><button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><div class="animated-icon"><span></span><span></span><span></span></div></button><iframe width="350" scrolling="no" height="20" frameborder="0" allowtransparency="true" src="https://i.tianqi.com?c=code&id=40&color=%23FFFFFF&icon=1&site=12"></iframe><div class="collapse navbar-collapse" id="navbarSupportedContent"><ul class="navbar-nav ml-auto text-center"><li class="nav-item"><a class="nav-link" href="/"><i class="iconfont icon-home-fill"></i> 首页</a></li><li class="nav-item"><a class="nav-link" href="/archives/"><i class="iconfont icon-archive-fill"></i> 归档</a></li><li class="nav-item"><a class="nav-link" href="/categories/"><i class="iconfont icon-category-fill"></i> 分类</a></li><li class="nav-item"><a class="nav-link" href="/tags/"><i class="iconfont icon-tags-fill"></i> 标签</a></li><li class="nav-item"><a class="nav-link" href="/about/"><i class="iconfont icon-user-fill"></i> 关于</a></li><li class="nav-item"><a class="nav-link" href="/links/"><i class="iconfont icon-link-fill"></i> 友链</a></li><li class="nav-item dropdown"><a class="nav-link dropdown-toggle" target="_self" href="javascript:;" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="iconfont icon-books"></i> 文档</a><div class="dropdown-menu" aria-labelledby="navbarDropdown"><a class="dropdown-item" href="https://www.niewx.cn/mybook/"><i class="iconfont icon-notebook"></i> 运维笔记 </a><a class="dropdown-item" target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/column/87421"><i class="iconfont icon-addrbook"></i> 云+社区文档 </a><a class="dropdown-item" href="https://www.niewx.cn/question/"><i class="iconfont icon-notebook"></i> 运维问题集锦</a></div></li><li class="nav-item"><a class="nav-link" href="/playlist/"><i class="iconfont icon-music"></i> 音乐</a></li><li class="nav-item dropdown"><a class="nav-link dropdown-toggle" target="_self" href="javascript:;" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="iconfont icon-douban-fill"></i> 豆瓣</a><div class="dropdown-menu" aria-labelledby="navbarDropdown"><a class="dropdown-item" href="/books"><i class="iconfont icon-book"></i> 书籍 </a><a class="dropdown-item" href="/movies"><i class="iconfont icon-youtube-fill"></i> 电影 </a><a class="dropdown-item" href="/games"><i class="iconfont icon-switch-fill"></i> 游戏</a></div></li><li class="nav-item" id="search-btn"><a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">&nbsp;<i class="iconfont icon-search"></i>&nbsp;</a></li><li class="nav-item" id="color-toggle-btn"><a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a></li></ul></div></div></nav><div id="banner" class="banner" parallax="true" style="background:url(/img/default.png) no-repeat center center;background-size:cover"><div class="full-bg-img"><div class="mask flex-center" style="background-color:rgba(0,0,0,.3)"><div class="banner-text text-center fade-in-up"><div class="h2"><span id="subtitle" data-typed-text="TKE集群部署日志聚合工具Loki"></span></div><div class="mt-3"><span class="post-meta mr-2"><i class="iconfont icon-author" aria-hidden="true"></i> VashonNie </span><span class="post-meta"><i class="iconfont icon-date-fill" aria-hidden="true"></i> <time datetime="2020-11-05 14:10" pubdate>2020年11月5日 下午</time></span></div><div class="mt-1"><span class="post-meta mr-2"><i class="iconfont icon-chart"></i>4.4k 字 </span><span class="post-meta mr-2"><i class="iconfont icon-clock-fill"></i>37 分钟 </span><span id="leancloud-page-views-container" class="post-meta" style="display:none"><i class="iconfont icon-eye" aria-hidden="true"></i> <span id="leancloud-page-views"></span> 次</span></div></div></div></div></div></div></header><main><div class="container-fluid nopadding-x"><div class="row nomargin-x"><div class="side-col d-none d-lg-block col-lg-2"></div><div class="col-lg-8 nopadding-x-md"><div class="container nopadding-x-md" id="board-ctn"><div id="board"><article class="post-content mx-auto"><h1 style="display:none">TKE集群部署日志聚合工具Loki</h1><div class="markdown-body"><p>本文章简要介绍了如何在腾讯云的TKE集群中搭建Loki日志采集工具。</p><h1 id="Loki日志系统介绍"><a href="#Loki日志系统介绍" class="headerlink" title="Loki日志系统介绍"></a>Loki日志系统介绍</h1><p>Loki是受Prometheus启发的水平可扩展，高度可用的多租户日志聚合系统。它的设计具有很高的成本效益，并且易于操作。它不索引日志的内容，而是为每个日志流设置一组标签。</p><p>与其他日志聚合系统相比，Loki的特点</p><ul><li>不对日志进行全文本索引。通过存储压缩的，非结构化的日志以及仅索引元数据，Loki更加易于操作且运行成本更低。</li><li>使用与Prometheus相同的标签对日志流进行索引和分组，从而使您能够使用与Prometheus相同的标签在指标和日志之间无缝切换。</li><li>特别适合存储Kubernetes Pod日志。诸如Pod标签之类的元数据会自动被抓取并建立索引。</li><li>在Grafana中具有本机支持（需要Grafana v6.0）。</li></ul><p>基于Loki的日志记录堆栈包含3个组件：</p><ul><li>promtail是代理，负责收集日志并将其发送给Loki。</li><li>loki是主服务器，负责存储日志和处理查询。</li><li>Grafana用于查询和显示日志。</li></ul><p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/1.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><p>Loki其实类似于elk和prometheus的架构，部署在k8s中，通过DaemonSet的方式部署promtail用来采集节点的日志，将采集的日志数据投递到loki，最后通过grafana来进行前端的界面查询和展示。</p><p>Loki像Prometheus一样，但是对于日志：我们更喜欢基于多维标签的索引方法，并且想要一个没有依赖性的，易于操作的单二进制系统。 Loki与Prometheus的不同之处在于，它侧重于日志而不是指标，并通过推送而不是拉动交付日志。</p><h1 id="部署Loki和grafana到k8s集群"><a href="#部署Loki和grafana到k8s集群" class="headerlink" title="部署Loki和grafana到k8s集群"></a>部署Loki和grafana到k8s集群</h1><h2 id="部署loki和promtail"><a href="#部署loki和promtail" class="headerlink" title="部署loki和promtail"></a>部署loki和promtail</h2><p>这里我们通过helm来部署loki和promtail到集群中，这里使用的环境是腾讯云上的托管TKE集群，在腾讯云上的容器服务有直接提供loki应用让我们直接部署到集群中，下面我们说一下部署方式</p><h3 id="控制台部署loki应用到集群"><a href="#控制台部署loki应用到集群" class="headerlink" title="控制台部署loki应用到集群"></a>控制台部署loki应用到集群</h3><p>点击腾讯云容器服务，点击应用，选择你的集群，点击新建。</p><p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/2.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><p>输入你的应用名和应用部署的命名空间，在日志分析中找到loki-stack，然后点击完成即可。</p><p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/3.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><p>这边部署成功后可以去控制台进入loki查看应用，你会发现部署loki和对应的promtail，这些pod都正常启动，说明loki和promtail都部署成功了。</p><p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/4.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/5.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><h3 id="helm命令部署loki应用到集群"><a href="#helm命令部署loki应用到集群" class="headerlink" title="helm命令部署loki应用到集群"></a>helm命令部署loki应用到集群</h3><p>当然如果你习惯用helm命令操作部署也是可以的，下面讲一下helm命名的部署方式</p><figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs jboss-cli"><span class="hljs-string">//</span>添加loki仓库<br>$ helm repo add loki https:<span class="hljs-string">//grafana.github.io/charts</span><br>$ helm repo update<br><span class="hljs-string">//</span>采用默认配置部署<br>$ helm upgrade <span class="hljs-params">--install</span> loki <span class="hljs-params">--namespace=loki</span> <span class="hljs-params">--name=nwx-loki</span> loki-stack <br><span class="hljs-string">//</span>部署Loki和Fluent Bit到您的集群<br>$ helm upgrade <span class="hljs-params">--install</span> loki <span class="hljs-params">--namespace=loki</span> <span class="hljs-params">--name=nwx-loki</span> \<br>    <span class="hljs-params">--set</span> fluent-bit.enabled=<span class="hljs-literal">true</span>,promtail.enabled=<span class="hljs-literal">false</span><br></code></pre></td></tr></table></figure><h2 id="部署grafana"><a href="#部署grafana" class="headerlink" title="部署grafana"></a>部署grafana</h2><h3 id="部署grafana及对应的service"><a href="#部署grafana及对应的service" class="headerlink" title="部署grafana及对应的service"></a>部署grafana及对应的service</h3><p>下面我们部署grafana作为前端界面来查询loki所采集的日志，这里在选择grafana版本需要注意，版本需要6.0以上的版本。</p><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">apps/v1beta2</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Deployment</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">labels:</span><br>    <span class="hljs-attr">k8s-app:</span> <span class="hljs-string">gafana</span><br>    <span class="hljs-attr">qcloud-app:</span> <span class="hljs-string">gafana</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">gafana</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">loki</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">progressDeadlineSeconds:</span> <span class="hljs-number">600</span><br>  <span class="hljs-attr">replicas:</span> <span class="hljs-number">1</span><br>  <span class="hljs-attr">revisionHistoryLimit:</span> <span class="hljs-number">10</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">matchLabels:</span><br>      <span class="hljs-attr">k8s-app:</span> <span class="hljs-string">gafana</span><br>      <span class="hljs-attr">qcloud-app:</span> <span class="hljs-string">gafana</span><br>  <span class="hljs-attr">strategy:</span><br>    <span class="hljs-attr">rollingUpdate:</span><br>      <span class="hljs-attr">maxSurge:</span> <span class="hljs-number">1</span><br>      <span class="hljs-attr">maxUnavailable:</span> <span class="hljs-number">0</span><br>    <span class="hljs-attr">type:</span> <span class="hljs-string">RollingUpdate</span><br>  <span class="hljs-attr">template:</span><br>    <span class="hljs-attr">metadata:</span><br>      <span class="hljs-attr">labels:</span><br>        <span class="hljs-attr">k8s-app:</span> <span class="hljs-string">gafana</span><br>        <span class="hljs-attr">qcloud-app:</span> <span class="hljs-string">gafana</span><br>    <span class="hljs-attr">spec:</span><br>      <span class="hljs-attr">containers:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">image:</span> <span class="hljs-string">grafana/grafana:master</span><br>        <span class="hljs-attr">imagePullPolicy:</span> <span class="hljs-string">Always</span><br>        <span class="hljs-attr">name:</span> <span class="hljs-string">gafana</span><br>        <span class="hljs-attr">resources:</span><br>          <span class="hljs-attr">limits:</span><br>            <span class="hljs-attr">cpu:</span> <span class="hljs-string">500m</span><br>            <span class="hljs-attr">memory:</span> <span class="hljs-string">1Gi</span><br>          <span class="hljs-attr">requests:</span><br>            <span class="hljs-attr">cpu:</span> <span class="hljs-string">250m</span><br>            <span class="hljs-attr">memory:</span> <span class="hljs-string">256Mi</span><br>        <span class="hljs-attr">securityContext:</span><br>          <span class="hljs-attr">privileged:</span> <span class="hljs-literal">false</span><br>        <span class="hljs-attr">terminationMessagePath:</span> <span class="hljs-string">/dev/termination-log</span><br>        <span class="hljs-attr">terminationMessagePolicy:</span> <span class="hljs-string">File</span><br>      <span class="hljs-attr">dnsPolicy:</span> <span class="hljs-string">ClusterFirst</span><br>      <span class="hljs-attr">imagePullSecrets:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">qcloudregistrykey</span><br>      <span class="hljs-attr">restartPolicy:</span> <span class="hljs-string">Always</span><br>      <span class="hljs-attr">schedulerName:</span> <span class="hljs-string">default-scheduler</span><br>      <span class="hljs-attr">securityContext:</span> &#123;&#125;<br>      <span class="hljs-attr">terminationGracePeriodSeconds:</span> <span class="hljs-number">30</span><br></code></pre></td></tr></table></figure><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Service</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">gafana</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">loki</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">externalTrafficPolicy:</span> <span class="hljs-string">Cluster</span><br>  <span class="hljs-attr">ports:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-number">3000</span><span class="hljs-number">-3000</span><span class="hljs-string">-tcp</span><br>    <span class="hljs-attr">nodePort:</span> <span class="hljs-number">32074</span><br>    <span class="hljs-attr">port:</span> <span class="hljs-number">3000</span><br>    <span class="hljs-attr">protocol:</span> <span class="hljs-string">TCP</span><br>    <span class="hljs-attr">targetPort:</span> <span class="hljs-number">3000</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">k8s-app:</span> <span class="hljs-string">gafana</span><br>    <span class="hljs-attr">qcloud-app:</span> <span class="hljs-string">gafana</span><br>  <span class="hljs-attr">sessionAffinity:</span> <span class="hljs-string">None</span><br>  <span class="hljs-attr">type:</span> <span class="hljs-string">NodePort</span><br></code></pre></td></tr></table></figure><p>直接kubectl apply上面2个yaml文件创建grafana应用和对应的service，也可以控制台创建</p><p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/6.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/7.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><h3 id="通过treafik给grafana配置域名访问"><a href="#通过treafik给grafana配置域名访问" class="headerlink" title="通过treafik给grafana配置域名访问"></a>通过treafik给grafana配置域名访问</h3><p>这里集群部署的treafik是2.0版本，关于treafik2.0部署可以参考 <a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1642306">https://cloud.tencent.com/developer/article/1642306</a></p><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-meta">---</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">traefik.containo.us/v1alpha1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">IngressRoute</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">loki</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">loki</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">entryPoints:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-string">web</span><br>  <span class="hljs-attr">routes:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">match:</span> <span class="hljs-string">Host(`loki.tx.niewx.cn`)</span><br>    <span class="hljs-attr">kind:</span> <span class="hljs-string">Rule</span><br>    <span class="hljs-attr">services:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">gafana</span><br>      <span class="hljs-attr">port:</span> <span class="hljs-number">3000</span><br></code></pre></td></tr></table></figure><p>直接添加一个IngressRoute就可以了，下面我们通过配置的域名看看是否可以成功。</p><p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/8.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><p>可以进入登陆界面表示部署成功。</p><h1 id="通过grafana界面查询日志"><a href="#通过grafana界面查询日志" class="headerlink" title="通过grafana界面查询日志"></a>通过grafana界面查询日志</h1><h2 id="grafana配置loki数据源"><a href="#grafana配置loki数据源" class="headerlink" title="grafana配置loki数据源"></a>grafana配置loki数据源</h2><p>下面我们需要在grafana配置一下loki的数据源，这样我们才可以在grafana上查询loki的日志，首先我们登录grafana，初始化账号密码是admin&#x2F;admin，第一次登录会要求你修改密码，登录成功后有一个grafana介绍。</p><p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/9.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><p>找到配置选项的Data Sources，点击添加数据源，选择loki，在loki数据源的url配置上你的service名称地址，我的service名称是nwx-loki，因此我们这里配置的是这个地址 <a href="http://nwx-loki:3100，配置好后点击测试，如果能连接成功说明添加成功。">http://nwx-loki:3100，配置好后点击测试，如果能连接成功说明添加成功。</a></p><p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/10.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/11.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/12.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/13.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><h2 id="界面上查询日志"><a href="#界面上查询日志" class="headerlink" title="界面上查询日志"></a>界面上查询日志</h2><p>添加数据源后，点击explore可以直接进到loki的查询界面</p><p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/14.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/15.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><p>我们这边查询一下loki的日志看看，点击log label选择app中的loki就可以看到loki的业务日志</p><p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/16.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/17.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><h2 id="loki查询语法"><a href="#loki查询语法" class="headerlink" title="loki查询语法"></a>loki查询语法</h2><p>下面我们简单的测试一下loki的查询语法</p><h3 id="job日志流"><a href="#job日志流" class="headerlink" title="job日志流"></a>job日志流</h3><figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs abnf">&#123;job<span class="hljs-operator">=</span><span class="hljs-string">&quot;efk/elasticsearch-master&quot;</span>&#125;<br></code></pre></td></tr></table></figure><p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/18.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><h3 id="合并流选择器"><a href="#合并流选择器" class="headerlink" title="合并流选择器"></a>合并流选择器</h3><figure class="highlight actionscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs actionscript">&#123;app =<span class="hljs-string">&quot;elasticsearch-master&quot;</span>,<span class="hljs-keyword">namespace</span> =<span class="hljs-string">&quot;efk&quot;</span>&#125;<br></code></pre></td></tr></table></figure><p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/19.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><h3 id="标签匹配的运算符"><a href="#标签匹配的运算符" class="headerlink" title="标签匹配的运算符"></a>标签匹配的运算符</h3><ul><li>&#x3D;： 完全相等。</li><li>!&#x3D;： 不相等。</li><li>&#x3D;~： 正则表达式匹配。</li><li>!~： 正则表达式不匹配。<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs actionscript">&#123;app != <span class="hljs-string">&quot;kibana&quot;</span>,<span class="hljs-keyword">namespace</span> =<span class="hljs-string">&quot;efk&quot;</span>&#125;<br></code></pre></td></tr></table></figure></li></ul><p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/20.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><h3 id="行筛选器表达式"><a href="#行筛选器表达式" class="headerlink" title="行筛选器表达式"></a>行筛选器表达式</h3><ul><li>|&#x3D;：日志行包含字符串。</li><li>!&#x3D;：日志行不包含字符串。</li><li>|~：日志行与正则表达式匹配。</li><li>!~：日志行与正则表达式不匹配。</li></ul><figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs 1c">&#123;app = <span class="hljs-string">&quot;kibana&quot;</span>,namespace =<span class="hljs-string">&quot;efk&quot;</span>&#125; <span class="hljs-string">|= &quot;</span><span class="hljs-number">172.16</span>.<span class="hljs-number">2.108</span><span class="hljs-string">&quot;</span><br></code></pre></td></tr></table></figure><p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/21.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><p>筛选器运算符可以多个并将按顺序筛选表达式 - 生成的日志行必须同时满足所有条件。</p><figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs 1c">&#123;app = <span class="hljs-string">&quot;kibana&quot;</span>,namespace =<span class="hljs-string">&quot;efk&quot;</span>&#125; <span class="hljs-string">|= &quot;</span><span class="hljs-number">172.16</span>.<span class="hljs-number">2.108</span><span class="hljs-string">&quot; != &quot;</span><span class="hljs-number">04</span>:<span class="hljs-number">58</span>:<span class="hljs-number">40</span><span class="hljs-string">&quot;</span><br></code></pre></td></tr></table></figure><p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/22.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><h3 id="统计某一时间段的日志数"><a href="#统计某一时间段的日志数" class="headerlink" title="统计某一时间段的日志数"></a>统计某一时间段的日志数</h3><figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs reasonml">count<span class="hljs-constructor">_over_time(&#123;<span class="hljs-params">app</span> = <span class="hljs-string">&quot;kibana&quot;</span>,<span class="hljs-params">namespace</span> =<span class="hljs-string">&quot;efk&quot;</span> &#125;[1m])</span><br></code></pre></td></tr></table></figure><p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/23.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><p>获取过去1个小时的日志计数，按级别分组</p><figure class="highlight lisp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs lisp">sum(<span class="hljs-name">count_over_time</span>(&#123;job=<span class="hljs-string">&quot;default/nginx&quot;</span>&#125;[<span class="hljs-number">60</span>m])) by (<span class="hljs-name">level</span>) <br></code></pre></td></tr></table></figure><p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/24.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p><p>loki配备了自己的查询LogQL，详细的查询语法参考<a target="_blank" rel="noopener" href="https://github.com/grafana/blob/master/docs/sources/logql/_index.md">https://github.com/grafana/blob/master/docs/sources/logql/_index.md</a></p><p>有两种类型的 LogQL 查询：</p><ul><li>日志查询返回日志行的内容。</li><li>指标查询扩展日志查询，并基于日志查询中的日志内容计算示例值。</li></ul><p>logQL基本上能满足我们的日常查询需求。大家可以多多学习实际操作下。</p><h1 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h1><p><a target="_blank" rel="noopener" href="https://github.com/grafana/loki">https://github.com/grafana/loki</a></p><p><a target="_blank" rel="noopener" href="https://github.com/grafana/blob/master/docs/sources/logql/_index.md">https://github.com/grafana/blob/master/docs/sources/logql/_index.md</a></p></div><hr><div><div class="post-metas my-3"><div class="post-meta mr-3 d-flex align-items-center"><i class="iconfont icon-category"></i> <span class="category-chains"><span class="category-chain"><a href="/categories/Kubernetes/" class="category-chain-item">Kubernetes</a> <span>></span> <a href="/categories/Kubernetes/TKE/" class="category-chain-item">TKE</a> <span>></span> <a href="/categories/Kubernetes/TKE/Log/" class="category-chain-item">Log</a></span></span></div><div class="post-meta"><i class="iconfont icon-tags"></i> <a href="/tags/Kubernetes/">#Kubernetes</a> <a href="/tags/TKE/">#TKE</a> <a href="/tags/Loki/">#Loki</a></div></div><div class="license-box my-3"><div class="license-title"><div>TKE集群部署日志聚合工具Loki</div><div>https://www.niewx.cn/2020/11/05/2020-11-05-Log-aggregation-tool-Loki/</div></div><div class="license-meta"><div class="license-meta-item"><div>作者</div><div>VashonNie</div></div><div class="license-meta-item license-meta-date"><div>发布于</div><div>2020年11月5日</div></div><div class="license-meta-item"><div>许可协议</div><div><a target="_blank" href="https://creativecommons.org/licenses/by-nc/4.0/"><span class="hint--top hint--rounded" aria-label="BY - 署名"><i class="iconfont icon-by"></i> </span></a><a target="_blank" href="https://creativecommons.org/licenses/by-nc/4.0/"><span class="hint--top hint--rounded" aria-label="NC - 非商业性使用"><i class="iconfont icon-nc"></i></span></a></div></div></div><div class="license-icon iconfont"></div></div><div class="post-prevnext my-3"><article class="post-prev col-6"><a href="/2020/11/07/2020-11-07-About-the-kubernetes-certificate/" title="关于Kubernetes证书的那点事"><i class="iconfont icon-arrowleft"></i> <span class="hidden-mobile">关于Kubernetes证书的那点事</span> <span class="visible-mobile">上一篇</span></a></article><article class="post-next col-6"><a href="/2020/11/01/2020-11-01-kubewatch-monitors-k8s-cluster-resource-changes/" title="kubewatch监控k8s集群资源变更"><span class="hidden-mobile">kubewatch监控k8s集群资源变更</span> <span class="visible-mobile">下一篇</span> <i class="iconfont icon-arrowright"></i></a></article></div></div><article id="comments" lazyload><div id="valine"></div><script type="text/javascript">Fluid.utils.loadComments("#valine",(function(){Fluid.utils.createScript("https://lib.baomitu.com/valine/1.4.16/Valine.min.js",(function(){var i=Object.assign({appId:"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz",appKey:"TuwIbmst7Q1N12V1EgEfVgDm",path:"window.location.pathname",placeholder:null,avatar:"retro",meta:["nick","mail","link"],requiredFields:[],pageSize:10,lang:"zh-CN",highlight:!1,recordIP:!1,serverURLs:"",emojiCDN:null,emojiMaps:null,enableQQ:!1},{el:"#valine",path:window.location.pathname});new Valine(i),Fluid.utils.waitElementVisible("#valine .vcontent",()=>{var i="#valine .vcontent img:not(.vemoji)";Fluid.plugins.imageCaption(i),Fluid.plugins.fancyBox(i)})}))}))</script><noscript>Please enable JavaScript to view the comments</noscript></article></article></div></div></div><div class="side-col d-none d-lg-block col-lg-2"><aside class="sidebar" style="margin-left:-1rem"><div id="toc"><p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p><div class="toc-body" id="toc-body"></div></div></aside></div></div></div><a id="scroll-top-button" aria-label="TOP" href="#" role="button"><i class="iconfont icon-arrowup" aria-hidden="true"></i></a><div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable modal-lg" role="document"><div class="modal-content"><div class="modal-header text-center"><h4 class="modal-title w-100 font-weight-bold">搜索</h4><button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button></div><div class="modal-body mx-3"><div class="md-form mb-5"><input type="text" id="local-search-input" class="form-control validate"> <label data-error="x" data-success="v" for="local-search-input">关键词</label></div><div class="list-group" id="local-search-result"></div></div></div></div></div></main><footer><div class="footer-inner"><div id="music_div" style="position:fixed;bottom:0;left:30px"><iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width="330" height="110" src="//music.163.com/outchain/player?type=0&id=919444742&auto=1&height=90"></iframe><script src="https://cdn.staticfile.org/jquery/3.3.1/jquery.min.js"></script><script src="/js/musicshow.js"></script></div><div class="footer-content"><a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a><div><span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span><script src="/js/duration.js"></script></div></div><div class="statistics"><span id="leancloud-site-pv-container" style="display:none">总访问量 <span id="leancloud-site-pv"></span> 次 </span><span id="leancloud-site-uv-container" style="display:none">总访客数 <span id="leancloud-site-uv"></span> 人</span></div></div></footer><script src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js"></script><link rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css"><script>NProgress.configure({showSpinner:!1,trickleSpeed:100}),NProgress.start(),window.addEventListener("load",(function(){NProgress.done()}))</script><script src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js"></script><script src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js"></script><script src="/js/events.js"></script><script src="/js/plugins.js"></script><script src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js"></script><script>!function(t,e){var i=Fluid.plugins.typing,n=e.getElementById("subtitle");n&&i&&i(n.getAttribute("data-typed-text"))}(window,document)</script><script defer>var _hmt=_hmt||[];!function(){var e=document.createElement("script");e.src="https://hm.baidu.com/hm.js?bfe4709ccd8c5c9e559c89f4fd0866f3";var t=document.getElementsByTagName("script")[0];t.parentNode.insertBefore(e,t)}()</script><script src="/js/img-lazyload.js"></script><script>Fluid.utils.createScript("https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js",(function(){var t=jQuery("#toc");if(0!==t.length&&window.tocbot){var o=jQuery("#board-ctn").offset().top;window.tocbot.init({tocSelector:"#toc-body",contentSelector:".markdown-body",headingSelector:CONFIG.toc.headingSelector||"h1,h2,h3,h4,h5,h6",linkClass:"tocbot-link",activeLinkClass:"tocbot-active-link",listClass:"tocbot-list",isCollapsedClass:"tocbot-is-collapsed",collapsibleClass:"tocbot-is-collapsible",collapseDepth:CONFIG.toc.collapseDepth||0,scrollSmooth:!0,headingsOffset:-o}),t.find(".toc-list-item").length>0&&t.css("visibility","visible")}}))</script><script>!function(){var e=CONFIG.code_language.enable&&CONFIG.code_language.default,a=CONFIG.copy_btn;if(e||a){var i="";i+='<div class="code-widget">',i+="LANG",i+="</div>",jQuery(".markdown-body pre").each((function(){var n=jQuery(this);if(!(n.find("code.mermaid").length>0||n.find("span.line").length>0)){var t,c="";e&&(c=CONFIG.code_language.default,n[0].children.length>0&&n[0].children[0].classList.length>=2&&n.children().hasClass("hljs")?c=n[0].children[0].classList[1]:n[0].getAttribute("data-language")?c=n[0].getAttribute("data-language"):n.parent().hasClass("sourceCode")&&n[0].children.length>0&&n[0].children[0].classList.length>=2?(c=n[0].children[0].classList[1],n.parent().addClass("code-wrapper")):n.parent().hasClass("markdown-body")&&0===n[0].classList.length&&n.wrap('<div class="code-wrapper"></div>'),c=c.toUpperCase().replace("NONE",CONFIG.code_language.default)),n.append(i.replace("LANG",c).replace('code-widget">',(t=n[0],(Fluid.utils.getBackgroundLightness(t)>=0?"code-widget-light":"code-widget-dark")+(a?' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>':' code-widget">')))),a&&Fluid.utils.createScript("https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js",(function(){new window.ClipboardJS(".copy-btn",{target:function(e){for(var a=e.parentNode.childNodes,i=0;i<a.length;i++)if("CODE"===a[i].tagName)return a[i]}}).on("success",(function(e){e.clearSelection(),e.trigger.innerHTML=e.trigger.innerHTML.replace("icon-copy","icon-success"),setTimeout((function(){e.trigger.innerHTML=e.trigger.innerHTML.replace("icon-success","icon-copy")}),2e3)}))}))}}))}}()</script><script>Fluid.utils.createScript("https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js",(function(){window.anchors.options={placement:CONFIG.anchorjs.placement,visible:CONFIG.anchorjs.visible},CONFIG.anchorjs.icon&&(window.anchors.options.icon=CONFIG.anchorjs.icon);var o=(CONFIG.anchorjs.element||"h1,h2,h3,h4,h5,h6").split(","),n=[];for(var i of o)n.push(".markdown-body > "+i.trim());"left"===CONFIG.anchorjs.placement&&(window.anchors.options.class="anchorjs-link-left"),window.anchors.add(n.join(", "))}))</script><script>Fluid.utils.createScript("https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js",(function(){Fluid.plugins.fancyBox()}))</script><script>Fluid.plugins.imageCaption()</script><script src="/js/local-search.js"></script><script defer src="/js/leancloud.js"></script><script src="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/DynamicRibbon.min.js"></script><script src="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/runtime.min.js"></script><script src="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/love.min.js"></script><script src="/js/boot.js"></script><noscript><div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div></noscript><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/z16.model.json"},"display":{"position":"right","width":180,"height":360},"mobile":{"show":true},"react":{"opacity":0.7},"log":false});</script></body></html>
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="VashonNie">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="本文章简要介绍了如何在腾讯云的TKE集群中搭建Loki日志采集工具。 Loki日志系统介绍Loki是受Prometheus启发的水平可扩展，高度可用的多租户日志聚合系统。它的设计具有很高的成本效益，并且易于操作。它不索引日志的内容，而是为每个日志流设置一组标签。 与其他日志聚合系统相比，Loki的特点  不对日志进行全文本索引。通过存储压缩的，非结构化的日志以及仅索引元数据，Loki更加易于操作且">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TKE集群部署日志聚合工具Loki">
+<meta property="og:url" content="https://www.niewx.cn/2020/11/05/2020-11-05-Log-aggregation-tool-Loki/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="本文章简要介绍了如何在腾讯云的TKE集群中搭建Loki日志采集工具。 Loki日志系统介绍Loki是受Prometheus启发的水平可扩展，高度可用的多租户日志聚合系统。它的设计具有很高的成本效益，并且易于操作。它不索引日志的内容，而是为每个日志流设置一组标签。 与其他日志聚合系统相比，Loki的特点  不对日志进行全文本索引。通过存储压缩的，非结构化的日志以及仅索引元数据，Loki更加易于操作且">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.niewx.cn/img/2020-11-05-Log-aggregation-tool-Loki/snail-bg.jpg">
+<meta property="article:published_time" content="2020-11-05T06:10:00.000Z">
+<meta property="article:modified_time" content="2020-11-05T06:10:00.000Z">
+<meta property="article:author" content="VashonNie">
+<meta property="article:tag" content="Kubernetes">
+<meta property="article:tag" content="TKE">
+<meta property="article:tag" content="Loki">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.niewx.cn/img/2020-11-05-Log-aggregation-tool-Loki/snail-bg.jpg">
+  
+  
+  <title>TKE集群部署日志聚合工具Loki - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/shubiao.css">
+<link rel="stylesheet" href="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/scroll.css">
+<link rel="stylesheet" href="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/gradient.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"www.niewx.cn","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"bfe4709ccd8c5c9e559c89f4fd0866f3","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","app_key":"TuwIbmst7Q1N12V1EgEfVgDm","server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>聂伟星</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+	
+	<iframe width="350" scrolling="no" height="20" frameborder="0" allowtransparency="true" src="https://i.tianqi.com?c=code&id=40&color=%23FFFFFF&icon=1&site=12"></iframe>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" target="_self" href="javascript:;" role="button"
+                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="iconfont icon-books"></i>
+                文档
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="https://www.niewx.cn/mybook/">
+                    <i class="iconfont icon-notebook"></i>
+                    运维笔记
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/column/87421">
+                    <i class="iconfont icon-addrbook"></i>
+                    云+社区文档
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="https://www.niewx.cn/question/">
+                    <i class="iconfont icon-notebook"></i>
+                    运维问题集锦
+                  </a>
+                
+              </div>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/playlist/">
+                <i class="iconfont icon-music"></i>
+                音乐
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" target="_self" href="javascript:;" role="button"
+                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="iconfont icon-douban-fill"></i>
+                豆瓣
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="/books">
+                    <i class="iconfont icon-book"></i>
+                    书籍
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="/movies">
+                    <i class="iconfont icon-youtube-fill"></i>
+                    电影
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" href="/games">
+                    <i class="iconfont icon-switch-fill"></i>
+                    游戏
+                  </a>
+                
+              </div>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="TKE集群部署日志聚合工具Loki"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-author" aria-hidden="true"></i>
+        VashonNie
+      </span>
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2020-11-05 14:10" pubdate>
+          2020年11月5日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          4.4k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          37 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="leancloud-page-views-container" class="post-meta" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="leancloud-page-views"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">TKE集群部署日志聚合工具Loki</h1>
+            
+            <div class="markdown-body">
+              
+              <p>本文章简要介绍了如何在腾讯云的TKE集群中搭建Loki日志采集工具。</p>
+<h1 id="Loki日志系统介绍"><a href="#Loki日志系统介绍" class="headerlink" title="Loki日志系统介绍"></a>Loki日志系统介绍</h1><p>Loki是受Prometheus启发的水平可扩展，高度可用的多租户日志聚合系统。它的设计具有很高的成本效益，并且易于操作。它不索引日志的内容，而是为每个日志流设置一组标签。</p>
+<p>与其他日志聚合系统相比，Loki的特点</p>
+<ul>
+<li>不对日志进行全文本索引。通过存储压缩的，非结构化的日志以及仅索引元数据，Loki更加易于操作且运行成本更低。</li>
+<li>使用与Prometheus相同的标签对日志流进行索引和分组，从而使您能够使用与Prometheus相同的标签在指标和日志之间无缝切换。</li>
+<li>特别适合存储Kubernetes Pod日志。诸如Pod标签之类的元数据会自动被抓取并建立索引。</li>
+<li>在Grafana中具有本机支持（需要Grafana v6.0）。</li>
+</ul>
+<p>基于Loki的日志记录堆栈包含3个组件：</p>
+<ul>
+<li>promtail是代理，负责收集日志并将其发送给Loki。</li>
+<li>loki是主服务器，负责存储日志和处理查询。</li>
+<li>Grafana用于查询和显示日志。</li>
+</ul>
+<p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/1.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>Loki其实类似于elk和prometheus的架构，部署在k8s中，通过DaemonSet的方式部署promtail用来采集节点的日志，将采集的日志数据投递到loki，最后通过grafana来进行前端的界面查询和展示。</p>
+<p>Loki像Prometheus一样，但是对于日志：我们更喜欢基于多维标签的索引方法，并且想要一个没有依赖性的，易于操作的单二进制系统。 Loki与Prometheus的不同之处在于，它侧重于日志而不是指标，并通过推送而不是拉动交付日志。</p>
+<h1 id="部署Loki和grafana到k8s集群"><a href="#部署Loki和grafana到k8s集群" class="headerlink" title="部署Loki和grafana到k8s集群"></a>部署Loki和grafana到k8s集群</h1><h2 id="部署loki和promtail"><a href="#部署loki和promtail" class="headerlink" title="部署loki和promtail"></a>部署loki和promtail</h2><p>这里我们通过helm来部署loki和promtail到集群中，这里使用的环境是腾讯云上的托管TKE集群，在腾讯云上的容器服务有直接提供loki应用让我们直接部署到集群中，下面我们说一下部署方式</p>
+<h3 id="控制台部署loki应用到集群"><a href="#控制台部署loki应用到集群" class="headerlink" title="控制台部署loki应用到集群"></a>控制台部署loki应用到集群</h3><p>点击腾讯云容器服务，点击应用，选择你的集群，点击新建。</p>
+<p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/2.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>输入你的应用名和应用部署的命名空间，在日志分析中找到loki-stack，然后点击完成即可。</p>
+<p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/3.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>这边部署成功后可以去控制台进入loki查看应用，你会发现部署loki和对应的promtail，这些pod都正常启动，说明loki和promtail都部署成功了。</p>
+<p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/4.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/5.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<h3 id="helm命令部署loki应用到集群"><a href="#helm命令部署loki应用到集群" class="headerlink" title="helm命令部署loki应用到集群"></a>helm命令部署loki应用到集群</h3><p>当然如果你习惯用helm命令操作部署也是可以的，下面讲一下helm命名的部署方式</p>
+<figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs jboss-cli"><span class="hljs-string">//</span>添加loki仓库<br>$ helm repo add loki https:<span class="hljs-string">//grafana.github.io/charts</span><br>$ helm repo update<br><span class="hljs-string">//</span>采用默认配置部署<br>$ helm upgrade <span class="hljs-params">--install</span> loki <span class="hljs-params">--namespace=loki</span> <span class="hljs-params">--name=nwx-loki</span> loki-stack <br><span class="hljs-string">//</span>部署Loki和Fluent Bit到您的集群<br>$ helm upgrade <span class="hljs-params">--install</span> loki <span class="hljs-params">--namespace=loki</span> <span class="hljs-params">--name=nwx-loki</span> \<br>    <span class="hljs-params">--set</span> fluent-bit.enabled=<span class="hljs-literal">true</span>,promtail.enabled=<span class="hljs-literal">false</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="部署grafana"><a href="#部署grafana" class="headerlink" title="部署grafana"></a>部署grafana</h2><h3 id="部署grafana及对应的service"><a href="#部署grafana及对应的service" class="headerlink" title="部署grafana及对应的service"></a>部署grafana及对应的service</h3><p>下面我们部署grafana作为前端界面来查询loki所采集的日志，这里在选择grafana版本需要注意，版本需要6.0以上的版本。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">apps/v1beta2</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Deployment</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">labels:</span><br>    <span class="hljs-attr">k8s-app:</span> <span class="hljs-string">gafana</span><br>    <span class="hljs-attr">qcloud-app:</span> <span class="hljs-string">gafana</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">gafana</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">loki</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">progressDeadlineSeconds:</span> <span class="hljs-number">600</span><br>  <span class="hljs-attr">replicas:</span> <span class="hljs-number">1</span><br>  <span class="hljs-attr">revisionHistoryLimit:</span> <span class="hljs-number">10</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">matchLabels:</span><br>      <span class="hljs-attr">k8s-app:</span> <span class="hljs-string">gafana</span><br>      <span class="hljs-attr">qcloud-app:</span> <span class="hljs-string">gafana</span><br>  <span class="hljs-attr">strategy:</span><br>    <span class="hljs-attr">rollingUpdate:</span><br>      <span class="hljs-attr">maxSurge:</span> <span class="hljs-number">1</span><br>      <span class="hljs-attr">maxUnavailable:</span> <span class="hljs-number">0</span><br>    <span class="hljs-attr">type:</span> <span class="hljs-string">RollingUpdate</span><br>  <span class="hljs-attr">template:</span><br>    <span class="hljs-attr">metadata:</span><br>      <span class="hljs-attr">labels:</span><br>        <span class="hljs-attr">k8s-app:</span> <span class="hljs-string">gafana</span><br>        <span class="hljs-attr">qcloud-app:</span> <span class="hljs-string">gafana</span><br>    <span class="hljs-attr">spec:</span><br>      <span class="hljs-attr">containers:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">image:</span> <span class="hljs-string">grafana/grafana:master</span><br>        <span class="hljs-attr">imagePullPolicy:</span> <span class="hljs-string">Always</span><br>        <span class="hljs-attr">name:</span> <span class="hljs-string">gafana</span><br>        <span class="hljs-attr">resources:</span><br>          <span class="hljs-attr">limits:</span><br>            <span class="hljs-attr">cpu:</span> <span class="hljs-string">500m</span><br>            <span class="hljs-attr">memory:</span> <span class="hljs-string">1Gi</span><br>          <span class="hljs-attr">requests:</span><br>            <span class="hljs-attr">cpu:</span> <span class="hljs-string">250m</span><br>            <span class="hljs-attr">memory:</span> <span class="hljs-string">256Mi</span><br>        <span class="hljs-attr">securityContext:</span><br>          <span class="hljs-attr">privileged:</span> <span class="hljs-literal">false</span><br>        <span class="hljs-attr">terminationMessagePath:</span> <span class="hljs-string">/dev/termination-log</span><br>        <span class="hljs-attr">terminationMessagePolicy:</span> <span class="hljs-string">File</span><br>      <span class="hljs-attr">dnsPolicy:</span> <span class="hljs-string">ClusterFirst</span><br>      <span class="hljs-attr">imagePullSecrets:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">qcloudregistrykey</span><br>      <span class="hljs-attr">restartPolicy:</span> <span class="hljs-string">Always</span><br>      <span class="hljs-attr">schedulerName:</span> <span class="hljs-string">default-scheduler</span><br>      <span class="hljs-attr">securityContext:</span> &#123;&#125;<br>      <span class="hljs-attr">terminationGracePeriodSeconds:</span> <span class="hljs-number">30</span><br></code></pre></td></tr></table></figure>
+
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Service</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">gafana</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">loki</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">externalTrafficPolicy:</span> <span class="hljs-string">Cluster</span><br>  <span class="hljs-attr">ports:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-number">3000</span><span class="hljs-number">-3000</span><span class="hljs-string">-tcp</span><br>    <span class="hljs-attr">nodePort:</span> <span class="hljs-number">32074</span><br>    <span class="hljs-attr">port:</span> <span class="hljs-number">3000</span><br>    <span class="hljs-attr">protocol:</span> <span class="hljs-string">TCP</span><br>    <span class="hljs-attr">targetPort:</span> <span class="hljs-number">3000</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">k8s-app:</span> <span class="hljs-string">gafana</span><br>    <span class="hljs-attr">qcloud-app:</span> <span class="hljs-string">gafana</span><br>  <span class="hljs-attr">sessionAffinity:</span> <span class="hljs-string">None</span><br>  <span class="hljs-attr">type:</span> <span class="hljs-string">NodePort</span><br></code></pre></td></tr></table></figure>
+
+<p>直接kubectl apply上面2个yaml文件创建grafana应用和对应的service，也可以控制台创建</p>
+<p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/6.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/7.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<h3 id="通过treafik给grafana配置域名访问"><a href="#通过treafik给grafana配置域名访问" class="headerlink" title="通过treafik给grafana配置域名访问"></a>通过treafik给grafana配置域名访问</h3><p>这里集群部署的treafik是2.0版本，关于treafik2.0部署可以参考 <a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1642306">https://cloud.tencent.com/developer/article/1642306</a></p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-meta">---</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">traefik.containo.us/v1alpha1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">IngressRoute</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">loki</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">loki</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">entryPoints:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-string">web</span><br>  <span class="hljs-attr">routes:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">match:</span> <span class="hljs-string">Host(`loki.tx.niewx.cn`)</span><br>    <span class="hljs-attr">kind:</span> <span class="hljs-string">Rule</span><br>    <span class="hljs-attr">services:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">gafana</span><br>      <span class="hljs-attr">port:</span> <span class="hljs-number">3000</span><br></code></pre></td></tr></table></figure>
+<p>直接添加一个IngressRoute就可以了，下面我们通过配置的域名看看是否可以成功。</p>
+<p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/8.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>可以进入登陆界面表示部署成功。</p>
+<h1 id="通过grafana界面查询日志"><a href="#通过grafana界面查询日志" class="headerlink" title="通过grafana界面查询日志"></a>通过grafana界面查询日志</h1><h2 id="grafana配置loki数据源"><a href="#grafana配置loki数据源" class="headerlink" title="grafana配置loki数据源"></a>grafana配置loki数据源</h2><p>下面我们需要在grafana配置一下loki的数据源，这样我们才可以在grafana上查询loki的日志，首先我们登录grafana，初始化账号密码是admin&#x2F;admin，第一次登录会要求你修改密码，登录成功后有一个grafana介绍。</p>
+<p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/9.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>找到配置选项的Data Sources，点击添加数据源，选择loki，在loki数据源的url配置上你的service名称地址，我的service名称是nwx-loki，因此我们这里配置的是这个地址 <a href="http://nwx-loki:3100，配置好后点击测试，如果能连接成功说明添加成功。">http://nwx-loki:3100，配置好后点击测试，如果能连接成功说明添加成功。</a></p>
+<p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/10.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/11.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/12.png" srcset="/img/loading.gif" lazyload alt="upload-image"></p>
+<p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/13.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<h2 id="界面上查询日志"><a href="#界面上查询日志" class="headerlink" title="界面上查询日志"></a>界面上查询日志</h2><p>添加数据源后，点击explore可以直接进到loki的查询界面</p>
+<p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/14.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/15.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>我们这边查询一下loki的日志看看，点击log label选择app中的loki就可以看到loki的业务日志</p>
+<p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/16.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/17.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<h2 id="loki查询语法"><a href="#loki查询语法" class="headerlink" title="loki查询语法"></a>loki查询语法</h2><p>下面我们简单的测试一下loki的查询语法</p>
+<h3 id="job日志流"><a href="#job日志流" class="headerlink" title="job日志流"></a>job日志流</h3><figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs abnf">&#123;job<span class="hljs-operator">=</span><span class="hljs-string">&quot;efk/elasticsearch-master&quot;</span>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/18.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<h3 id="合并流选择器"><a href="#合并流选择器" class="headerlink" title="合并流选择器"></a>合并流选择器</h3><figure class="highlight actionscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs actionscript">&#123;app =<span class="hljs-string">&quot;elasticsearch-master&quot;</span>,<span class="hljs-keyword">namespace</span> =<span class="hljs-string">&quot;efk&quot;</span>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/19.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<h3 id="标签匹配的运算符"><a href="#标签匹配的运算符" class="headerlink" title="标签匹配的运算符"></a>标签匹配的运算符</h3><ul>
+<li>&#x3D;： 完全相等。</li>
+<li>!&#x3D;： 不相等。</li>
+<li>&#x3D;~： 正则表达式匹配。</li>
+<li>!~： 正则表达式不匹配。<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs actionscript">&#123;app != <span class="hljs-string">&quot;kibana&quot;</span>,<span class="hljs-keyword">namespace</span> =<span class="hljs-string">&quot;efk&quot;</span>&#125;<br></code></pre></td></tr></table></figure></li>
+</ul>
+<p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/20.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<h3 id="行筛选器表达式"><a href="#行筛选器表达式" class="headerlink" title="行筛选器表达式"></a>行筛选器表达式</h3><ul>
+<li>|&#x3D;：日志行包含字符串。</li>
+<li>!&#x3D;：日志行不包含字符串。</li>
+<li>|~：日志行与正则表达式匹配。</li>
+<li>!~：日志行与正则表达式不匹配。</li>
+</ul>
+<figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs 1c">&#123;app = <span class="hljs-string">&quot;kibana&quot;</span>,namespace =<span class="hljs-string">&quot;efk&quot;</span>&#125; <span class="hljs-string">|= &quot;</span><span class="hljs-number">172.16</span>.<span class="hljs-number">2.108</span><span class="hljs-string">&quot;</span><br></code></pre></td></tr></table></figure>
+
+<p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/21.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>筛选器运算符可以多个并将按顺序筛选表达式 - 生成的日志行必须同时满足所有条件。</p>
+<figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs 1c">&#123;app = <span class="hljs-string">&quot;kibana&quot;</span>,namespace =<span class="hljs-string">&quot;efk&quot;</span>&#125; <span class="hljs-string">|= &quot;</span><span class="hljs-number">172.16</span>.<span class="hljs-number">2.108</span><span class="hljs-string">&quot; != &quot;</span><span class="hljs-number">04</span>:<span class="hljs-number">58</span>:<span class="hljs-number">40</span><span class="hljs-string">&quot;</span><br></code></pre></td></tr></table></figure>
+
+<p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/22.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<h3 id="统计某一时间段的日志数"><a href="#统计某一时间段的日志数" class="headerlink" title="统计某一时间段的日志数"></a>统计某一时间段的日志数</h3><figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs reasonml">count<span class="hljs-constructor">_over_time(&#123;<span class="hljs-params">app</span> = <span class="hljs-string">&quot;kibana&quot;</span>,<span class="hljs-params">namespace</span> =<span class="hljs-string">&quot;efk&quot;</span> &#125;[1m])</span><br></code></pre></td></tr></table></figure>
+
+<p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/23.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>获取过去1个小时的日志计数，按级别分组</p>
+<figure class="highlight lisp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs lisp">sum(<span class="hljs-name">count_over_time</span>(&#123;job=<span class="hljs-string">&quot;default/nginx&quot;</span>&#125;[<span class="hljs-number">60</span>m])) by (<span class="hljs-name">level</span>) <br></code></pre></td></tr></table></figure>
+
+<p><img src="/img/2020-11-05-Log-aggregation-tool-Loki/24.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>loki配备了自己的查询LogQL，详细的查询语法参考<a target="_blank" rel="noopener" href="https://github.com/grafana/blob/master/docs/sources/logql/_index.md">https://github.com/grafana/blob/master/docs/sources/logql/_index.md</a></p>
+<p>有两种类型的 LogQL 查询：</p>
+<ul>
+<li>日志查询返回日志行的内容。</li>
+<li>指标查询扩展日志查询，并基于日志查询中的日志内容计算示例值。</li>
+</ul>
+<p>logQL基本上能满足我们的日常查询需求。大家可以多多学习实际操作下。</p>
+<h1 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h1><p><a target="_blank" rel="noopener" href="https://github.com/grafana/loki">https://github.com/grafana/loki</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/grafana/blob/master/docs/sources/logql/_index.md">https://github.com/grafana/blob/master/docs/sources/logql/_index.md</a></p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Kubernetes/" class="category-chain-item">Kubernetes</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/Kubernetes/TKE/" class="category-chain-item">TKE</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/Kubernetes/TKE/Log/" class="category-chain-item">Log</a>
+  
+  
+
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Kubernetes/">#Kubernetes</a>
+      
+        <a href="/tags/TKE/">#TKE</a>
+      
+        <a href="/tags/Loki/">#Loki</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>TKE集群部署日志聚合工具Loki</div>
+      <div>https://www.niewx.cn/2020/11/05/2020-11-05-Log-aggregation-tool-Loki/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>VashonNie</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2020年11月5日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by-nc/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by-nc/4.0/">
+              <span class="hint--top hint--rounded" aria-label="NC - 非商业性使用">
+                <i class="iconfont icon-nc"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2020/11/07/2020-11-07-About-the-kubernetes-certificate/" title="关于Kubernetes证书的那点事">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">关于Kubernetes证书的那点事</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2020/11/01/2020-11-01-kubewatch-monitors-k8s-cluster-resource-changes/" title="kubewatch监控k8s集群资源变更">
+                        <span class="hidden-mobile">kubewatch监控k8s集群资源变更</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <div id="valine"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#valine', function() {
+      Fluid.utils.createScript('https://lib.baomitu.com/valine/1.4.16/Valine.min.js', function() {
+        var options = Object.assign(
+          {"appId":"XirY0sfpYd0HU4g4MjKSR39K-gzGzoHsz","appKey":"TuwIbmst7Q1N12V1EgEfVgDm","path":"window.location.pathname","placeholder":null,"avatar":"retro","meta":["nick","mail","link"],"requiredFields":[],"pageSize":10,"lang":"zh-CN","highlight":false,"recordIP":false,"serverURLs":"","emojiCDN":null,"emojiMaps":null,"enableQQ":false},
+          {
+            el: "#valine",
+            path: window.location.pathname
+          }
+        )
+        new Valine(options);
+        Fluid.utils.waitElementVisible('#valine .vcontent', () => {
+          var imgSelector = '#valine .vcontent img:not(.vemoji)';
+          Fluid.plugins.imageCaption(imgSelector);
+          Fluid.plugins.fancyBox(imgSelector);
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+   <div id="music_div" style="position: fixed; bottom: 0px; left: 30px;">
+    <iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=110 
+    	src="//music.163.com/outchain/player?type=0&id=919444742&auto=1&height=90">
+    </iframe>
+    <script src="https://cdn.staticfile.org/jquery/3.3.1/jquery.min.js"></script>
+    <script src="/js/musicshow.js"></script>
+</div>
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> </div>
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="leancloud-site-pv-container" style="display: none">
+        总访问量 
+        <span id="leancloud-site-pv"></span>
+         次
+      </span>
+    
+    
+      <span id="leancloud-site-uv-container" style="display: none">
+        总访客数 
+        <span id="leancloud-site-uv"></span>
+         人
+      </span>
+    
+    
+
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?bfe4709ccd8c5c9e559c89f4fd0866f3";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="/js/leancloud.js" ></script>
+
+
+
+
+  
+<script src="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/DynamicRibbon.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/runtime.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/EmoryHuang/BlogBeautify@1.1/love.min.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/z16.model.json"},"display":{"position":"right","width":180,"height":360},"mobile":{"show":true},"react":{"opacity":0.7},"log":false});</script></body>
+</html>
