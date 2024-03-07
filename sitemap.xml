@@ -56,7 +56,7 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2022/03/24/2022-03-24-Build-a-test-k8s-cluster-with-a-single-node/</loc>
+    <loc>https://www.niewx.cn/2022/03/21/2022-03-21-Operator-builds-redis-cluster-on-k8s/</loc>
     
     <lastmod>2022-04-06</lastmod>
     
@@ -65,7 +65,7 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2022/03/21/2022-03-21-Operator-builds-redis-cluster-on-k8s/</loc>
+    <loc>https://www.niewx.cn/2022/03/24/2022-03-24-Build-a-test-k8s-cluster-with-a-single-node/</loc>
     
     <lastmod>2022-04-06</lastmod>
     
@@ -101,15 +101,6 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2022/02/15/2022-02-15-Manage-multi-cluster-kubeconfig-through-context/</loc>
-    
-    <lastmod>2022-04-06</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://www.niewx.cn/2022/03/21/2022-03-21-Kubernetes-deploys-mysql-master-slave-cluster/</loc>
     
     <lastmod>2022-04-06</lastmod>
@@ -119,7 +110,7 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2021/11/11/2021-11-11-How-to-configure-nginx-ingress-log-format/</loc>
+    <loc>https://www.niewx.cn/2022/02/15/2022-02-15-Manage-multi-cluster-kubeconfig-through-context/</loc>
     
     <lastmod>2022-04-06</lastmod>
     
@@ -129,6 +120,15 @@
   
   <url>
     <loc>https://www.niewx.cn/2021/11/09/2021-11-09-Use-Nginx-Ingress-to-expose-TCP-and-udp-services/</loc>
+    
+    <lastmod>2022-04-06</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://www.niewx.cn/2021/11/11/2021-11-11-How-to-configure-nginx-ingress-log-format/</loc>
     
     <lastmod>2022-04-06</lastmod>
     
@@ -164,7 +164,7 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2021/09/14/2021-09-14-The-elastic-cluster-collects-nginx-ingress-controller-access-logs/</loc>
+    <loc>https://www.niewx.cn/2021/09/11/2021-09-11-Terraform-orchestrates-Tencent-Cloud-resources/</loc>
     
     <lastmod>2022-04-06</lastmod>
     
@@ -173,7 +173,7 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2021/09/11/2021-09-11-Terraform-orchestrates-Tencent-Cloud-resources/</loc>
+    <loc>https://www.niewx.cn/2021/09/14/2021-09-14-The-elastic-cluster-collects-nginx-ingress-controller-access-logs/</loc>
     
     <lastmod>2022-04-06</lastmod>
     
@@ -776,7 +776,7 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2020/08/14/2020-08-14-Self-made-CA-certificate-set-ssl-certificate/</loc>
+    <loc>https://www.niewx.cn/2020/08/14/2020-08-14-TKE's-first-knowledge-of-container-detectors/</loc>
     
     <lastmod>2020-08-14</lastmod>
     
@@ -785,7 +785,7 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2020/08/14/2020-08-14-TKE's-first-knowledge-of-container-detectors/</loc>
+    <loc>https://www.niewx.cn/2020/08/14/2020-08-14-Self-made-CA-certificate-set-ssl-certificate/</loc>
     
     <lastmod>2020-08-14</lastmod>
     
@@ -875,7 +875,7 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2020/07/12/2020-07-12-Deployment-and-use-of-Traefik1.7.17/</loc>
+    <loc>https://www.niewx.cn/2020/07/12/2020-07-12-Harbor-builds-enterprise-docker-private-mirror-repository/</loc>
     
     <lastmod>2020-07-12</lastmod>
     
@@ -884,7 +884,7 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/2020/07/12/2020-07-12-Harbor-builds-enterprise-docker-private-mirror-repository/</loc>
+    <loc>https://www.niewx.cn/2020/07/12/2020-07-12-Deployment-and-use-of-Traefik1.7.17/</loc>
     
     <lastmod>2020-07-12</lastmod>
     
@@ -1052,13 +1052,6 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/tags/Coredns/</loc>
-    <lastmod>2024-03-07</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
     <loc>https://www.niewx.cn/tags/Treafik2/</loc>
     <lastmod>2024-03-07</lastmod>
     <changefreq>weekly</changefreq>
@@ -1066,21 +1059,7 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/tags/Treafik1-7/</loc>
-    <lastmod>2024-03-07</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://www.niewx.cn/tags/configMap/</loc>
-    <lastmod>2024-03-07</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://www.niewx.cn/tags/Service/</loc>
+    <loc>https://www.niewx.cn/tags/Coredns/</loc>
     <lastmod>2024-03-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -1094,7 +1073,28 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/tags/NFS/</loc>
+    <loc>https://www.niewx.cn/tags/configMap/</loc>
+    <lastmod>2024-03-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://www.niewx.cn/tags/Treafik1-7/</loc>
+    <lastmod>2024-03-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://www.niewx.cn/tags/Service/</loc>
+    <lastmod>2024-03-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://www.niewx.cn/tags/Dashboard/</loc>
     <lastmod>2024-03-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -1102,6 +1102,20 @@
   
   <url>
     <loc>https://www.niewx.cn/tags/COS/</loc>
+    <lastmod>2024-03-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://www.niewx.cn/tags/NFS/</loc>
+    <lastmod>2024-03-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://www.niewx.cn/tags/Probe/</loc>
     <lastmod>2024-03-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -1123,13 +1137,6 @@
   
   <url>
     <loc>https://www.niewx.cn/tags/Jenkins/</loc>
-    <lastmod>2024-03-07</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://www.niewx.cn/tags/Probe/</loc>
     <lastmod>2024-03-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -1185,13 +1192,6 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/tags/securityContext/</loc>
-    <lastmod>2024-03-07</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
     <loc>https://www.niewx.cn/tags/Istio/</loc>
     <lastmod>2024-03-07</lastmod>
     <changefreq>weekly</changefreq>
@@ -1213,13 +1213,6 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/tags/ServiceEntry/</loc>
-    <lastmod>2024-03-07</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
     <loc>https://www.niewx.cn/tags/Gateway/</loc>
     <lastmod>2024-03-07</lastmod>
     <changefreq>weekly</changefreq>
@@ -1227,7 +1220,21 @@
   </url>
   
   <url>
+    <loc>https://www.niewx.cn/tags/ServiceEntry/</loc>
+    <lastmod>2024-03-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
     <loc>https://www.niewx.cn/tags/Kiali/</loc>
+    <lastmod>2024-03-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://www.niewx.cn/tags/Envoy/</loc>
     <lastmod>2024-03-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -1242,13 +1249,6 @@
   
   <url>
     <loc>https://www.niewx.cn/tags/Grafana/</loc>
-    <lastmod>2024-03-07</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://www.niewx.cn/tags/Envoy/</loc>
     <lastmod>2024-03-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -1276,14 +1276,21 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/tags/Kubeadm/</loc>
+    <loc>https://www.niewx.cn/tags/Kong/</loc>
     <lastmod>2024-03-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/tags/Kong/</loc>
+    <loc>https://www.niewx.cn/tags/securityContext/</loc>
+    <lastmod>2024-03-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://www.niewx.cn/tags/Kubeadm/</loc>
     <lastmod>2024-03-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -1304,14 +1311,14 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/tags/Nginx/</loc>
+    <loc>https://www.niewx.cn/tags/gitbook/</loc>
     <lastmod>2024-03-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/tags/gitbook/</loc>
+    <loc>https://www.niewx.cn/tags/Nginx/</loc>
     <lastmod>2024-03-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -1325,14 +1332,7 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/tags/cert-manager/</loc>
-    <lastmod>2024-03-07</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://www.niewx.cn/tags/python/</loc>
+    <loc>https://www.niewx.cn/tags/Terraform/</loc>
     <lastmod>2024-03-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -1346,7 +1346,7 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/tags/Terraform/</loc>
+    <loc>https://www.niewx.cn/tags/cert-manager/</loc>
     <lastmod>2024-03-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -1423,6 +1423,13 @@
   </url>
   
   <url>
+    <loc>https://www.niewx.cn/tags/python/</loc>
+    <lastmod>2024-03-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
     <loc>https://www.niewx.cn/tags/ephemeral-storage/</loc>
     <lastmod>2024-03-07</lastmod>
     <changefreq>weekly</changefreq>
@@ -1451,21 +1458,14 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/tags/mesh/</loc>
-    <lastmod>2024-03-07</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://www.niewx.cn/tags/Dashboard/</loc>
-    <lastmod>2024-03-07</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
     <loc>https://www.niewx.cn/tags/flannel/</loc>
+    <lastmod>2024-03-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://www.niewx.cn/tags/mesh/</loc>
     <lastmod>2024-03-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -1530,6 +1530,13 @@
   </url>
   
   <url>
+    <loc>https://www.niewx.cn/categories/Kubernetes/</loc>
+    <lastmod>2024-03-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
     <loc>https://www.niewx.cn/categories/TKE/</loc>
     <lastmod>2024-03-07</lastmod>
     <changefreq>weekly</changefreq>
@@ -1544,14 +1551,14 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/categories/Kubernetes/</loc>
+    <loc>https://www.niewx.cn/categories/TKE/Kubernetes/</loc>
     <lastmod>2024-03-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/categories/TKE/Kubernetes/</loc>
+    <loc>https://www.niewx.cn/categories/Harbor/</loc>
     <lastmod>2024-03-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -1565,7 +1572,7 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/categories/Harbor/</loc>
+    <loc>https://www.niewx.cn/categories/Kubernetes/Docker/</loc>
     <lastmod>2024-03-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -1586,7 +1593,7 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/categories/Kubernetes/Docker/</loc>
+    <loc>https://www.niewx.cn/categories/Docker/</loc>
     <lastmod>2024-03-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -1594,13 +1601,6 @@
   
   <url>
     <loc>https://www.niewx.cn/categories/Kubernetes/TKE/</loc>
-    <lastmod>2024-03-07</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://www.niewx.cn/categories/Docker/</loc>
     <lastmod>2024-03-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -1649,13 +1649,6 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/categories/Rancher/</loc>
-    <lastmod>2024-03-07</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
     <loc>https://www.niewx.cn/categories/Kubernetes/TKE/Log/</loc>
     <lastmod>2024-03-07</lastmod>
     <changefreq>weekly</changefreq>
@@ -1663,7 +1656,7 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/categories/Nginx/</loc>
+    <loc>https://www.niewx.cn/categories/Rancher/</loc>
     <lastmod>2024-03-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -1677,6 +1670,13 @@
   </url>
   
   <url>
+    <loc>https://www.niewx.cn/categories/Nginx/</loc>
+    <lastmod>2024-03-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
     <loc>https://www.niewx.cn/categories/elasticsearch/</loc>
     <lastmod>2024-03-07</lastmod>
     <changefreq>weekly</changefreq>
@@ -1684,14 +1684,7 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/categories/cert-manager/</loc>
-    <lastmod>2024-03-07</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://www.niewx.cn/categories/python/</loc>
+    <loc>https://www.niewx.cn/categories/Terraform/</loc>
     <lastmod>2024-03-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -1705,7 +1698,7 @@
   </url>
   
   <url>
-    <loc>https://www.niewx.cn/categories/Terraform/</loc>
+    <loc>https://www.niewx.cn/categories/cert-manager/</loc>
     <lastmod>2024-03-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -1748,6 +1741,13 @@
   
   <url>
     <loc>https://www.niewx.cn/categories/Database/</loc>
+    <lastmod>2024-03-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://www.niewx.cn/categories/python/</loc>
     <lastmod>2024-03-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
