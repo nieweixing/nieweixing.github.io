@@ -25,7 +25,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://www.niewx.cn/img/2022-03-28-Flannel-network-mode-of-k8s/bg.jpg">
 <meta property="article:published_time" content="2022-03-28T07:19:52.000Z">
-<meta property="article:modified_time" content="2022-04-06T03:47:48.000Z">
+<meta property="article:modified_time" content="2024-11-22T02:21:31.232Z">
 <meta property="article:author" content="VashonNie">
 <meta property="article:tag" content="Kubernetes">
 <meta property="article:tag" content="flannel">
@@ -320,7 +320,7 @@
         <i class="iconfont icon-chart"></i>
         
           <!-- compatible with older versions-->
-          4.1k 字
+          4k 字
         
       </span>
     
@@ -332,7 +332,7 @@
         
         
           <!-- compatible with older versions-->
-          35 分钟
+          34 分钟
         
       </span>
     
@@ -417,12 +417,16 @@
 <figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs ruby">[root<span class="hljs-variable">@Node1</span> ~]<span class="hljs-comment"># bridge fdb show | grep flannel.1</span><br><span class="hljs-symbol">ba:</span><span class="hljs-number">74</span><span class="hljs-symbol">:f9</span><span class="hljs-symbol">:db</span><span class="hljs-symbol">:</span><span class="hljs-number">69</span><span class="hljs-symbol">:c1</span> dev flannel.<span class="hljs-number">1</span> dst <span class="hljs-number">192.168</span>.<span class="hljs-number">50.3</span> <span class="hljs-variable language_">self</span> permanent<br></code></pre></td></tr></table></figure>
 
 <p>源IP地址信息来自于 flannel.1 网卡设置本身，根据 local 192.168.50.2 可以得知源IP地址为192.168.50.2。</p>
-<p>&#96;&#96;&#96;&#96;<br>[root@Node1 ~]# ip -d a show flannel.1<br>6: flannel.1: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1450 qdisc noqueue state UNKNOWN group default<br>    link&#x2F;ether 32:02:78:2f:02:cb brd ff:ff:ff:ff:ff:ff promiscuity 0<br>    vxlan id 1 local 192.168.50.2 dev eth0 srcport 0 0 dstport 8472 nolearning ageing 300 noudpcsum noudp6zerocsumtx noudp6zerocsumrx numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535<br>    inet 10.244.0.0&#x2F;32 brd 10.244.0.0 scope global flannel.1<br>       valid_lft forever preferred_lft forever<br>    inet6 fe80::3002:78ff:fe2f:2cb&#x2F;64 scope link<br>       valid_lft forever preferred_lft forever</p>
-<figure class="highlight sqf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs sqf"><br>至此， flannel.<span class="hljs-number">1</span> 已经得到了所有完成VXLAN封包所需的信息，最终通过 eth0 发送一个VXLAN UDP报文： <span class="hljs-built_in">image</span>.png Flannel的VXLAN模式通过静态配置路由表，ARP表和FDB表的信息，结合VXLAN虚拟网卡 flannel.<span class="hljs-number">1</span> ，实现了一个所有Pod同属一个大二层网络的VXLAN网络模型。<br><br><br><span class="hljs-meta"># host-gw模式</span><br><br>在上述的VXLAN的示例中，Node1和Node2其实是同一宿主机中的两台使用桥接模式的虚机，也就是说它们在一个二层网络中。在二层网络互通的情况下，直接配置节点的三层路由即可互通，不需要使用VXLAN隧道。要使用host-gw模式，需要修改 ConfigMap kube-flannel-cfg ，将 Backend.<span class="hljs-built_in">Type</span> 从vxlan改为host-gw，然后重启所有kube-flannel Pod即可：<br><br></code></pre></td></tr></table></figure>
-<p>  net-conf.json: |<br>    {<br>      “Network”: “10.244.0.0&#x2F;16”,<br>      “Backend”: {<br>        “Type”: “host-gw” &#x2F;&#x2F; &lt;- 改成host-gw<br>      }<br>    }</p>
-<figure class="highlight arcade"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs arcade"><br>![upload-image](<span class="hljs-regexp">/img/</span><span class="hljs-number">2022</span><span class="hljs-number">-03</span><span class="hljs-number">-28</span>-Flannel-network-mode-of-k8s/<span class="hljs-number">5.</span>png) <br><br>在host-gw模式下，由于不涉及VXLAN的封包解包，不再需要flannel<span class="hljs-number">.1</span>虚机网卡。 flanneld 负责为各节点设置路由 ，将对应节点Pod子网的下一跳地址指向对应的节点的IP，如图中路由表①所示。<br><br></code></pre></td></tr></table></figure>
-<p>[root@Node1 ~]# ip r<br>…<br>10.244.0.0&#x2F;24 dev cni0 proto kernel scope link src 10.244.0.1<br>10.244.1.0&#x2F;24 via 192.168.50.3 dev eth0 # Node2子网的下一跳地址指向Node2的public ip。</p>
-<p>&#96;&#96;&#96;</p>
+<figure class="highlight pf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs pf">[root@Node1 ~]<span class="hljs-comment"># ip -d a show flannel.1</span><br><span class="hljs-number">6</span>: flannel.<span class="hljs-number">1</span>: <span class="hljs-variable">&lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt;</span> mtu <span class="hljs-number">1450</span> qdisc noqueue <span class="hljs-keyword">state</span> UNKNOWN <span class="hljs-keyword">group</span> <span class="hljs-keyword">default</span><br>    link/ether <span class="hljs-number">32</span>:<span class="hljs-number">02</span>:<span class="hljs-number">78</span>:<span class="hljs-number">2</span>f:<span class="hljs-number">02</span>:cb brd ff:ff:ff:ff:ff:ff promiscuity <span class="hljs-number">0</span><br>    vxlan id <span class="hljs-number">1</span> local <span class="hljs-number">192.168</span>.<span class="hljs-number">50.2</span> dev eth0 srcport <span class="hljs-number">0</span> <span class="hljs-number">0</span> dstport <span class="hljs-number">8472</span> nolearning ageing <span class="hljs-number">300</span> noudpcsum noudp6zerocsumtx noudp6zerocsumrx numtxqueues <span class="hljs-number">1</span> numrxqueues <span class="hljs-number">1</span> gso_max_size <span class="hljs-number">65536</span> gso_max_segs <span class="hljs-number">65535</span><br>    <span class="hljs-keyword">inet</span> <span class="hljs-number">10.244</span>.<span class="hljs-number">0.0</span>/<span class="hljs-number">32</span> brd <span class="hljs-number">10.244</span>.<span class="hljs-number">0.0</span> scope <span class="hljs-keyword">global</span> flannel.<span class="hljs-number">1</span><br>       valid_lft forever preferred_lft forever<br>    <span class="hljs-keyword">inet6</span> fe80::<span class="hljs-number">3002</span>:<span class="hljs-number">78</span>ff:fe2f:<span class="hljs-number">2</span>cb/<span class="hljs-number">64</span> scope link<br>       valid_lft forever preferred_lft forever<br></code></pre></td></tr></table></figure>
+
+<p>至此， flannel.1 已经得到了所有完成VXLAN封包所需的信息，最终通过 eth0 发送一个VXLAN UDP报文： image.png Flannel的VXLAN模式通过静态配置路由表，ARP表和FDB表的信息，结合VXLAN虚拟网卡 flannel.1 ，实现了一个所有Pod同属一个大二层网络的VXLAN网络模型。</p>
+<h1 id="host-gw模式"><a href="#host-gw模式" class="headerlink" title="host-gw模式"></a>host-gw模式</h1><p>在上述的VXLAN的示例中，Node1和Node2其实是同一宿主机中的两台使用桥接模式的虚机，也就是说它们在一个二层网络中。在二层网络互通的情况下，直接配置节点的三层路由即可互通，不需要使用VXLAN隧道。要使用host-gw模式，需要修改 ConfigMap kube-flannel-cfg ，将 Backend.Type 从vxlan改为host-gw，然后重启所有kube-flannel Pod即可：</p>
+<figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs stata"><span class="hljs-keyword">net</span>-<span class="hljs-keyword">conf</span>.json: |<br>  &#123;<br>    <span class="hljs-string">&quot;Network&quot;</span>: <span class="hljs-string">&quot;10.244.0.0/16&quot;</span>,<br>    <span class="hljs-string">&quot;Backend&quot;</span>: &#123;<br>      <span class="hljs-string">&quot;Type&quot;</span>: <span class="hljs-string">&quot;host-gw&quot;</span> <span class="hljs-comment">// &lt;- 改成host-gw</span><br>    &#125;<br>  &#125;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/img/2022-03-28-Flannel-network-mode-of-k8s/5.png" srcset="/img/loading.gif" lazyload alt="upload-image"> </p>
+<p>在host-gw模式下，由于不涉及VXLAN的封包解包，不再需要flannel.1虚机网卡。 flanneld 负责为各节点设置路由 ，将对应节点Pod子网的下一跳地址指向对应的节点的IP，如图中路由表①所示。</p>
+<figure class="highlight accesslog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs accesslog"><span class="hljs-string">[root@Node1 ~]</span># ip r<br>...<br><span class="hljs-number">10.244.0.0</span>/<span class="hljs-number">24</span> dev cni0 proto kernel scope link src <span class="hljs-number">10</span>.<span class="hljs-number">244</span>.<span class="hljs-number">0</span>.<span class="hljs-number">1</span><br><span class="hljs-number">10.244.1.0</span>/<span class="hljs-number">24</span> via <span class="hljs-number">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">50</span>.<span class="hljs-number">3</span> dev eth0 # Node2子网的下一跳地址指向Node2的public ip。<br></code></pre></td></tr></table></figure>
+
 <p>由于没有封包解包带来的消耗，host-gw是性能最好的。不过一般在云环境下，都不支持使用host-gw的模式，在私有化部署的场景下，可以考虑。</p>
 <h1 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h1><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/cheyunhua/p/15241291.html">https://www.cnblogs.com/cheyunhua/p/15241291.html</a></p>
 
